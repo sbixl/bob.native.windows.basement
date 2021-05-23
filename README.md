@@ -1,4 +1,4 @@
-# Previous not
+# Previous note
 
 Most of the recipes and classes included in this project were widely adopted from the [basement project](https://github.com/BobBuildTool/basement). But since the project currently only 
  supports bash as shell script language, this is a attempt to introduce the pwsh script 
