@@ -1,0 +1,79 @@
+shared: True
+
+buildVars: [ AUTOCONF_TARGET ]
+buildScript: |
+    rm -r -Force *
+    cp -r "$($args | select -skip 1)/*" .
+
+packageScript: |
+    cp -r "$($args[0])/*" .
+
+provideTools:
+    target-toolchain:
+        path: "usr/bin"
+        environment:
+            # usual compiler variables
+            AR: "${AUTOCONF_TARGET}-ar"
+            AS: "${AUTOCONF_TARGET}-as"
+            CC: "${AUTOCONF_TARGET}-gcc"
+            CPP: "${AUTOCONF_TARGET}-cpp"
+            CXX: "${AUTOCONF_TARGET}-g++"
+            GDB: "${AUTOCONF_TARGET}-gdb"
+            LD: "${AUTOCONF_TARGET}-ld"
+            NM: "${AUTOCONF_TARGET}-nm"
+            OBJCOPY: "${AUTOCONF_TARGET}-objcopy"
+            OBJDUMP: "${AUTOCONF_TARGET}-objdump"
+            RANLIB: "${AUTOCONF_TARGET}-ranlib"
+            STRIP: "${AUTOCONF_TARGET}-strip"
+
+            # Host system definition. Note that we do not touch the build
+            # system definition (AUTOCONF_BUILD) because this is a cross
+            # compiling toolchain.
+            ARCH: "${ARCH}"
+            AUTOCONF_HOST: "${AUTOCONF_TARGET}"
+            CROSS_COMPILE: "${AUTOCONF_TARGET}-"
+            TOOLCHAIN_SYSROOT: "../${AUTOCONF_TARGET}"
+
+            # compiler flags
+            CPPFLAGS:   "-Wdate-time"
+            CFLAGS:     "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
+            CXXFLAGS:   "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
+            LDFLAGS:    "-Wl,-O1 -Wl,--hash-style=gnu"
+
+multiPackage:
+    # Keep an unconfigured package that can be tweaked by the consumer. This is
+    # available for special use cases.
+    "": {}
+
+    gcc:
+        depends:
+            - name: devel::gcc
+        multiPackage:
+            # ARMv7 bare metal toolchain
+            arm-none-eabi:
+                environment:
+                    AUTOCONF_TARGET: "arm-none-eabi"
+                    ARCH: "arm"
+
+            # ARMv7 Linux CortexA toolchain with hard floating point
+            arm-linux-gnueabihf:
+                environment:
+                    AUTOCONF_TARGET: "arm-none-linux-gnueabihf"
+                    ARCH: "arm"
+                    GCC_TARGET_ARCH: "armv7-a"
+                    GCC_TARGET_FLOAT_ABI: "hard"
+                    GCC_TARGET_FPU: "vfpv4"
+
+            # ARMv8-A AArch64 bare metal toolchain
+            aarch64-none-eabi:
+                environment:
+                    AUTOCONF_TARGET: "aarch64-none-elf"
+                    ARCH: "arm64"
+                    GCC_TARGET_ARCH: "armv8-a"
+
+            # ARMv8-A AArch64 Linux toolchain
+            aarch64-linux-gnu:
+                environment:
+                    AUTOCONF_TARGET: "aarch64-none-linux-gnu"
+                    ARCH: "arm64"
+                    GCC_TARGET_ARCH: "armv8-a"

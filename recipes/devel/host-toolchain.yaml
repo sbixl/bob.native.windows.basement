@@ -1,0 +1,49 @@
+shared: True
+
+environment:
+    AUTOCONF_TARGET: "x86_64-pc-windows-msvc"
+
+depends:
+    # build the native clang compiler
+    - devel::clang-native
+
+buildScript: |
+    cp -r -Force "$($BOB_DEP_PATHS["devel::clang-native"])\*" .
+
+packageScript: |
+    cp -r "$($args[0])\*" .
+
+provideTools:
+    host-toolchain:
+        path: usr/bin
+        #libs: [ "include\\c++\\v1", "lib", "lib\\clang\\11.0.1" ]
+
+    target-toolchain:
+        path: usr/bin
+        #libs: [ "include\\c++\\v1", "lib", "lib\\clang\\11.0.1" ]
+
+provideVars:
+    # usual compiler variables
+    AR:      "llvm-ar"
+    AS:      "llvm-as"
+    CC:      "clang"
+    CPP:     "clang-cpp"
+    CXX:     "clang++"
+    GDB:     "lldb"
+    LD:      "llvm-ld"
+    NM:      "llvm-nm"
+    OBJCOPY: "llvm-objcopy"
+    OBJDUMP: "llvm-objdump"
+    RANLIB:  "llvm-ranlib"
+    STRIP:   "llvm-strip"
+
+    # Define our build and host systems because we define the host- and
+    # target-toolchain. ARCH is unchanged, though.
+    AUTOCONF_BUILD: "$AUTOCONF_TARGET"
+    AUTOCONF_HOST:  "$AUTOCONF_TARGET"
+
+    # We build everything static on host builds without debug symbols.
+    CPPFLAGS: ""
+    CFLAGS: "-Oz -pipe"
+    CXXFLAGS: "-Oz -pipe"
+    LDFLAGS: "-Xclang -std=c++1z -Xclang -stdlib=libc++"

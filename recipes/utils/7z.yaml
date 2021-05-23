@@ -1,0 +1,28 @@
+inherit: [cpackage, install]
+
+metaEnvironment:
+    PKG_VERSION: "19.00"
+
+checkoutSCM:
+    scm: url
+    url: https://github.com/kornelski/7z/archive/${PKG_VERSION}.zip
+    digestSHA1: 723d39a42909d18ce71b831d6f3645ae41e9eda7
+
+buildVars: [ CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION ]
+buildScript: |
+    mkdir -Force build >$null
+    cp -Force -r "$($args[0])\7z-${Env:PKG_VERSION}\*" build
+
+    pushd "build\CPP\7zip"
+    Check-Command { nmake NEW_COMPILER=1 MY_STATIC_LINK=1 }
+    popd
+
+    mkdir -Force install\usr\bin >$null
+    cp build\CPP\7zip\Bundles\Alone\x64\7za.exe install\usr\bin
+    mv install\usr\bin\7za.exe install\usr\bin\7z.exe
+
+packageScript: |
+    InstallPackageTgt "$($args[0])\install"
+
+provideTools:
+    7z: usr/bin

@@ -1,0 +1,43 @@
+buildToolsWeak: [ninja]
+buildVarsWeak: [PARALLEL_JOBS]
+buildScript: |
+    function ninjaParallel
+    {
+        Param(
+            # optional
+            [Parameter(Position = 0, mandatory=$false)]
+            [Alias("-o")]
+            [string[]] $OPTIONS=@(),
+            # optional
+            [Parameter(Position = 1, mandatory=$false)]
+            [Alias("-t")]
+            [string[]] $TARGETS=@()
+        )
+
+        # set the number of logical cores which can be used for parallel builds
+        if( ${Env:PARALLEL_JOBS} )
+        {
+            $NOLP = ${Env:PARALLEL_JOBS}
+        }
+        else
+        {
+            $NOLP = $((Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors)
+        }
+
+        Check-Command { ninja -j $NOLP $TARGETS "$OPTIONS" }
+    }
+
+    function ninjaSequential
+    {
+        Param(
+            # optional
+            [Parameter(Position = 0)]
+            [string[]]$OPTIONS=@()
+        )
+        Check-Command { ninja -j 1 "$OPTIONS" }
+    }
+
+    function ninjaInstall
+    {
+        Check-Command { ninja install }
+    }

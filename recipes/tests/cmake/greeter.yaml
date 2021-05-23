@@ -1,0 +1,31 @@
+inherit: [ "basement::rootrecipe", cmake ]
+
+checkoutSCM:
+    scm: import
+    url: recipes/tests/src/greeter/
+    prune: True
+
+buildScript: |
+    cmakeBuild "$($args[0])"
+    #for i in "${!BOB_DEP_PATHS[@]}" ; do
+    #    if [[ $i == *-tgt ]] ; then
+    #        rsync -a "${BOB_DEP_PATHS[$i]}/" install/
+    #    fi
+    #done
+
+packageScript: |
+    cmakePackageTgt
+
+multiPackage:
+    host:
+        depends: &deps
+            - tests::cmake::libgreet-dev
+            - tests::cmake::libgreet-tgt
+    cross:
+        depends:
+            - if: !expr |
+                "${BOB_HOST_PLATFORM}" == "win32"
+              name: devel::cross-toolchain-gcc-aarch64-linux-gnu
+              use: [environment, tools]
+              forward: True
+            - depends: *deps

@@ -1,0 +1,89 @@
+# Common class C/C++ based packages. It updates the various compiler flags
+# variables so that the dependencies are found by the toolchains.
+
+buildTools: [target-toolchain]
+buildVars: [AUTOCONF_BUILD, AUTOCONF_HOST, CPPFLAGS, CFLAGS, CXXFLAGS, LDFLAGS,
+            BASEMENT_LIBS]
+
+# The following variables are only used by the Microsoft Visual Studio
+# toolchain. Their value depends on the install location but they do not change
+# the build result. The toolset version is handled by the toolchain directly
+# and is attached to 'target-toolchain'.
+buildVarsWeak: [INCLUDE, LIB, LIBPATH, VS_PATH, PLATFORM]
+buildScript: |
+    # Check if we're officially cross-compiling
+    function cpackageCrossCompiling
+    {
+        if ( "${Env:AUTOCONF_BUILD}" -ne "${Env:AUTOCONF_HOST}" )
+        {
+            return 1 # cross compiling
+        }
+        else
+        {
+            return 0 # native build
+        }
+    }
+
+    # Get desired library type: "static", "shared" or "both".
+    #
+    # By default shared libraries are built when cross-compiling and static
+    # libraries on host builds. This can be overridded by setting BASEMENT_LIBS
+    # to "static", "shared" or "both".
+    function cpackageLibraryType
+    {
+        if ( $null -ne ${Env:BASEMENT_LIBS} )
+        {
+            "${Env:BASEMENT_LIBS}"
+            return
+        }
+        elseif ( cpackageCrossCompiling )
+        {
+            "shared"
+            return
+        }
+        else
+        {
+            "static"
+            return
+        }
+    }
+
+    # Check $BASEMENT_LIBS values to catch misconfigurations early
+    switch ( ${Env:BASEMENT_LIBS} )
+    {
+        { ($PSItem -eq "static") -or ($PSItem -eq "shared") -or ($PSItem -eq "both") -or ($PSItem -eq $null) }
+        {
+            # continue
+        }
+        default
+        {
+            # break on error
+            Write-Error "Invalid BASEMENT_LIBS value: ${Env:BASEMENT_LIBS}"
+        }
+    }
+
+    # The global paths need to be added to $PATH.
+    $Env:PATH="$Env:VS_PATH;$Env:PATH"
+
+    # Gather all include and library paths.
+    if ( ${Env:AUTOCONF_HOST}.Contains("-win32") )
+    {
+        foreach ( $i in ($args | select -skip 1) )
+        {
+            if( Test-Path "$i/usr/include" )
+            {
+                ${Env:CPPFLAGS} += " -I$("$i/usr/include")"
+            }
+            foreach ( $j in @("lib", "usr/lib") )
+            {
+                if( Test-Path "$i/$j" )
+                {
+                    # windows: TODO
+                    # cygwin: LDFLAGS+=" -LIBPATH:$(cygpath -w "$i/$j")"
+                    # linux: LDFLAGS+=" -L$i/$j"; LDFLAGS+=" -Wl,-rpath-link=$i/$j"
+                }
+            }
+
+        }
+    }
+

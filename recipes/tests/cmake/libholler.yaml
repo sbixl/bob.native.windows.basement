@@ -1,0 +1,17 @@
+inherit: [cmake]
+
+checkoutSCM:
+    scm: import
+    url: recipes/tests/src/libholler/
+    prune: True
+
+buildScript: |
+    cmakeBuild "$($args[0])"
+
+multiPackage:
+    dev:
+        packageScript: |
+           cmakePackageDev
+    tgt:
+        packageScript: |
+           cmakePackageTgt

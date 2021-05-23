@@ -1,0 +1,41 @@
+inherit: [patch]
+
+metaEnvironment:
+        PKG_VERSION: "1.10.2"
+
+checkoutSCM:
+    scm: git
+    url: https://github.com/ninja-build/ninja.git
+    branch: master
+    tag: "v${PKG_VERSION}"
+
+checkoutDeterministic: True
+checkoutScript: |
+    patchApply $<<ninja\0001-enable-clang-compiler-on-native-windows.patch>>
+
+multiPackage:
+    "":
+        inherit: [cmake]
+        buildVars: [PKG_VERSION]
+        buildScript: |
+            cmakeBuild "$($args[0])" `
+                       -DCMAKE_BUILD_TYPE=Release
+
+        packageScript: |
+            cmakePackageTgt
+
+    bootstrap:
+        inherit: [cpackage, install]
+        buildVars: [CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION]
+        buildScript: |
+            $SRC_PATH = "$($args[0])\configure.py"
+            Check-Command { python $SRC_PATH --bootstrap }
+
+            mkdir -Force install\usr\bin >$null
+            cp ninja.exe install\usr\bin
+
+        packageScript: |
+            InstallPackageTgt "$($args[0])\install"
+
+provideTools:
+    ninja: usr/bin

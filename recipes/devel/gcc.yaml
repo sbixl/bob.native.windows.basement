@@ -1,0 +1,52 @@
+# since we can't build gcc native or cross compiling toolchain on windows we must download pre build binaries
+checkoutSCM:
+    -
+        if: !expr |
+            "${AUTOCONF_TARGET}" == "arm-none-eabi"
+        scm: url
+        url: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-arm-none-eabi.tar.xz
+        digestSHA256: "0780d297cac511556bd135666bec75dec78f2e1346f5cdd44bd5bacc05a87f5b"
+        dir: ${AUTOCONF_TARGET}
+        extract: no
+    -
+        if: !expr |
+            "${AUTOCONF_TARGET}" == "arm-none-linux-gnueabihf"
+        scm: url
+        url: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-arm-none-linux-gnueabihf.tar.xz
+        digestSHA256: "ebad4026aa25127db575b6950ee3b0107cef5a41ddd795663627d1a48b226ff3"
+        dir: ${AUTOCONF_TARGET}
+        extract: no
+    -
+        if: !expr |
+            "${AUTOCONF_TARGET}" == "aarch64-none-elf"
+        scm: url
+        url: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-aarch64-none-elf.tar.xz
+        digestSHA256: "eb28cd18e7e4ca5bf57332ce00da006fb7a841075a117b8c4386c64e1559431a"
+        dir: ${AUTOCONF_TARGET}
+        extract: no
+    -
+        if: !expr |
+            "${AUTOCONF_TARGET}" == "aarch64-none-linux-gnu"
+        scm: url
+        url: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-aarch64-none-linux-gnu.tar.xz
+        digestSHA256: "f35aef3f305290b7bd944fc3269cdf4bd64841c4992db7ef94f2ec7da37df27e"
+        dir: ${AUTOCONF_TARGET}
+        extract: no
+
+buildVars: [AUTOCONF_TARGET]
+buildScript: |
+    # create a symlink to avoid wasting memory
+    $ArchiveName = $(Get-ChildItem "$($args[0])/${Env:AUTOCONF_TARGET}" -File '*.tar.xz')
+    New-Item -ItemType SymbolicLink -Path "${Env:AUTOCONF_TARGET}.tar.xz"  -Target "$($args[0])/${Env:AUTOCONF_TARGET}/$ArchiveName" >$null
+
+packageTools: [7z]
+packageScript: |
+     $ArchivPath = "$($args[0])"
+     Check-Command { 7z x -y $ArchivPath/${Env:AUTOCONF_TARGET}.tar.xz }
+     mkdir usr > $null
+     Check-Command { 7z x -o"usr" -y $PWD/${Env:AUTOCONF_TARGET}.tar }
+     # because 7z has not strip option we need to do it ourselves
+     $RootFolder = $(Get-ChildItem usr)
+     cp -r usr/$RootFolder/* usr -Force
+     rm -Recurse usr/$RootFolder
+     rm $PWD/${Env:AUTOCONF_TARGET}.tar

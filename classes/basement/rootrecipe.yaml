@@ -1,0 +1,32 @@
+root: True
+
+depends:
+    - if: !expr |
+        "${BOB_HOST_PLATFORM}" == "win32"
+      depends:
+        - name: devel::vs2019-toolchain-vc142-amd64
+          use: [environment, tools]
+          forward: True
+        # unfortunately we can build 7z only with nmake and must use the msvc compiler
+        - name: utils::7z
+          use: [tools]
+          forward: True
+        # bootstrap ninja and cmake with the msvc compiler
+        - name: devel::ninja-bootstrap
+          use: [tools]
+          forward: True
+        - name: devel::cmake-bootstrap
+          use: [tools]
+          forward: True
+        # Use clang compiler instead of msvc compiler. The user might explicitly disable
+        # it's usage but this will then taint all binary artifacts built for the host.
+        - name: devel::host-toolchain
+          use: [environment, tools]
+          forward: True
+          if: "${BASEMENT_HOST_CLANG_TOOLCHAIN:-1}"
+        - name: devel::ninja
+          use: [tools]
+          forward: True
+        - name: devel::cmake
+          use: [tools]
+          forward: True

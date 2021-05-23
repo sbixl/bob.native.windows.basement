@@ -1,0 +1,13 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7f03c35..d7669a4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -105,7 +105,7 @@ if(WIN32)
+ 		src/msvc_helper_main-win32.cc
+ 		src/getopt.c
+ 	)
+-	if(MSVC)
++	if( CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+ 		target_sources(libninja PRIVATE src/minidump-win32.cc)
+ 	endif()
+ else()

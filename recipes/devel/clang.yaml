@@ -1,0 +1,148 @@
+inherit: [cpackage, ninja, install]
+
+metaEnvironment:
+    PKG_VERSION: "11.1.0"
+
+checkoutSCM:
+    scm: url
+    url: https://github.com/llvm/llvm-project/releases/download/llvmorg-${PKG_VERSION}/llvm-project-${PKG_VERSION}.src.tar.xz
+    digestSHA1: 713a5f9ce67713c2b955f9c016b4f96afa4162f1
+    extract: no
+
+checkoutTools: [ 7z ]
+checkoutVars: [ PKG_VERSION ]
+checkoutDeterministic: True
+checkoutScript: |
+     Check-Command { 7z x -y llvm-project-${Env:PKG_VERSION}.src.tar.xz }
+     Check-Command { 7z x -y llvm-project-${Env:PKG_VERSION}.src.tar }
+
+     rm -r -Force llvm-project-${Env:PKG_VERSION}.src.tar
+
+buildToolsWeak: [cmake]
+buildVars: [ LLVM_TARGETS, LLVM_PROJECTS, CFLAGS, CXXFLAGS ]
+buildScript: |
+    $SRC_PATH = "$($args[0])\llvm-project-${Env:PKG_VERSION}.src\llvm"
+
+    function buildClang
+    {
+        # set the number of logical processor which can be used for parallel builds
+        if( ${Env:PARALLEL_JOBS} )
+        {
+            $PARALLEL_COMPILE_JOBS = ${Env:PARALLEL_JOBS}
+        }
+        else
+        {
+            $PARALLEL_COMPILE_JOBS = $((Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors)
+        }
+
+        # limit parallel link to reduce memory usage
+        $PARALLEL_LINK_JOBS = 2
+
+        $_OPTIONS = $($args)
+        Check-Command {
+            # cmake -E time `
+            cmake $SRC_PATH `
+                  -GNinja `
+                  -DCMAKE_BUILD_TYPE=Release `
+                  -DCMAKE_INSTALL_UCRT_LIBRARIES=ON `
+                  -DCMAKE_INSTALL_PREFIX=install\usr `
+                  -DLLVM_TARGETS_TO_BUILD="${Env:LLVM_TARGETS}" `
+                  -DLLVM_ENABLE_PROJECTS="${Env:LLVM_PROJECTS}" `
+                  -DLLVM_USE_CRT_RELEASE=MT `
+                  -DLLVM_ENABLE_ASSERTIONS=OFF `
+                  -DLLVM_INCLUDE_EXAMPLES=OFF `
+                  -DLLVM_INCLUDE_TESTS=OFF `
+                  -DLLVM_INCLUDE_BENCHMARKS=OFF `
+                  -DLLVM_ENABLE_ZLIB=OFF `
+                  -DLLVM_OPTIMIZED_TABLEGEN=ON `
+                  -DLLVM_PARALLEL_LINK_JOBS="$PARALLEL_LINK_JOBS" `
+                  -DLLVM_PARALLEL_COMPILE_JOBS="$PARALLEL_COMPILE_JOBS" `
+                  $_OPTIONS
+        }
+
+        ninjaParallel -t "all"
+        ninjaInstall
+    }
+
+packageScript: |
+    installPackageTgt "$($args[0])\install"
+
+multiPackage:
+    # Bootstrap LLVM using the MSVC compiler from the visual studio build tools.
+    # This minimal compiler (clang + lld) is required later to build the entire
+    # clang toolchain for the accordant target (architecture). The MSVC compiler
+    # is not able to compile the entire toolchain due to some internal limitations
+    # (especially the libc++ could not build with it).
+    bootstrap:
+        environment:
+            LLVM_TARGETS:  "X86"
+            LLVM_PROJECTS: "clang;lld"
+
+        buildScript: |
+
+            # while building with msvc toolchain, use the required flags and options
+            # defined by llvm
+            ${Env:CFLAGS} = ""
+            ${Env:CXXFLAGS} = ""
+
+            buildClang -DCMAKE_C_FLAGS="-utf-8" `
+                       -DCMAKE_CXX_FLAGS="-utf-8" `
+
+        provideTools:
+            clang-bootstrap: usr/bin
+
+    cross:
+        environment:
+            LLVM_PROJECTS: "clang;lld;lldb"
+
+        depends:
+            -
+                name: devel::clang-native
+                use: [tools]
+
+        buildScript: |
+            buildClang
+
+    native:
+        environment:
+            LLVM_TARGETS:  "X86"
+            LLVM_PROJECTS: "clang;clang-tools-extra;compiler-rt;lld;lldb;libcxx"
+
+        depends:
+            -
+                name: devel::clang-bootstrap
+                use: [tools]
+
+        buildTools: [ clang-bootstrap ]
+        buildScript: |
+
+            $archtable = @{
+                "x64"   = "-m64";
+                "x86"   = "-m32";
+            }
+
+            $curarch = $archtable[${Env:PLATFORM}]
+
+            $clexe = (Get-Command -CommandType Application "cl.exe")[0]
+            $msvcversion = "$($clexe.FileVersionInfo.FileMajorPart).$($clexe.FileVersionInfo.FileMinorPart)"
+
+            $AR = "$($BOB_TOOL_PATHS["clang-bootstrap"])\llvm-lib.exe".Replace("\","/")
+            $RANLIB = "$($BOB_TOOL_PATHS["clang-bootstrap"])\llvm-ranlib.exe".Replace("\","/")
+
+            buildClang -DLLVM_FORCE_BUILD_RUNTIME=ON `
+                       -DLLVM_STATIC_LINK_CXX_STDLIB=TRUE `
+                       -DLIBCXX_ENABLE_SHARED=OFF `
+                       -DLIBCXX_ENABLE_STATIC=ON `
+                       -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=NO `
+                       -DLIBCXX_HAS_WIN32_THREAD_API=ON `
+                       -DLIBCXX_STANDARD_VER="c++17" `
+                       -DLLDB_RELOCATABLE_PYTHON=1 `
+                       -DLLDB_DISABLE_PYTHON=1 `
+                       -DCMAKE_C_COMPILER=clang-cl `
+                       -DCMAKE_C_FLAGS="-fms-compatibility-version=$msvcversion $curarch " `
+                       -DCMAKE_CXX_COMPILER=clang-cl `
+                       -DCMAKE_CXX_FLAGS="-fms-compatibility-version=$msvcversion $curarch " `
+                       -DLLVM_ENABLE_LTO=Thin `
+                       -DCMAKE_LINKER=lld-link `
+                       -DCMAKE_AR="$AR" `
+                       -DCMAKE_RANLIB="$RANLIB"

@@ -1,0 +1,33 @@
+checkoutDeterministic: True
+checkoutScript: |
+    function patchApplySeries
+    {
+        Write-Host "TODO"
+    }
+
+    function patchApply
+    {
+        Param(
+            # mandatory
+            [Parameter(Position = 0, mandatory=$true)]
+            $PATCH_FILE
+        )
+
+        if( Test-Path "patch.applied" )
+        {
+            # patch allredy applied, remove and apply it again
+            Check-Command {
+                git apply -R $PATCH_FILE
+            }
+            rm patch.applied >$null
+        }
+        else
+        {
+            # patch not applied til now
+        }
+
+        Check-Command {
+            git apply --verbose $PATCH_FILE
+        }
+        echo patched > patch.applied
+    }

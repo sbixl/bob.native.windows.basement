@@ -1,0 +1,59 @@
+metaEnvironment:
+    PKG_VERSION: "3.18.4"
+
+checkoutSCM:
+    -
+        scm: url
+        url: https://github.com/Kitware/CMake/archive/v${PKG_VERSION}.zip
+        digestSHA1: "8288e37a9041e03a955b316ca0ea2ae93c3df4ba"
+        dir: cmake.src
+    # Since there is unfortunately no possibility to bootstrap cmake like under linux,
+    # we must download a pre build binary for windows to build cmake from source.
+    -
+        scm: url
+        url: https://github.com/Kitware/CMake/releases/download/v${PKG_VERSION}/cmake-${PKG_VERSION}-win64-x64.zip
+        digestSHA1: "51e611bb39f8f4c49a160085048e0dd24ec22812"
+        dir: cmake.bin
+
+multiPackage:
+    "":
+        inherit: [cmake]
+        buildVars: [PKG_VERSION]
+        buildScript: |
+            cmakeBuild "$($args[0])\cmake.src\CMake-${Env:PKG_VERSION}" `
+                       -DCMAKE_BUILD_TYPE=RELEASE
+
+        packageScript: |
+            cmakePackageTgt
+
+    bootstrap:
+        inherit: [cpackage, ninja, install]
+        buildVars: [ PKG_VERSION ]
+        buildScript: |
+
+            # Append the path to the prebuild cmake binary
+            $Env:PATH="$($args[0])\cmake.bin\cmake-${Env:PKG_VERSION}-win64-x64\bin\;$Env:PATH"
+
+            mkdir -Force build >$null
+            pushd build
+
+            $SOURCE_PATH = "$($args[0])\cmake.src\CMake-${Env:PKG_VERSION}"
+
+            Check-Command {
+                cmake "$SOURCE_PATH" `
+                      -GNinja `
+                      -DCMAKE_BUILD_TYPE=RELEASE `
+                      -DBUILD_SHARED_LIBS=OFF `
+                      -DCMAKE_INSTALL_PREFIX="..\install\usr" `
+                }
+
+            ninjaParallel -t "all"
+            ninjaInstall
+
+            popd
+
+        packageScript: |
+            InstallPackageTgt "$($args[0])\install"
+
+provideTools:
+    cmake: usr/bin

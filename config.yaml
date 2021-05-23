@@ -1,0 +1,6 @@
+bobMinimumVersion: "0.18"
+scriptLanguage: PowerShell
+
+plugins:
+    - multiarch
+    - vsenv
