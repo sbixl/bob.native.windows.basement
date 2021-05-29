@@ -4,8 +4,8 @@ checkoutSCM:
         if: !expr |
             "${AUTOCONF_TARGET}" == "arm-none-eabi"
         scm: url
-        url: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-arm-none-eabi.tar.xz
-        digestSHA256: "0780d297cac511556bd135666bec75dec78f2e1346f5cdd44bd5bacc05a87f5b"
+        url: https://developer.arm.com/-/media/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-win32.zip
+        digestSHA256: "90057b8737b888c53ca5aee332f1f73c401d6d3873124d2c2906df4347ebef9e"
         dir: ${AUTOCONF_TARGET}
         extract: no
     -
@@ -36,17 +36,33 @@ checkoutSCM:
 buildVars: [AUTOCONF_TARGET]
 buildScript: |
     # create a symlink to avoid wasting memory
-    $ArchiveName = $(Get-ChildItem "$($args[0])/${Env:AUTOCONF_TARGET}" -File '*.tar.xz')
-    New-Item -ItemType SymbolicLink -Path "${Env:AUTOCONF_TARGET}.tar.xz"  -Target "$($args[0])/${Env:AUTOCONF_TARGET}/$ArchiveName" >$null
+    if ( "arm-none-eabi" -eq  ${Env:AUTOCONF_TARGET} )
+    {
+        $ArchiveName = $(Get-ChildItem "$($args[0])/${Env:AUTOCONF_TARGET}" -File '*.zip')
+        New-Item -ItemType SymbolicLink -Path "${Env:AUTOCONF_TARGET}.zip"  -Target "$($args[0])/${Env:AUTOCONF_TARGET}/$ArchiveName" >$null
+    }
+    else
+    {
+        $ArchiveName = $(Get-ChildItem "$($args[0])/${Env:AUTOCONF_TARGET}" -File '*.tar.xz')
+        New-Item -ItemType SymbolicLink -Path "${Env:AUTOCONF_TARGET}.tar.xz"  -Target "$($args[0])/${Env:AUTOCONF_TARGET}/$ArchiveName" >$null
+    }
 
 packageTools: [7z]
 packageScript: |
-     $ArchivPath = "$($args[0])"
-     Check-Command { 7z x -y $ArchivPath/${Env:AUTOCONF_TARGET}.tar.xz }
-     mkdir usr > $null
-     Check-Command { 7z x -o"usr" -y $PWD/${Env:AUTOCONF_TARGET}.tar }
-     # because 7z has not strip option we need to do it ourselves
-     $RootFolder = $(Get-ChildItem usr)
-     cp -r usr/$RootFolder/* usr -Force
-     rm -Recurse usr/$RootFolder
-     rm $PWD/${Env:AUTOCONF_TARGET}.tar
+    $ArchivPath = "$($args[0])"
+    mkdir usr > $null
+    if ( "arm-none-eabi" -eq  ${Env:AUTOCONF_TARGET} )
+    {
+        Check-Command { 7z x -o"usr" -y $ArchivPath/${Env:AUTOCONF_TARGET}.zip }
+    }
+    else
+    {
+        Check-Command { 7z x -y $ArchivPath/${Env:AUTOCONF_TARGET}.tar.xz }
+        Check-Command { 7z x -o"usr" -y $PWD/${Env:AUTOCONF_TARGET}.tar }
+        rm $PWD/${Env:AUTOCONF_TARGET}.tar
+    }
+    
+    # because 7z has not strip option we need to do it ourselves
+    $RootFolder = $(Get-ChildItem usr)
+    cp -r usr/$RootFolder/* usr -Force
+    rm -Recurse usr/$RootFolder
