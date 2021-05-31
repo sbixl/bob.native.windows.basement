@@ -21,7 +21,7 @@ and common GCC toolchains are ready-to-use.
 
 * Windows 10 system configuration
   * Make sure you can create symbolic links without admin rights. Usually you can enable
-    this by switching to the developer mode.
+    this by switching to the developer mode. If this does not work, enable it in your [security policy setting](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/create-symbolic-links).
   * [Enable long path support](https://www.msftnext.com/how-to-enable-ntfs-long-paths-in-windows-10/). 
 * Bleeding edge Bob Build Tool (https://github.com/BobBuildTool/bob)
 
@@ -80,8 +80,8 @@ The following tools can be used by naming them in `{checkout,build,package}Tools
 
 Since windows does not have a native compiler by default, the msvc compiler must
 be installed. Independently of this, you can build the clang compiler downstream 
-as host toolchain. Building the clang compiler as host toolchain is enabled by default. 
-If you want the msvc compiler as host toolchain you can simply set `BASEMENT_HOST_CLANG_TOOLCHAIN` to "1" in the `default.yaml`. In this project 
+as host toolchain. Building the clang compiler as host toolchain is disabled by default. 
+If you want the clang compiler as host toolchain you can simply set `BASEMENT_HOST_CLANG_TOOLCHAIN` to "1" in the `default.yaml`. In this project 
 the clang compiler uses the gnu command line by default and not the msvc command line.
 
 The following cross compiling toolchains are available pre-configured. If you need
@@ -91,7 +91,7 @@ as you like.
 * `devel::cross-toolchain-gcc-aarch64-linux-gnu`: ARMv8-A AArch64 Linux with glibc.
 * `devel::cross-toolchain-gcc-arm-linux-gnueabihf`: ARMv7-A Linux with glibc. Hard
   floating point ABI.
-* `devel::cross-toolchain-gcc-arm-none-eabi`: ARMv7 bare metal toolchain with
+* `devel::cross-toolchain-gcc-arm-none-eabi`: 32-bit Arm Cortex-A,-M,-R bare metal toolchain with
   newlib libc.
 * `devel::cross-toolchain-gcc-x86_64-linux-gnu`: x86_64 toolchain for Linux with glibc.
 

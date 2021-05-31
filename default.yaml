@@ -1,7 +1,7 @@
 environment:
-    # By default the llvm toolchain is used as host toolchain. The user might
-    # explicity disable it's usage and switch to msvc 2019 toolchain.
-    BASEMENT_HOST_CLANG_TOOLCHAIN: "1"
+    # By default the msvc toolchain is used as host toolchain. The user might
+    # explicity disable it's usage and switch to clang toolchain.
+    BASEMENT_HOST_CLANG_TOOLCHAIN: "0"
 
     # default compile flags
     BASEMENT_OPTIMIZE: "s" # compiler optimization level (0/1/2/s)
