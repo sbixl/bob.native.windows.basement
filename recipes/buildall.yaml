@@ -5,7 +5,8 @@ depends:
     - devel::cross-toolchain-gcc-arm-linux-gnueabihf
     - devel::cross-toolchain-gcc-aarch64-none-eabi
     - devel::cross-toolchain-gcc-aarch64-linux-gnu
-
+    - devel::cross-toolchain-llvm-embedded-toolchain-for-arm
+    
 buildScript: |
     $null
 

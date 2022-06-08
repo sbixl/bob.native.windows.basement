@@ -1,12 +1,12 @@
 inherit: [cpackage, ninja, install]
 
 metaEnvironment:
-    PKG_VERSION: "11.1.0"
+    PKG_VERSION: "14.0.0"
 
 checkoutSCM:
     scm: url
     url: https://github.com/llvm/llvm-project/releases/download/llvmorg-${PKG_VERSION}/llvm-project-${PKG_VERSION}.src.tar.xz
-    digestSHA1: 713a5f9ce67713c2b955f9c016b4f96afa4162f1
+    digestSHA1: af5a37be12d3725c5514a8aff81c88be0e6515a0
     extract: no
 
 checkoutTools: [ 7z ]
@@ -60,7 +60,7 @@ buildScript: |
                   $_OPTIONS
         }
 
-        ninjaParallel -t "all"
+        ninjaParallel -t "install-distribution-stripped"
         ninjaInstall
     }
 
@@ -91,26 +91,14 @@ multiPackage:
         provideTools:
             clang-bootstrap: usr/bin
 
-    cross:
-        environment:
-            LLVM_PROJECTS: "clang;lld;lldb"
-
-        depends:
-            -
-                name: devel::clang-native
-                use: [tools]
-
-        buildScript: |
-            buildClang
-
     native:
         environment:
             LLVM_TARGETS:  "X86"
-            LLVM_PROJECTS: "clang;clang-tools-extra;compiler-rt;lld;lldb;libcxx"
+            LLVM_PROJECTS: "clang;clang-tools-extra;compiler-rt;lld;lldb"
 
         depends:
             -
-                name: devel::clang-bootstrap
+                name: devel::host::clang-bootstrap
                 use: [tools]
 
         buildTools: [ clang-bootstrap ]
@@ -131,13 +119,12 @@ multiPackage:
 
             buildClang -DLLVM_FORCE_BUILD_RUNTIME=ON `
                        -DLLVM_STATIC_LINK_CXX_STDLIB=TRUE `
+                       -DLLVM_ENABLE_RUNTIMES=libcxx `
                        -DLIBCXX_ENABLE_SHARED=OFF `
                        -DLIBCXX_ENABLE_STATIC=ON `
                        -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=NO `
                        -DLIBCXX_HAS_WIN32_THREAD_API=ON `
-                       -DLIBCXX_STANDARD_VER="c++17" `
-                       -DLLDB_RELOCATABLE_PYTHON=1 `
-                       -DLLDB_DISABLE_PYTHON=1 `
+                       -DLLDB_EMBED_PYTHON_HOME=OFF `
                        -DCMAKE_C_COMPILER=clang-cl `
                        -DCMAKE_C_FLAGS="-fms-compatibility-version=$msvcversion $curarch " `
                        -DCMAKE_CXX_COMPILER=clang-cl `

@@ -5,10 +5,10 @@ environment:
 
 depends:
     # build the native clang compiler
-    - devel::clang-native
+    - devel::host::clang-native
 
 buildScript: |
-    cp -r -Force "$($BOB_DEP_PATHS["devel::clang-native"])\*" .
+    cp -r -Force "$($BOB_DEP_PATHS["devel::host::clang-native"])\*" .
 
 packageScript: |
     cp -r "$($args[0])\*" .

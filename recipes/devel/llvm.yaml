@@ -1,0 +1,23 @@
+# since we can't build gcc native or cross compiling toolchain on windows we must download pre build binaries
+checkoutSCM:
+    scm: url
+    url: https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-windows.zip
+    digestSHA256: "1d0ba47d93e09e34ee1e31cec43f221b9d689401a5eae568df6cdef0261c6abb"
+    dir: llvm
+    extract: no
+
+buildScript: |
+    # create a symlink to avoid wasting memory
+    $ArchiveName = $(Get-ChildItem "$($args[0])/llvm" -File '*.zip')
+    New-Item -ItemType SymbolicLink -Path "llvm.zip"  -Target "$($args[0])/llvm/$ArchiveName" >$null
+
+
+packageTools: [7z]
+packageScript: |
+    $ArchivPath = "$($args[0])"
+    mkdir usr > $null
+    Check-Command { 7z x -o"usr" -y $ArchivPath/llvm.zip }
+    # because 7z has not strip option we need to do it ourselves
+    $RootFolder = $(Get-ChildItem usr)
+    cp -r usr/$RootFolder/* usr -Force
+    rm -Recurse usr/$RootFolder

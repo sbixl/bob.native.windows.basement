@@ -8,38 +8,6 @@ buildScript: |
 packageScript: |
     cp -r "$($args[0])/*" .
 
-provideTools:
-    target-toolchain:
-        path: "usr/bin"
-        environment:
-            # usual compiler variables
-            AR: "${AUTOCONF_TARGET}-ar"
-            AS: "${AUTOCONF_TARGET}-as"
-            CC: "${AUTOCONF_TARGET}-gcc"
-            CPP: "${AUTOCONF_TARGET}-cpp"
-            CXX: "${AUTOCONF_TARGET}-g++"
-            GDB: "${AUTOCONF_TARGET}-gdb"
-            LD: "${AUTOCONF_TARGET}-ld"
-            NM: "${AUTOCONF_TARGET}-nm"
-            OBJCOPY: "${AUTOCONF_TARGET}-objcopy"
-            OBJDUMP: "${AUTOCONF_TARGET}-objdump"
-            RANLIB: "${AUTOCONF_TARGET}-ranlib"
-            STRIP: "${AUTOCONF_TARGET}-strip"
-
-            # Host system definition. Note that we do not touch the build
-            # system definition (AUTOCONF_BUILD) because this is a cross
-            # compiling toolchain.
-            ARCH: "${ARCH}"
-            AUTOCONF_HOST: "${AUTOCONF_TARGET}"
-            CROSS_COMPILE: "${AUTOCONF_TARGET}-"
-            TOOLCHAIN_SYSROOT: "../${AUTOCONF_TARGET}"
-
-            # compiler flags
-            CPPFLAGS:   "-Wdate-time"
-            CFLAGS:     "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
-            CXXFLAGS:   "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
-            LDFLAGS:    "-Wl,-O1 -Wl,--hash-style=gnu"
-
 multiPackage:
     # Keep an unconfigured package that can be tweaked by the consumer. This is
     # available for special use cases.
@@ -48,6 +16,36 @@ multiPackage:
     gcc:
         depends:
             - name: devel::gcc
+       
+        provideTools:
+            target-toolchain:
+                path: "usr/bin"
+                environment:
+                    # usual compiler variables
+                    AR: "${AUTOCONF_TARGET}-ar"
+                    AS: "${AUTOCONF_TARGET}-as"
+                    CC: "${AUTOCONF_TARGET}-gcc"
+                    CPP: "${AUTOCONF_TARGET}-cpp"
+                    CXX: "${AUTOCONF_TARGET}-g++"
+                    GDB: "${AUTOCONF_TARGET}-gdb"
+                    LD: "${AUTOCONF_TARGET}-ld"
+                    NM: "${AUTOCONF_TARGET}-nm"
+                    OBJCOPY: "${AUTOCONF_TARGET}-objcopy"
+                    OBJDUMP: "${AUTOCONF_TARGET}-objdump"
+                    RANLIB: "${AUTOCONF_TARGET}-ranlib"
+                    STRIP: "${AUTOCONF_TARGET}-strip"
+
+                    ARCH: "${ARCH}"
+                    AUTOCONF_HOST: "${AUTOCONF_TARGET}"
+                    CROSS_COMPILE: "${AUTOCONF_TARGET}-"
+                    TOOLCHAIN_SYSROOT: "../${AUTOCONF_TARGET}"
+
+                    # compiler flags
+                    CPPFLAGS:   "-Wdate-time"
+                    CFLAGS:     "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
+                    CXXFLAGS:   "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
+                    LDFLAGS:    "-Wl,-O1 -Wl,--hash-style=gnu"
+
         multiPackage:
             # ARMv7 bare metal toolchain
             arm-none-eabi:
@@ -77,3 +75,38 @@ multiPackage:
                     AUTOCONF_TARGET: "aarch64-none-linux-gnu"
                     ARCH: "arm64"
                     GCC_TARGET_ARCH: "armv8-a"
+    
+    llvm:
+        depends:
+            - devel::llvm
+
+        multiPackage:
+            embedded-toolchain-for-arm:
+                environment:
+                    ARCH: "arm"
+            
+                provideTools:
+                    target-toolchain:
+                        path: "usr/bin"
+                        environment:
+                            # usual compiler variables
+                            AR: "llvm-ar"
+                            AS: "clang"
+                            CC: "clang"
+                            CPP: "clang-cpp"
+                            CXX: "clang++"
+                            LD:  "lld-link"
+                            NM:  "llvm-nm"
+                            OBJCOPY: "llvm-objcopy"
+                            OBJDUMP: "llvm-objdump"
+                            RANLIB: "llvm-ranlib"
+                            STRIP: "llvm-strip"
+
+                            ARCH: "${ARCH}"
+                            TOOLCHAIN_SYSROOT: ".."
+
+                            # compiler flags
+                            CPPFLAGS:   "-Wdate-time"
+                            CFLAGS:     "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
+                            CXXFLAGS:   "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
+                            LDFLAGS:    "-Wl,-O1 -Wl,--hash-style=gnu"
