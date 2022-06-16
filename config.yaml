@@ -1,6 +1,7 @@
-bobMinimumVersion: "0.18"
+bobMinimumVersion: "0.20.0"
 scriptLanguage: PowerShell
 
 plugins:
     - multiarch
     - vsenv
+    - msbuild

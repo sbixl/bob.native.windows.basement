@@ -1,0 +1,29 @@
+inherit: [ "pipython3::vars" ]
+
+buildTools: [python3]
+buildScript: |
+    function pipInstall
+    {
+        Param(
+            # mandatory
+            [Parameter(Position = 0)]
+            [String]$PIP_PACKAGE
+        )
+
+        mkdir -Force -p install/usr/lib >$null
+        # add -q for verbosity off 
+        Check-Command {
+            python3 -m pip install $PIP_PACKAGE `
+                --root ${PWD}/install `
+                --prefix usr `
+                --disable-pip-version-check `
+                --no-warn-script-location `
+                --ignore-installed
+        }
+    }
+packageScript: |
+    $BUILD_DIR="$($args[0])"
+    function installPythonModule
+    {
+        cp -r -Exclude @("__pycache__/", "*.dist-info/", "*.egg-info") "${BUILD_DIR}/install/*" .
+    }

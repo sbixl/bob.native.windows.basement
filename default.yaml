@@ -19,5 +19,8 @@ environment:
     AUTOCONF_BUILD: "$(host-autoconf)"
     AUTOCONF_HOST:  "$(host-autoconf)"
 
+    GITHUB_PYPA_MIRROR: "https://github.com/pypa"
+    PYTHON_MIRROR:      "https://www.python.org/ftp/python"
+
 include:
     - user

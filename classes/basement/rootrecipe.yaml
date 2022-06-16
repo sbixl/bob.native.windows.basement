@@ -30,3 +30,9 @@ depends:
         - name: devel::cmake
           use: [tools]
           forward: True
+        - name: devel::msbuild
+          use: [tools]
+          forward: True
+        - name: python::pipython3
+          use: [tools]
+          forward: True

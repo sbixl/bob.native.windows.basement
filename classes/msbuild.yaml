@@ -1,0 +1,5 @@
+buildTools: [msbuild]
+
+buildVarsWeak: [MSB_PATH]
+buildSetup: |
+    $env:Path="${Env:MSB_PATH};"+$env:Path

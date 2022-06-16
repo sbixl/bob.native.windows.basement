@@ -1,0 +1,182 @@
+inherit: [patch, msbuild]
+
+metaEnvironment:
+    PKG_VERSION: "3.8.0"
+
+privateEnvironment:
+    BASEMENT_LIBS: "both"
+
+depends:
+    - name: python::pipython3-minimal
+      use: [tools]
+      forward: true
+
+checkoutSCM:
+    -
+        scm: url
+        url: ${PYTHON_MIRROR}/${PKG_VERSION}/Python-${PKG_VERSION}.tar.xz
+        extract: no
+        dir: python
+    # Fetching external libraries...
+    -
+        scm: url
+        url: https://github.com/python/cpython-source-deps/archive/bzip2-1.0.6.zip
+        extract: no
+        dir: deps/bzip2
+    -
+        scm: url
+        url: https://github.com/python/cpython-source-deps/archive/sqlite-3.28.0.0.zip
+        extract: no
+        dir: deps/sqlite
+    -
+        scm: url
+        url: https://github.com/python/cpython-source-deps/archive/xz-5.2.2.zip
+        extract: no
+        dir: deps/xz        
+    -
+        scm: url
+        url: https://github.com/python/cpython-source-deps/archive/zlib-1.2.11.zip
+        extract: no
+        dir: deps/zlib        
+    # Fetching external binaries...
+    -
+        scm: url
+        url: https://github.com/python/cpython-bin-deps/archive/libffi-3.3.0.zip
+        extract: no
+        dir: deps/libffi        
+    -
+        scm: url
+        url: https://github.com/python/cpython-bin-deps/archive/openssl-bin-1.1.1d.zip
+        extract: no
+        dir: deps/openssl-bin        
+    -
+        scm: url
+        url: https://github.com/python/cpython-bin-deps/archive/tcltk-8.6.9.0.zip
+        extract: no
+        dir: deps/tcltk        
+
+checkoutTools: [ 7z ]
+checkoutVars: [ PKG_VERSION ]
+checkoutDeterministic: True
+checkoutScript: |
+    pushd python
+    Check-Command { 7z x -y Python-${Env:PKG_VERSION}.tar.xz }
+    Check-Command { 7z x -y Python-${Env:PKG_VERSION}.tar }
+    # because 7zip does not support strip
+    pushd Python-${Env:PKG_VERSION}
+    mv * ..
+    popd
+    rm -Force -r Python-${Env:PKG_VERSION}
+    
+    Check-Command { git init }
+    Check-Command { git add -A }
+    Check-Command { git commit -m "added for patching" }
+    patchApply $<<pipython3/0001-fix-libffi-version.patch>>
+    popd
+
+# depends on python3-minimal tool
+buildTools: [python3]
+buildVars: [MSB_PATH]
+buildScript: |
+    $SRC_PATH="$($args[0])"
+    function addLib
+    {
+        Param(
+            # mandatory
+            [Parameter(Position = 0)]
+            [String]$DEP,
+            [Parameter(Position = 1)]
+            [String]$VER
+        )
+        
+        pushd src/externals
+        Check-Command { 7z x -y $SRC_PATH/deps/$DEP/$DEP-$VER.zip }
+        Rename-Item cpython-source-deps-$DEP-$VER $DEP-$VER
+        popd
+    }
+
+    function addBin
+    {
+        Param(
+            # mandatory
+            [Parameter(Position = 0)]
+            [String]$DEP,
+            [Parameter(Position = 1)]
+            [String]$VER
+        )
+        
+        pushd src/externals
+        Check-Command { 7z x -y $SRC_PATH/deps/$DEP/$DEP-$VER.zip }
+        Rename-Item cpython-bin-deps-$DEP-$VER $DEP-$VER
+        popd
+    }
+    
+    function buildMe
+    {
+        mkdir -Force -p $("src", "src/externals") >$null
+        cp -Exclude "*.tar.xz*" -Force -r "${SRC_PATH}/python/*" src
+
+        $env:MSBUILD=${Env:MSB_PATH}
+        $env:HOST_PYTHON=$(Get-Command python3).Path
+        
+        Write-Host $env:HOST_PYTHON
+        
+        # copy dependencies
+        addLib "bzip2"       "1.0.6"
+        addLib "sqlite"      "3.28.0.0"
+        addLib "xz"          "5.2.2"
+        addLib "zlib"        "1.2.11"                        
+        addBin "libffi"      "3.3.0"
+        addBin "openssl-bin" "1.1.1d" 
+        addBin "tcltk"       "8.6.9.0"
+        
+        Check-Command { src/PCbuild/build.bat -p x64 }
+        
+        $installdir="src/PCbuild/amd64"
+
+        mkdir -p @("install/usr/bin", "install/usr/lib", "install/usr/include") >$null
+        cp -Exclude "*.lib" -Force -r $installdir/* install/usr/bin/
+        cp -Include "*.lib" -Force -r $installdir/* install//usr/lib/
+        cp install/usr/bin/python.exe install/usr/bin/python3.exe
+        cp -Force -r src/Lib/* install/usr/lib/
+        cp -Force -r src/Include/* install/usr/include/
+        cp -Include @("*.h", "*/") -Force -r src/PC/* install/usr/include/
+    }
+
+multiPackage:
+    withsetuptools:
+        depends:
+            - python::pipython3-setuptools
+
+        buildScript: |
+            buildMe
+            cp -Force -r "$($BOB_DEP_PATHS["python::pipython3-setuptools"])/*" install/
+
+        packageScript: |
+            cp -Force -r "$($args[0])/install/*" .
+
+        provideTools:
+            python3: usr/bin
+
+    "":
+        depends:
+            - name: python::pipython3-withsetuptools
+              use: [tools]
+              forward: true
+            - python::pipython3-setuptools
+            - python::pipython3-pip
+            - python::pipython3-wheel
+
+        buildScript: |
+            buildMe
+            cp -Force -r "$($BOB_DEP_PATHS["python::pipython3-setuptools"])/*" install/
+            cp -Force -r "$($BOB_DEP_PATHS["python::pipython3-pip"])/*" install/
+            cp -Force -r "$($BOB_DEP_PATHS["python::pipython3-wheel"])/*" install/
+
+        packageScript: |
+            cp -Force -r "$($args[0])/install/*" .
+
+        provideTools:
+            python3:
+                path: usr/bin
+                netAccess: True

@@ -1,0 +1,34 @@
+metaEnvironment:
+    PKG_VERSION: "20.3.1"
+
+checkoutSCM:
+    scm: url
+    url: ${GITHUB_PYPA_MIRROR}/pip/archive/${PKG_VERSION}.tar.gz
+    digestSHA256: 633c67c520027bead41f3b2cf0772f234542246838135f8a92c919e593068593
+    extract: False
+
+buildTools: [7z, python3]
+buildVars: [PKG_VERSION]
+buildScript: |
+    mkdir -Force -p @("build", "install/usr/lib") >$null
+    pushd build
+    $ARCHIVE="$($args[0])/${Env:PKG_VERSION}.tar.gz"
+    Check-Command { 7z x -y $ARCHIVE }
+    $ARCHIVE="${Env:PKG_VERSION}.tar"
+    Check-Command { 7z x -y $ARCHIVE }
+    # because 7zip does not support strip
+    pushd pip-${Env:PKG_VERSION}
+    mv * ..
+    popd
+    rm -Force -r pip-${Env:PKG_VERSION}
+    python3 setup.py install `
+        --root "$PWD/../install" `
+        --prefix usr
+    popd
+
+    #for i in $(find install/usr/*/ -maxdepth 1 -type f  || true) ; do
+    #    sed -i 's/^#!.*python3.*$/#!\/usr\/bin\/env python3/' $i
+    #done
+
+packageScript: |
+    cp -r "$($args[0])/install/*" .

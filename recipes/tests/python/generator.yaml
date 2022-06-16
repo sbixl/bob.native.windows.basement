@@ -1,0 +1,17 @@
+inherit: [ "python3" ]
+
+checkoutSCM:
+    scm: import
+    url: recipes/tests/src/python
+    prune: True
+
+buildScript: |
+    pipInstall jinja2==3.1.2
+    mkdir -Force -p install/usr/bin >$null
+    cp -Force -r "$($args[0])/*" install/usr/bin
+
+packageScript: |
+    installPythonModule
+
+provideTools:
+    generator: "usr/bin"

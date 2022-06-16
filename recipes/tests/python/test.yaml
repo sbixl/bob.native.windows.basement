@@ -1,0 +1,22 @@
+inherit: [ "basement::rootrecipe", python3 ]
+
+depends:
+    - name: tests::python::generator
+      use: [tools]
+      forward: True
+      checkoutDep: true
+
+checkoutTools: [generator]
+checkoutScript: |
+    Check-Command {    
+        python3 "$($BOB_TOOL_PATHS["generator"])\generator.py" -o "$PWD" 
+    }
+    
+
+buildScript: |
+    Check-Command {    
+        python3 "$($BOB_TOOL_PATHS["generator"])\generator.py" -o "$PWD" 
+    }
+
+packageScript: |
+    cp -Force -r "$($args[0])\*" .
