@@ -49,6 +49,7 @@ In tests/cmake there are a couple of recipes that build small test packages whic
 ```shell
     bob dev tests::cmake::greeter-host
     bob dev tests::cmake::greeter-cross
+	bob dev tests::python::test
 ```
 
 # How to use
