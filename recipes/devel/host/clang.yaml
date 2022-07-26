@@ -5,7 +5,7 @@ metaEnvironment:
 
 checkoutSCM:
     scm: url
-    url: https://github.com/llvm/llvm-project/releases/download/llvmorg-${PKG_VERSION}/llvm-project-${PKG_VERSION}.src.tar.xz
+    url: ${GITHUB_MIRROR}/llvm/llvm-project/releases/download/llvmorg-${PKG_VERSION}/llvm-project-${PKG_VERSION}.src.tar.xz
     digestSHA1: af5a37be12d3725c5514a8aff81c88be0e6515a0
     extract: no
 

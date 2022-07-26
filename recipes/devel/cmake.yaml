@@ -4,14 +4,14 @@ metaEnvironment:
 checkoutSCM:
     -
         scm: url
-        url: https://github.com/Kitware/CMake/archive/v${PKG_VERSION}.zip
+        url: ${GITHUB_MIRROR}/Kitware/CMake/archive/v${PKG_VERSION}.zip
         digestSHA1: "8288e37a9041e03a955b316ca0ea2ae93c3df4ba"
         dir: cmake.src
     # Since there is unfortunately no possibility to bootstrap cmake like under linux,
     # we must download a pre build binary for windows to build cmake from source.
     -
         scm: url
-        url: https://github.com/Kitware/CMake/releases/download/v${PKG_VERSION}/cmake-${PKG_VERSION}-win64-x64.zip
+        url: ${GITHUB_MIRROR}/Kitware/CMake/releases/download/v${PKG_VERSION}/cmake-${PKG_VERSION}-win64-x64.zip
         digestSHA1: "51e611bb39f8f4c49a160085048e0dd24ec22812"
         dir: cmake.bin
 

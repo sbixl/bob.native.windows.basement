@@ -5,7 +5,7 @@ metaEnvironment:
 
 checkoutSCM:
     scm: url
-    url: https://github.com/kornelski/7z/archive/${PKG_VERSION}.zip
+    url: ${GITHUB_MIRROR}/kornelski/7z/archive/${PKG_VERSION}.zip
     digestSHA1: 723d39a42909d18ce71b831d6f3645ae41e9eda7
 
 buildVars: [ CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION ]

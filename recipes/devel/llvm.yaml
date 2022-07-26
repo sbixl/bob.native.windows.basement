@@ -1,7 +1,7 @@
 # since we can't build gcc native or cross compiling toolchain on windows we must download pre build binaries
 checkoutSCM:
     scm: url
-    url: https://github.com/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-windows.zip
+    url: ${GITHUB_MIRROR}/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-windows.zip
     digestSHA256: "1d0ba47d93e09e34ee1e31cec43f221b9d689401a5eae568df6cdef0261c6abb"
     dir: llvm
     extract: no

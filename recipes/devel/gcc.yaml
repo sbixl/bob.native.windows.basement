@@ -4,7 +4,7 @@ checkoutSCM:
         if: !expr |
             "${AUTOCONF_TARGET}" == "arm-none-eabi"
         scm: url
-        url: https://developer.arm.com/-/media/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-win32.zip
+        url: ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-win32.zip
         digestSHA256: "90057b8737b888c53ca5aee332f1f73c401d6d3873124d2c2906df4347ebef9e"
         dir: ${AUTOCONF_TARGET}
         extract: no
@@ -12,7 +12,7 @@ checkoutSCM:
         if: !expr |
             "${AUTOCONF_TARGET}" == "arm-none-linux-gnueabihf"
         scm: url
-        url: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-arm-none-linux-gnueabihf.tar.xz
+        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-arm-none-linux-gnueabihf.tar.xz
         digestSHA256: "ebad4026aa25127db575b6950ee3b0107cef5a41ddd795663627d1a48b226ff3"
         dir: ${AUTOCONF_TARGET}
         extract: no
@@ -20,7 +20,7 @@ checkoutSCM:
         if: !expr |
             "${AUTOCONF_TARGET}" == "aarch64-none-elf"
         scm: url
-        url: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-aarch64-none-elf.tar.xz
+        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-aarch64-none-elf.tar.xz
         digestSHA256: "eb28cd18e7e4ca5bf57332ce00da006fb7a841075a117b8c4386c64e1559431a"
         dir: ${AUTOCONF_TARGET}
         extract: no
@@ -28,7 +28,7 @@ checkoutSCM:
         if: !expr |
             "${AUTOCONF_TARGET}" == "aarch64-none-linux-gnu"
         scm: url
-        url: https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-aarch64-none-linux-gnu.tar.xz
+        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-aarch64-none-linux-gnu.tar.xz
         digestSHA256: "f35aef3f305290b7bd944fc3269cdf4bd64841c4992db7ef94f2ec7da37df27e"
         dir: ${AUTOCONF_TARGET}
         extract: no
@@ -64,5 +64,5 @@ packageScript: |
     
     # because 7z has not strip option we need to do it ourselves
     $RootFolder = $(Get-ChildItem usr)
-    cp -r usr/$RootFolder/* usr -Force
+    robocopy usr/$RootFolder/ usr /S /NFL /NDL /NJH /NJS /nc /ns
     rm -Recurse usr/$RootFolder

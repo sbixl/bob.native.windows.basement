@@ -4,21 +4,34 @@ metaEnvironment:
         PKG_VERSION: "1.10.2"
 
 checkoutSCM:
-    scm: git
-    url: https://github.com/ninja-build/ninja.git
-    branch: master
-    tag: "v${PKG_VERSION}"
+    scm: url
+    url: ${GITHUB_MIRROR}/Kitware/ninja/archive/refs/tags/v${PKG_VERSION}.g51db2.kitware.jobserver-1.zip
+    digestSHA1: 9163d3c826979a7e519b8be9d9c54d689825cb96
 
+checkoutVars: [PKG_VERSION]
 checkoutDeterministic: True
 checkoutScript: |
+    pushd ninja-${Env:PKG_VERSION}.g51db2.kitware.jobserver-1
+    if( Test-Path .git)
+    {
+        # revert patch in order to apply it again
+        Check-Command { git clean -f }
+    }
+    else
+    {
+        Check-Command { git init }
+        Check-Command { git add -A }
+        Check-Command { git commit -m "added for patching" }
+    }
     patchApply $<<ninja\0001-enable-clang-compiler-on-native-windows.patch>>
+    popd
 
 multiPackage:
     "":
         inherit: [cmake]
         buildVars: [PKG_VERSION]
         buildScript: |
-            cmakeBuild "$($args[0])" `
+            cmakeBuild "$($args[0])\ninja-${Env:PKG_VERSION}.g51db2.kitware.jobserver-1" `
                        -DCMAKE_BUILD_TYPE=Release
 
         packageScript: |
@@ -28,7 +41,7 @@ multiPackage:
         inherit: [cpackage, install]
         buildVars: [CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION]
         buildScript: |
-            $SRC_PATH = "$($args[0])\configure.py"
+            $SRC_PATH = "$($args[0])\ninja-${Env:PKG_VERSION}.g51db2.kitware.jobserver-1\configure.py"
             Check-Command { python $SRC_PATH --bootstrap }
 
             mkdir -Force install\usr\bin >$null

@@ -20,38 +20,38 @@ checkoutSCM:
     # Fetching external libraries...
     -
         scm: url
-        url: https://github.com/python/cpython-source-deps/archive/bzip2-1.0.6.zip
+        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/bzip2-1.0.6.zip
         extract: no
         dir: deps/bzip2
     -
         scm: url
-        url: https://github.com/python/cpython-source-deps/archive/sqlite-3.28.0.0.zip
+        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/sqlite-3.28.0.0.zip
         extract: no
         dir: deps/sqlite
     -
         scm: url
-        url: https://github.com/python/cpython-source-deps/archive/xz-5.2.2.zip
+        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/xz-5.2.2.zip
         extract: no
         dir: deps/xz        
     -
         scm: url
-        url: https://github.com/python/cpython-source-deps/archive/zlib-1.2.11.zip
+        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/zlib-1.2.11.zip
         extract: no
         dir: deps/zlib        
     # Fetching external binaries...
     -
         scm: url
-        url: https://github.com/python/cpython-bin-deps/archive/libffi-3.3.0.zip
+        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/libffi-3.3.0.zip
         extract: no
         dir: deps/libffi        
     -
         scm: url
-        url: https://github.com/python/cpython-bin-deps/archive/openssl-bin-1.1.1d.zip
+        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/openssl-bin-1.1.1d.zip
         extract: no
         dir: deps/openssl-bin        
     -
         scm: url
-        url: https://github.com/python/cpython-bin-deps/archive/tcltk-8.6.9.0.zip
+        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/tcltk-8.6.9.0.zip
         extract: no
         dir: deps/tcltk        
 
@@ -64,13 +64,21 @@ checkoutScript: |
     Check-Command { 7z x -y Python-${Env:PKG_VERSION}.tar }
     # because 7zip does not support strip
     pushd Python-${Env:PKG_VERSION}
-    mv * ..
+    robocopy . .. /S /IM /NFL /NDL /NJH /NJS /nc /ns
     popd
     rm -Force -r Python-${Env:PKG_VERSION}
     
-    Check-Command { git init }
-    Check-Command { git add -A }
-    Check-Command { git commit -m "added for patching" }
+    if( Test-Path .git)
+    {
+        # revert patch in order to apply it again
+        Check-Command { git clean -f }
+    }
+    else
+    {
+        Check-Command { git init }
+        Check-Command { git add -A }
+        Check-Command { git commit -m "added for patching" }
+    }
     patchApply $<<pipython3/0001-fix-libffi-version.patch>>
     popd
 

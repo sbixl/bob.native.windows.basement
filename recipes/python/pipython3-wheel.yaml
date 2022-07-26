@@ -3,7 +3,7 @@ metaEnvironment:
 
 checkoutSCM:
     scm: url
-    url: ${GITHUB_PYPA_MIRROR}/wheel/archive/${PKG_VERSION}.tar.gz
+    url: ${GITHUB_MIRROR}/pypa/wheel/archive/${PKG_VERSION}.tar.gz
     digestSHA256: c31e70355935f1d47bf0d898661a1e9dd47966d935c0a785dbe5b41eedf6802a
     extract: False
 
@@ -18,17 +18,13 @@ buildScript: |
     Check-Command { 7z x -y $ARCHIVE }
     # because 7zip does not support strip
     pushd wheel-${Env:PKG_VERSION}
-    mv * ..
+    robocopy . .. /S /IM /NFL /NDL /NJH /NJS /nc /ns
     popd
     rm -Force -r wheel-${Env:PKG_VERSION}
     python3 setup.py install `
         --root "$PWD/../install" `
         --prefix usr
     popd
-
-    #for i in $(find install/usr/*/ -maxdepth 1 -type f  || true) ; do
-    #    sed -i 's/^#!.*python3.*$/#!\/usr\/bin\/env python3/' $i
-    #done
 
 packageScript: |
     cp -r "$($args[0])/install/*" .
