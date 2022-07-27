@@ -22,6 +22,15 @@ environment:
     GITHUB_MIRROR:        "https://github.com"
     PYTHON_MIRROR:        "https://www.python.org/ftp/python"
     DEVELOPER_ARM_MIRROR: "https://developer.arm.com"
+    
+    # This is for local (user) specific usage. Let this environment variable
+    # point to you internal PIPY Mirror storage in order to install pip packages 
+    # without the usage of external internet access. 
+    #
+    # example:
+    #   PYTHON_PYPI_MIRROR:   "\\\\MY-NAS\\pypi.mirror\\packages\\wheels"
+    #
+    PYTHON_PYPI_MIRROR:   ""
 
 include:
     - user

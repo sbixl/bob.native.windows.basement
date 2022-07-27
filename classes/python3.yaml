@@ -1,13 +1,41 @@
 inherit: [ "pipython3::vars" ]
 
+buildVars: [PYTHON_PYPI_MIRROR]
 buildTools: [python3]
 buildScript: |
+
+    ########################################################################################
+    #
+    # \brief: This function will install a pip package and all its dependencies with or  
+    #         without external internet access (depends on bob environment variable
+    #         PYTHON_PYPI_MIRROR).
+    #
+    # \args[in]: PIP_PACKAGE pypi package to be installed or path to a local directory
+    # \args[in]: RELATIVE_SEARCH_PATH relative search path in PYTHON_PYPI_MIRROR
+    #
+    # \example:
+    #     buildScript: |
+    #         pipInstallLocal "jinja2==3.1.2"
+    #
+    #     buildScript: |
+    #         pipInstallLocal "$MyLocalPath/MyPyModule" "MyPyModuleDependencies"
+    #
+    # \note: If bob environment variable PYTHON_PYPI_MIRROR is not set or points to
+    #        an invalid location, pip will use the external network (pypi.org) to 
+    #        donwload the required pip package. Furthermore if the required pip package
+    #        is not found in PYTHON_PYPI_MIRROR, pip will use external network access
+    #        as fallback solution too!
+    #
+    ########################################################################################
     function pipInstall
     {
         Param(
             # mandatory
             [Parameter(Position = 0)]
-            [String]$PIP_PACKAGE
+            [String]$PIP_PACKAGE,
+            # optional
+            [Parameter(Mandatory=$false,Position = 1)]
+            [String]$RELATIVE_SEARCH_PATH = ""
         )
 
         mkdir -Force -p install/usr/lib >$null
@@ -15,12 +43,14 @@ buildScript: |
         Check-Command {
             python3 -m pip install $PIP_PACKAGE `
                 --root ${PWD}/install `
+                --find-links="${Env:PYTHON_PYPI_MIRROR}\\${RELATIVE_SEARCH_PATH}" `
                 --prefix usr `
                 --disable-pip-version-check `
                 --no-warn-script-location `
                 --ignore-installed
         }
     }
+    
 packageScript: |
     $BUILD_DIR="$($args[0])"
     function installPythonModule
