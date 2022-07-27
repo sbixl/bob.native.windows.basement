@@ -36,6 +36,8 @@ provideVars:
     OBJDUMP: "llvm-objdump"
     RANLIB:  "llvm-ranlib"
     STRIP:   "llvm-strip"
+    
+    ARCH:   "x86_64"
 
     # Define our build and host systems because we define the host- and
     # target-toolchain. ARCH is unchanged, though.
