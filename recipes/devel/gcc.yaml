@@ -4,64 +4,47 @@ checkoutSCM:
         if: !expr |
             "${AUTOCONF_TARGET}" == "arm-none-eabi"
         scm: url
-        url: ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu-rm/10-2020q4/gcc-arm-none-eabi-10-2020-q4-major-win32.zip
-        digestSHA256: "90057b8737b888c53ca5aee332f1f73c401d6d3873124d2c2906df4347ebef9e"
+        url: ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-mingw-w64-i686-arm-none-eabi.zip
+        digestSHA256: "585156432d73c9c2c8b4742e342564a75d47886d90ac821f88d2b564c33e6766"
         dir: ${AUTOCONF_TARGET}
         extract: no
     -
         if: !expr |
             "${AUTOCONF_TARGET}" == "arm-none-linux-gnueabihf"
         scm: url
-        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-arm-none-linux-gnueabihf.tar.xz
-        digestSHA256: "ebad4026aa25127db575b6950ee3b0107cef5a41ddd795663627d1a48b226ff3"
+        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-mingw-w64-i686-arm-none-linux-gnueabihf.zip
+        digestSHA256: "2c2d3d9c91419f38867d69876570dd039fd3fd70a2c3ad22299dfc312ed82a6b"
         dir: ${AUTOCONF_TARGET}
         extract: no
     -
         if: !expr |
             "${AUTOCONF_TARGET}" == "aarch64-none-elf"
         scm: url
-        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-aarch64-none-elf.tar.xz
-        digestSHA256: "eb28cd18e7e4ca5bf57332ce00da006fb7a841075a117b8c4386c64e1559431a"
+        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-mingw-w64-i686-aarch64-none-elf.zip
+        digestSHA256: "4ce6d3f1c063e40b6b70063156d7796f86c224149c241ede22c622958e763034"
         dir: ${AUTOCONF_TARGET}
         extract: no
     -
         if: !expr |
             "${AUTOCONF_TARGET}" == "aarch64-none-linux-gnu"
         scm: url
-        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-mingw-w64-i686-aarch64-none-linux-gnu.tar.xz
-        digestSHA256: "f35aef3f305290b7bd944fc3269cdf4bd64841c4992db7ef94f2ec7da37df27e"
+        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-mingw-w64-i686-aarch64-none-linux-gnu.zip
+        digestSHA256: "4ede5507bb03395e597cb206202a9b65b128c9b5825c951d8e09acdc487dcc5a"
         dir: ${AUTOCONF_TARGET}
         extract: no
 
 buildVars: [AUTOCONF_TARGET]
 buildScript: |
     # create a symlink to avoid wasting memory
-    if ( "arm-none-eabi" -eq  ${Env:AUTOCONF_TARGET} )
-    {
-        $ArchiveName = $(Get-ChildItem "$($args[0])/${Env:AUTOCONF_TARGET}" -File '*.zip')
-        New-Item -ItemType SymbolicLink -Path "${Env:AUTOCONF_TARGET}.zip"  -Target "$($args[0])/${Env:AUTOCONF_TARGET}/$ArchiveName" >$null
-    }
-    else
-    {
-        $ArchiveName = $(Get-ChildItem "$($args[0])/${Env:AUTOCONF_TARGET}" -File '*.tar.xz')
-        New-Item -ItemType SymbolicLink -Path "${Env:AUTOCONF_TARGET}.tar.xz"  -Target "$($args[0])/${Env:AUTOCONF_TARGET}/$ArchiveName" >$null
-    }
+    $ArchiveName = $(Get-ChildItem "$($args[0])/${Env:AUTOCONF_TARGET}" -File '*.zip')
+    New-Item -ItemType SymbolicLink -Path "${Env:AUTOCONF_TARGET}.zip"  -Target "$($args[0])/${Env:AUTOCONF_TARGET}/$ArchiveName" >$null
 
 packageTools: [7z]
 packageScript: |
     $ArchivPath = "$($args[0])"
     mkdir usr > $null
-    if ( "arm-none-eabi" -eq  ${Env:AUTOCONF_TARGET} )
-    {
-        Check-Command { 7z x -o"usr" -y $ArchivPath/${Env:AUTOCONF_TARGET}.zip }
-    }
-    else
-    {
-        Check-Command { 7z x -y $ArchivPath/${Env:AUTOCONF_TARGET}.tar.xz }
-        Check-Command { 7z x -o"usr" -y $PWD/${Env:AUTOCONF_TARGET}.tar }
-        rm $PWD/${Env:AUTOCONF_TARGET}.tar
-    }
-    
+    Check-Command { 7z x -o"usr" -y $ArchivPath/${Env:AUTOCONF_TARGET}.zip }
+
     # because 7z has not strip option we need to do it ourselves
     $RootFolder = $(Get-ChildItem usr)
     robocopy usr/$RootFolder/ usr /S /NFL /NDL /NJH /NJS /nc /ns
