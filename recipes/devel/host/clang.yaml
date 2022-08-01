@@ -1,4 +1,4 @@
-inherit: [cpackage, ninja, install]
+inherit: [cpackage, ninja, install, filesystem]
 
 metaEnvironment:
     PKG_VERSION: "14.0.0"
@@ -21,7 +21,11 @@ checkoutScript: |
 buildToolsWeak: [cmake]
 buildVars: [ LLVM_TARGETS, LLVM_PROJECTS, CFLAGS, CXXFLAGS ]
 buildScript: |
-    $SRC_PATH = "$($args[0])\llvm-project-${Env:PKG_VERSION}.src\llvm"
+    # Attention: While building Clang within a CI environment, the absolute paths used on Jenkins
+    # are longer than for a local build. For this reason, the entire source directory is copied to
+    # the build step because the relative path can be used!
+
+    CopyDirectory "$($args[0])\llvm-project-${Env:PKG_VERSION}.src" src $true
 
     function buildClang
     {
@@ -41,20 +45,47 @@ buildScript: |
         $_OPTIONS = $($args)
         Check-Command {
             # cmake -E time `
-            cmake $SRC_PATH `
+            cmake "src\llvm" `
                   -GNinja `
                   -DCMAKE_BUILD_TYPE=Release `
+                  -DBUILD_SHARED_LIBS=OFF `
                   -DCMAKE_INSTALL_UCRT_LIBRARIES=ON `
                   -DCMAKE_INSTALL_PREFIX=install\usr `
+                  -DLLDB_EMBED_PYTHON_HOME=OFF `
                   -DLLVM_TARGETS_TO_BUILD="${Env:LLVM_TARGETS}" `
                   -DLLVM_ENABLE_PROJECTS="${Env:LLVM_PROJECTS}" `
                   -DLLVM_USE_CRT_RELEASE=MT `
+                  -DLLVM_OPTIMIZED_TABLEGEN=ON `
+                  -DLLVM_BUILD_LLVM_C_DYLIB=OFF `
+                  -DLLVM_ENABLE_BACKTRACES=OFF `
+                  -DLLVM_ENABLE_UNWIND_TABLES=OFF `
+                  -DLLVM_ENABLE_CRASH_OVERRIDES=OFF `
+                  -DLLVM_ENABLE_TERMINFO=OFF `
+                  -DLLVM_ENABLE_LIBXML2=OFF `
+                  -DLLVM_ENABLE_LIBEDIT=OFF `
+                  -DLLVM_ENABLE_LIBPFM=OFF `
+                  -DLLVM_ENABLE_ZLIB=OFF `
+                  -DLLVM_ENABLE_Z3_SOLVER=OFF `
+                  -DLLVM_ENABLE_WARNINGS=OFF `
+                  -DLLVM_ENABLE_PEDANTIC=OFF `
+                  -DLLVM_ENABLE_WERROR=OFF `
                   -DLLVM_ENABLE_ASSERTIONS=OFF `
+                  -DLLVM_BUILD_EXAMPLES=OFF `
+                  -DLLVM_BUILD_TESTS=OFF `
+                  -DLLVM_BUILD_BENCHMARKS=OFF `
+                  -DLLVM_BUILD_DOCS=OFF `
                   -DLLVM_INCLUDE_EXAMPLES=OFF `
                   -DLLVM_INCLUDE_TESTS=OFF `
                   -DLLVM_INCLUDE_BENCHMARKS=OFF `
-                  -DLLVM_ENABLE_ZLIB=OFF `
-                  -DLLVM_OPTIMIZED_TABLEGEN=ON `
+                  -DLLVM_INCLUDE_DOCS=OFF `
+                  -DLLVM_ENABLE_BINDINGS=OFF `
+                  -DLLVM_ENABLE_PLUGINS=OFF `
+                  -DLLVM_ENABLE_IDE=OFF `
+                  -DCLANG_BUILD_EXAMPLES=OFF `
+                  -DCLANG_INCLUDE_TESTS=OFF `
+                  -DCLANG_INCLUDE_DOCS=OFF `
+                  -DCLANG_ENABLE_ARCMT=OFF `
+                  -DCLANG_ENABLE_STATIC_ANALYZER=OFF `
                   -DLLVM_PARALLEL_LINK_JOBS="$PARALLEL_LINK_JOBS" `
                   -DLLVM_PARALLEL_COMPILE_JOBS="$PARALLEL_COMPILE_JOBS" `
                   $_OPTIONS
@@ -94,7 +125,9 @@ multiPackage:
     native:
         environment:
             LLVM_TARGETS:  "X86"
-            LLVM_PROJECTS: "clang;clang-tools-extra;compiler-rt;lld;lldb"
+            # while building in a CI-Environement, it is not possible to build the project
+            # clang-tools-extra because the paths will get to long and the build fails!
+            LLVM_PROJECTS: "clang;compiler-rt;lld;lldb"
 
         depends:
             -
@@ -124,7 +157,6 @@ multiPackage:
                        -DLIBCXX_ENABLE_STATIC=ON `
                        -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=NO `
                        -DLIBCXX_HAS_WIN32_THREAD_API=ON `
-                       -DLLDB_EMBED_PYTHON_HOME=OFF `
                        -DCMAKE_C_COMPILER=clang-cl `
                        -DCMAKE_C_FLAGS="-fms-compatibility-version=$msvcversion $curarch " `
                        -DCMAKE_CXX_COMPILER=clang-cl `

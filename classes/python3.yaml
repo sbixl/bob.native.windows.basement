@@ -2,7 +2,7 @@ inherit: [ "pipython3::vars" ]
 
 buildVars: [PYTHON_PYPI_MIRROR]
 buildTools: [python3]
-buildScript: |
+buildSetup: |
 
     ########################################################################################
     #
@@ -51,7 +51,7 @@ buildScript: |
         }
     }
     
-packageScript: |
+packageSetup: |
     $BUILD_DIR="$($args[0])"
     function installPythonModule
     {

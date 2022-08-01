@@ -127,8 +127,6 @@ buildScript: |
         $env:MSBUILD=${Env:MSB_PATH}
         $env:HOST_PYTHON=$(Get-Command python3).Path
         
-        Write-Host $env:HOST_PYTHON
-        
         # copy dependencies
         addLib "bzip2"       "1.0.6"
         addLib "sqlite"      "3.28.0.0"

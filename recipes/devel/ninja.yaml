@@ -43,6 +43,7 @@ multiPackage:
         buildScript: |
             $SRC_PATH = "$($args[0])\ninja-${Env:PKG_VERSION}.g51db2.kitware.jobserver-1\configure.py"
             Check-Command { python $SRC_PATH --bootstrap }
+            ./ninja.exe
 
             mkdir -Force install\usr\bin >$null
             cp ninja.exe install\usr\bin

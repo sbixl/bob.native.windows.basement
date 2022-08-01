@@ -40,9 +40,7 @@ can clone the recipes and build them with Bob in development mode:
     bob dev buildall
 ```
 
-Because there is currently no Jenkins / CI support for windows yet, you have
-to build all packages locally in your host environment. Building the clang compiler
-can take some time, so have a bit of patience. ;-)
+Building the clang compiler can take some time, so have a bit of patience. ;-)
 
 In tests/cmake there are a couple of recipes that build small test packages which use the basement layer. They act as smoke tests for this project.
 
@@ -106,6 +104,53 @@ To use a cross compiling toolchain include it where needed via:
         - name: <recipe name here>
           use: [tools, environment]
           forward: True
+
+# Continuos Integration (Bob Jenkins support for native Windows) 
+
+Recently it is possible to use bob in combination with Jenkins for Continuos Integration (CI) by still 
+remaining under native windows. The entire project is ready for CI and can be build using distributed 
+Jenkins-Nodes.
+
+While setting up the CI infrastructure and especially the Jenkins Nodes, the `JENKINS_HOME`
+environment variable should always set to a short path e.g `C:\data\jenkins_home` because
+otherwise the build of some artifacts (especially the host clang compiler) will fail due to
+path limitations under native windows!
+
+The following example briefly shows, how easy it is to configure the accordant Jenkins jobs with the 
+use of the Bob-Jenkins-Interface. The option `-n windows`, will tell the jenkins master to schedule 
+the jobs only on build nodes which are tagged with the label **windows**. 
+
+The http address http://jenkins-master:8080 is freely chosen, but can be used in a local (private) infrastructure.
+
+```shell
+    bob jenkins add local http://user@jenkins-master:8080 --r buildall --host-platform win32 -n windows --upload
+    bob jenkins push local
+```
+
+The option `-- upload` will tell the Jenkins to copy the build artifacts to a dedicated binary artifact 
+server. In my setup this is a simple nginx based HTTP server, located in the jenkins master host device. 
+In order to tell bob the location where the binary artifact server can be found, you hav to add the 
+following configuration to the `default.yaml` or `user.yaml`:
+
+    archive:
+        -
+            backend: http
+            url: "http://jenkins-master:80"
+            # default: flags: [download, upload]
+            # upload and download (re-use) artifacts from artefact server
+
+While using this project as a bob layer in another project, the binary artifact server 
+shall be added to the `default.yaml` too:
+
+    archive:
+        -
+            backend: http
+            url: "http://jenkins-master:80"
+            # only download artifacts from artefact server, never upload any
+            flags: [download]
+
+Please take care to set the option `flags: [download]` to prevent uploading binary artifacts
+from the bob project which uses this basement layer to the artifact server unless it is expressly so desired.
 
 # Some words about performance
 

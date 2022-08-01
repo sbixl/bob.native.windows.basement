@@ -1,0 +1,27 @@
+checkoutSetup: &ref |
+    function CopyDirectory
+    {
+        Param(
+            # mandatory
+            [Parameter(Position = 0)]
+            [String]$SRC,
+            [Parameter(Position = 1)]
+            [String]$DST,
+            # optional
+            [Parameter(Position = 2)]
+            [bool]$VERBOSITY = $false
+        )    
+        
+        if($VERBOSITY -eq $false)
+        {
+            robocopy $SRC $DST /MIR /NDL /NJH /NJS | %{$data = $_.Split([char]9); if("$($data[4])" -ne "") { $file = "$($data[4])"} ;Write-Progress "Percentage $($data[0])" -Activity "Robocopy" -CurrentOperation "$($file)"  -ErrorAction SilentlyContinue; }
+        }
+        else
+        {
+            robocopy $SRC $DST /MIR /NDL /NJH /NJS
+        }
+    }
+
+buildSetup: *ref
+
+packageSetup: *ref
