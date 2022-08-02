@@ -1,0 +1,28 @@
+inherit: [cmake]
+
+metaEnvironment:
+    PKG_VERSION: "2.5.25"
+
+checkoutSCM:
+    scm: url
+    url: ${GITHUB_MIRROR}/lexxmark/winflexbison/archive/refs/tags/v${PKG_VERSION}.zip
+    digestSHA256: ced600ece7ecaf349081e822d7470136111e85a9b698ddcf1c1eb5e8da8066b4
+
+buildVars: [PKG_VERSION]
+buildScript: |
+    $SRC_PATH="$($args[0])\winflexbison-${Env:PKG_VERSION}"
+
+    cmakeBuild $SRC_PATH
+
+packageScript: |
+    cmakePackageBin
+
+    rm -r usr/custom_build_rules
+    rm usr/win_bison.exe
+    rm usr/win_bison.ilk
+    rm usr/win_bison.pdb
+    rm -r usr/data
+    mv usr/win_flex.exe  usr/flex.exe
+
+provideTools:
+    flex: usr
