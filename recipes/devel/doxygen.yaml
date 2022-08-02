@@ -1,0 +1,36 @@
+inherit: [cmake]
+
+metaEnvironment:
+    PKG_VERSION: "1_9_4"
+
+depends:
+    - name: devel::flex
+      use: [tools]
+    - name: devel::bison
+      use: [tools]
+
+checkoutSCM:
+    scm: url
+    url: ${GITHUB_MIRROR}/doxygen/doxygen/archive/refs/tags/Release_${PKG_VERSION}.zip
+    digestSHA256: fb67813ca79e2d5cbd8ca4a89e5e26ba54a3b23007e9b0dd370bf383d7e778e8
+
+buildTools: [flex, bison]
+buildVars: [PKG_VERSION]
+buildScript: |
+    cmakeBuild -GNinja `
+               -Dbuild_wizard=OFF `
+               -Dbuild_app=OFF `
+               -Dbuild_parse=OFF `
+               -Dbuild_xmlparser=OFF `
+               -Dbuild_search=OFF `
+               -Dbuild_doc=OFF `
+               -Duse_sqlite3=OFF `
+               -Duse_libclang=OFF `
+               -Dwin_static=ON `
+               "$($args[0])\doxygen-Release_${Env:PKG_VERSION}"
+
+packageScript: |
+    cmakePackageBin
+
+provideTools:
+    doxygen: usr/bin    
