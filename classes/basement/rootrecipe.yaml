@@ -24,19 +24,12 @@ depends:
         - name: devel::cmake-bootstrap
           use: [tools]
           forward: True
-        - name: devel::doxygen
-          use: [tools]
-          forward: True 
-        # Use clang compiler instead of msvc compiler. The user might explicitly disable
-        # it's usage but this will then taint all binary artifacts built for the host.
         - name: devel::host-toolchain
           use: [environment, tools]
           forward: True
-          if: "${BASEMENT_HOST_CLANG_TOOLCHAIN:-1}"
         - name: devel::ninja
           use: [tools]
           forward: True
         - name: devel::cmake
           use: [tools]
           forward: True
-         

@@ -1,8 +1,4 @@
 environment:
-    # By default the msvc toolchain is used as host toolchain. The user might
-    # explicity disable it's usage and switch to clang toolchain.
-    BASEMENT_HOST_CLANG_TOOLCHAIN: "0"
-
     # default compile flags
     BASEMENT_OPTIMIZE: "s" # compiler optimization level (0/1/2/s)
     BASEMENT_DEBUG: "1"    # generate debug symbols (0/1)
@@ -20,6 +16,7 @@ environment:
     AUTOCONF_HOST:  "$(host-autoconf)"
 
     GITHUB_MIRROR:        "https://github.com"
+    GITLAB_MIRROR:        "https://gitlab.com"
     PYTHON_MIRROR:        "https://www.python.org/ftp/python"
     DEVELOPER_ARM_MIRROR: "https://developer.arm.com"
     
