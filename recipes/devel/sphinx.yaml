@@ -1,0 +1,19 @@
+inherit: [python3]
+
+buildScript: |
+    'breathe==4.31.0
+    mlx.traceability==7.5.0
+    Sphinx==4.3.0
+    sphinx_rtd_theme==1.0.0
+    sphinx_tabs==3.2.0
+    sphinx-prompt==1.5.0
+    sphinxcontrib-jsmath==1.0.1' | Out-File -encoding ASCII ${PWD}\requirements.txt
+
+    pipInstallFromFile requirements.txt "sphinx"
+
+packageScript: |
+    installPythonModule
+
+provideTools:
+    sphinx:
+        path: "usr/Scripts"
