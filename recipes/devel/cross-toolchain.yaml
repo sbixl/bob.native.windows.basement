@@ -49,7 +49,7 @@ multiPackage:
                     CXXFLAGS:   "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
                     LDFLAGS:    "-Wl,-O1 -Wl,--hash-style=gnu"
 
-        packageVars: [AUTOCONF_TARGET]
+        packageVars: [AUTOCONF_TARGET, ARCH]
         packageScript: |
       
             # get version number
@@ -98,6 +98,23 @@ multiPackage:
             set(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES   "${{CMAKE_C_STANDARD_INCLUDE_DIRECTORIES}}   ${{CMAKE_CURRENT_LIST_DIR}}/usr/{0}/include")
             set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES "${{CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES}} ${{CMAKE_CURRENT_LIST_DIR}}/usr/{0}/include/c++/{1}")' -f "${Env:AUTOCONF_TARGET}", "${version}" | 
             Out-File -encoding utf8 ${PWD}\${Env:AUTOCONF_TARGET}.toolchain
+
+            mkdir -Force -p usr/etc/ide >$null
+            pushd usr/etc/ide
+            # Create setup file which can be used by an IDE Generator.
+            'defines: []
+            
+            toolchain:
+                name: "gcc"
+                arch: "{0}"
+                cxx:  "usr/bin/{1}-gcc.exe"
+                cc:   "usr/bin/{1}-g++.exe"
+                dbg:  "usr/bin/{1}-gdb.exe"
+
+            publicHeader:
+                - usr\{1}\include
+                - usr\{1}\include\c++\{2}' -f "${Env:ARCH}", "${Env:AUTOCONF_TARGET}", "${version}" | Out-File -encoding ASCII toolchain.cfg
+            popd
 
         multiPackage:
             
