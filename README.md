@@ -1,17 +1,22 @@
 # Previous note
 
-Most of the recipes and classes included in this project were widely adopted from the [basement project](https://github.com/BobBuildTool/basement). But since the project currently only
- supports bash as shell script language, this is a attempt to introduce the pwsh script
- language to be used on native windows without msys. For this the recipes and classes were ported from bash to pwsh as far as possible.
+Most of the recipes and classes included in this project were widely adopted from the 
+[basement project](https://github.com/BobBuildTool/basement). But since the project 
+currently only supports bash as shell script language, this is a attempt to introduce 
+the pwsh script language to be used on native windows without MSYS. For this the recipes 
+and classes were ported from bash to pwsh as far as possible.
 
-The approach of an position independent python3 is widely adopted from the [pipython3 project](https://github.com/mahaase/pipython3). But since this project currently only supports bash as shell script language, porting to pwsh was necessary too.
+The approach of an position independent python3 is widely adopted from the 
+[pipython3 project](https://github.com/mahaase/pipython3). But since this 
+project currently only supports bash as shell script language, porting to 
+pwsh was necessary too.
 
 # Native Windows Basement
 
 These basement project is a collection of useful recipes and classes that can be
-used by other projects. Most importantly it provides standard classes
-to handle common build systems and other standard tasks. Additionally a native clang
-and common GCC toolchains are ready-to-use.
+used by other projects. Most importantly it provides standard classes to handle 
+common build systems and other standard tasks. Additionally a native host clang 
+and common GCC as well as an embedded LLVM toolchain are ready-to-use.
 
 # Prerequisites
 
@@ -23,13 +28,19 @@ and common GCC toolchains are ready-to-use.
 
 * Windows 10 system configuration
   * Make sure you can create symbolic links without admin rights. Usually you can enable
-    this by switching to the developer mode. If this does not work, enable it in your [security policy setting](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/create-symbolic-links).
+    this by switching to the developer mode. If this does not work, enable it in your 
+    [security policy setting](https://docs.microsoft.com/en-us/windows/security/threat-protection/security-policy-settings/create-symbolic-links).
   * [Enable long path support](https://www.msftnext.com/how-to-enable-ntfs-long-paths-in-windows-10/).
+
+* git for windows (https://gitforwindows.org/)
 * Bleeding edge Bob Build Tool (https://github.com/BobBuildTool/bob)
 
 # How to build
 
-Take care using a flat folder structure. Regardless of whether or not long paths are enabled, if the paths are too long, the build process of the clang compiler will fail as some paths could not be resolved. The best way is to clone the repository e.g under "C:\Work" or something similar.
+Take care using a flat folder structure. Regardless of whether or not long paths 
+are enabled, if the paths are too long, the build process of the clang compiler 
+will fail as some paths could not be resolved, created or deleted. The best way 
+is to clone the  repository e.g under "C:\Work" or something similar.
 
 Since there are currently no examples that attract this project as a layer you
 can clone the recipes and build them with Bob in development mode:
@@ -37,17 +48,20 @@ can clone the recipes and build them with Bob in development mode:
 ```shell
     git clone https://github.com/sbixl/bob.native.windows.basement.git
     cd bob.native.windows.basement
+    cd tests
     bob dev buildall
 ```
 
 Building the clang compiler can take some time, so have a bit of patience. ;-)
 
-In tests/cmake there are a couple of recipes that build small test packages which use the basement layer. They act as smoke tests for this project.
+In the directory tests there are a couple of recipes that build small test packages 
+which use the basement layer. They act as smoke tests for this project.
 
 ```shell
-    bob dev tests::cmake::greeter-host
-    bob dev tests::cmake::greeter-cross
-    bob dev tests::python::test
+    cd tests
+    bob dev cmake::greeter-host
+    bob dev cmake::greeter-cross
+    bob dev python::test
 ```
 
 # How to use
@@ -55,7 +69,7 @@ In tests/cmake there are a couple of recipes that build small test packages whic
 First you need to add the `basement` layer to your project. To do so add a
 `layers` entry to `config.yaml`:
 
-    bobMinimumVersion: "0.20"
+    bobMinimumVersion: "0.21"
     layers:
         - basement
 
@@ -81,10 +95,9 @@ The following tools can be used by naming them in `{checkout,build,package}Tools
 * python3
 
 Since windows does not have a native compiler by default, the msvc compiler must
-be installed. Independently of this, you can build the clang compiler downstream
-as host toolchain. Building the clang compiler as host toolchain is disabled by default.
-If you want the clang compiler as host toolchain you can simply set `BASEMENT_HOST_CLANG_TOOLCHAIN` to "1" in the `default.yaml`. In this project
-the clang compiler uses the gnu command line by default and not the msvc command line.
+be installed. Independently of this, a native host clang compiler is build downstream
+as host toolchain. The clang compiler uses the gnu command line by default and not 
+the msvc command line.
 
 The following cross compiling toolchains are available pre-configured. If you need
 other targets you can depend on `devel::cross-toolchain` directly and configure it
@@ -107,50 +120,52 @@ To use a cross compiling toolchain include it where needed via:
 
 # Continuos Integration (Bob Jenkins support for native Windows) 
 
-Recently it is possible to use bob in combination with Jenkins for Continuos Integration (CI) by still 
-remaining under native windows. The entire project is ready for CI and can be build using distributed 
-Jenkins-Nodes.
+Recently it is possible to use bob in combination with Jenkins for Continuos 
+Integration (CI) by still remaining under native windows. The basement project 
+is ready for CI and can be build using distributed Jenkins-Nodes.
 
-While setting up the CI infrastructure and especially the Jenkins Nodes, the `JENKINS_HOME`
-environment variable should always set to a short path e.g `C:\data\jenkins_home` because
-otherwise the build of some artifacts (especially the host clang compiler) will fail due to
-path limitations under native windows!
+While setting up the CI infrastructure and especially the Jenkins-Nodes, the 
+`JENKINS_HOME` environment variable should always set to a short path e.g 
+`C:\data\jenkins_home` because otherwise the build of some artifacts (especially 
+the host clang compiler) will fail due to path limitations under native windows!
 
-The following example briefly shows, how easy it is to configure the accordant Jenkins jobs with the 
-use of the Bob-Jenkins-Interface. The option `-n windows`, will tell the jenkins master to schedule 
-the jobs only on build nodes which are tagged with the label **windows**. 
-
-The http address http://jenkins-master:8080 is freely chosen, but can be used in a local (private) infrastructure.
+The following example briefly shows, how easy it is to configure the accordant 
+Jenkins-Jobs with the use of the Bob-Jenkins-Interface. The option `-n windows`, 
+will tell the Jenkins-Master to schedule the jobs only on build nodes which are 
+tagged with the label **windows**. 
 
 ```shell
-    bob jenkins add local http://user@jenkins-master:8080 --r buildall --host-platform win32 -n windows --upload
+    bob jenkins add local http://user@localhost:8080 --r buildall --host-platform win32 -n windows --upload
+    bob jenkins set-options local --clean
+    bob jenkins set-options local -o jobs.update=lazy
     bob jenkins push local
 ```
 
-The option `-- upload` will tell the Jenkins to copy the build artifacts to a dedicated binary artifact 
-server. In my setup this is a simple nginx based HTTP server, located in the jenkins master host device. 
-In order to tell bob the location where the binary artifact server can be found, you hav to add the 
+The option `-- upload` will tell the Jenkins to copy the build artifacts to a
+dedicated binary artifact server. In my setup this is a simple nginx based HTTP 
+server, located in the Jenkins-Master host device. In order to tell bob the 
+location where the binary artifact server can be found, you hav to add the 
 following configuration to the `default.yaml` or `user.yaml`:
 
     archive:
         -
             backend: http
-            url: "http://jenkins-master:80"
-            # default: flags: [download, upload]
-            # upload and download (re-use) artifacts from artefact server
+            url: "http://localhost:80"
+            # default: upload and download (re-use) artifacts from artefact server
 
-While using this project as a bob layer in another project, the binary artifact server 
-shall be added to the `default.yaml` too:
+While using this project as a bob layer in another project, the binary artifact 
+server shall be added to the `default.yaml` too:
 
     archive:
         -
             backend: http
-            url: "http://jenkins-master:80"
+            url: "http://localhost:80"
             # only download artifacts from artefact server, never upload any
             flags: [download]
 
-Please take care to set the option `flags: [download]` to prevent uploading binary artifacts
-from the bob project which uses this basement layer to the artifact server unless it is expressly so desired.
+Please take care to set the option `flags: [download]` to prevent uploading 
+binary artifacts from the bob project which uses this basement layer to the 
+artifact server unless it is expressly so desired.
 
 # Some words about performance
 
@@ -170,5 +185,3 @@ Here are a few tips how to speed up the build process:
 
 - [ ] Add example projects which use the layer
 - [ ] Improve recipes of the clang host toolchain
-- [ ] Extend tooling support (e.g. doxygen)
-
