@@ -48,7 +48,6 @@ can clone the recipes and build them with Bob in development mode:
 ```shell
     git clone https://github.com/sbixl/bob.native.windows.basement.git
     cd bob.native.windows.basement
-    cd tests
     bob dev buildall
 ```
 
@@ -59,9 +58,9 @@ which use the basement layer. They act as smoke tests for this project.
 
 ```shell
     cd tests
-    bob dev cmake::greeter-host
-    bob dev cmake::greeter-cross
-    bob dev python::test
+    bob dev tests::cmake::greeter-host
+    bob dev tests::cmake::greeter-cross
+    bob dev tests::python::test
 ```
 
 # How to use
