@@ -21,6 +21,18 @@ checkoutSetup: &ref |
             robocopy $SRC $DST /MIR /NDL /NJH /NJS
         }
     }
+    
+    function DeleteDirectory
+    {
+        param(
+            [string]$DIR
+        )
+
+        if (Test-Path $DIR)
+        {
+            cmd.exe /c "rmdir /s /q $DIR"
+        }        
+    }
 
 buildSetup: *ref
 
