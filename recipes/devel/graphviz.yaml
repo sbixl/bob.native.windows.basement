@@ -1,0 +1,18 @@
+inherit: [filesystem]
+
+metaEnvironment:
+    PKG_VERSION: "5.0.0"
+
+checkoutSCM:
+    scm: url
+    url: ${GITLAB_MIRROR}/api/v4/projects/4207231/packages/generic/graphviz-releases/${PKG_VERSION}/windows_10_msbuild_Release_graphviz-${PKG_VERSION}-win32.zip
+    digestSHA256: ff9e4f4776564f4233cfd4aee410564e27d15e4b1613966bdc243dbf8e384208
+
+buildScript: |
+    CopyDirectory "$($args[0])\Graphviz" install
+
+packageScript: |
+    CopyDirectory "$($args[0])\install" usr
+
+provideTools:
+    graphviz: usr/bin
