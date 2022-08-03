@@ -3,6 +3,10 @@ inherit: [cmake]
 metaEnvironment:
     PKG_VERSION: "2.5.25"
 
+depends:
+    - name: devel::vs2019-toolchain-vc142-amd64
+      use: [environment, tools]
+
 checkoutSCM:
     scm: url
     url: ${GITHUB_MIRROR}/lexxmark/winflexbison/archive/refs/tags/v${PKG_VERSION}.zip
