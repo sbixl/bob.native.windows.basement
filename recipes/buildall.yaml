@@ -6,7 +6,16 @@ depends:
     - devel::cross-toolchain-gcc-aarch64-none-eabi
     - devel::cross-toolchain-gcc-aarch64-linux-gnu
     - devel::cross-toolchain-llvm-embedded-toolchain-for-arm
-    
+    - name: devel::doxygen
+      use: [tools]
+      forward: True 
+    - name: devel::graphviz
+      use: [tools]
+      forward: True 
+    - name: devel::sphinx
+      use: [tools]
+      forward: True    
+      
 buildScript: |
     $null
 
@@ -16,3 +25,5 @@ packageTools:
     - cmake
     - python3
     - doxygen
+    - graphviz
+    - sphinx    
