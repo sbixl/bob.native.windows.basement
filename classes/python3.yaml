@@ -43,12 +43,80 @@ buildSetup: |
         Check-Command {
             python3 -m pip install $PIP_PACKAGE `
                 --root ${PWD}/install `
-                --find-links="${Env:PYTHON_PYPI_MIRROR}\\${RELATIVE_SEARCH_PATH}" `
+                --find-links="${Env:PYTHON_PYPI_MIRROR}\${RELATIVE_SEARCH_PATH}" `
                 --prefix usr `
                 --disable-pip-version-check `
                 --no-warn-script-location `
+                --no-cache-dir `
                 --ignore-installed
         }
+
+        # append previous installed pip module to python path
+        $PYTHONPATH=""
+        foreach ($i in @("", "lib-dynload", "site-packages"))
+        {
+            $PYTHONPATH=${PYTHONPATH}+"install\$PYTHONDESTLIB"+"\$i;"
+        }  
+        $Env:PYTHONPATH=$PYTHONPATH
+
+    }
+
+    ########################################################################################
+    #
+    # \brief: This function will install a list of pip packages and all its dependencies 
+    #         with or  without external internet access (depends on bob environment variable
+    #         PYTHON_PYPI_MIRROR) from a file.
+    #
+    # \args[in]: REQUIREMENTS_FILE Path to the file contianing the required pip packages
+    # \args[in]: RELATIVE_SEARCH_PATH relative search path in PYTHON_PYPI_MIRROR
+    #
+    # \example:
+    #     buildScript: |
+    #        'breathe==4.31.0
+    #         mlx.traceability==7.5.0
+    #         Sphinx==4.3.0' | Out-File -encoding ASCII ${PWD}\requirements.txt
+    #         
+    #         pipInstallFromFile requirements.txt
+    #
+    # \note: If bob environment variable PYTHON_PYPI_MIRROR is not set or points to
+    #        an invalid location, pip will use the external network (pypi.org) to 
+    #        donwload the required pip package. Furthermore if the required pip package
+    #        is not found in PYTHON_PYPI_MIRROR, pip will use external network access
+    #        as fallback solution too!
+    #
+    ########################################################################################
+    function pipInstallFromFile
+    {
+        Param(
+            # mandatory
+            [Parameter(Position = 0)]
+            [String]$REQUIREMENTS_FILE,
+            # optional
+            [Parameter(Mandatory=$false,Position = 1)]
+            [String]$RELATIVE_SEARCH_PATH = ""
+        )
+
+        mkdir -Force -p install/usr/lib >$null
+        # add -q for verbosity off 
+        Check-Command {
+            python3 -m pip install -r $REQUIREMENTS_FILE `
+                --root ${PWD}/install `
+                --find-links="${Env:PYTHON_PYPI_MIRROR}\${RELATIVE_SEARCH_PATH}" `
+                --prefix usr `
+                --disable-pip-version-check `
+                --no-warn-script-location `
+                --no-cache-dir `
+                --ignore-installed
+        }
+        
+        # append previous installed pip module to python path
+        $PYTHONPATH=""
+        foreach ($i in @("", "lib-dynload", "site-packages"))
+        {
+            $PYTHONPATH=${PYTHONPATH}+"install\$PYTHONDESTLIB"+"\$i;"
+        }  
+        $Env:PYTHONPATH=$PYTHONPATH
+
     }
     
 packageSetup: |
