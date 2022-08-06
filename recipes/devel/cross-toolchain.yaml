@@ -105,15 +105,16 @@ multiPackage:
             'defines: []
             
             toolchain:
-                name: "gcc"
+                name: "{1}"
                 arch: "{0}"
-                cxx:  "usr/bin/{1}-gcc.exe"
-                cc:   "usr/bin/{1}-g++.exe"
+                cxx:  "usr/bin/{1}-g++.exe"
+                cc:   "usr/bin/{1}-gcc.exe"
                 dbg:  "usr/bin/{1}-gdb.exe"
 
             publicHeader:
                 - usr\{1}\include
-                - usr\{1}\include\c++\{2}' -f "${Env:ARCH}", "${Env:AUTOCONF_TARGET}", "${version}" | Out-File -encoding ASCII toolchain.cfg
+                - usr\{1}\include\c++\{2}
+                - usr\lib\gcc\{1}\{2}\include' -f "${Env:ARCH}", "${Env:AUTOCONF_TARGET}", "${version}" | Out-File -encoding ASCII toolchain.cfg
             popd
 
         multiPackage:
