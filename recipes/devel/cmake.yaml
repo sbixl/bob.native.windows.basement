@@ -1,18 +1,18 @@
 metaEnvironment:
-    PKG_VERSION: "3.18.4"
+    PKG_VERSION: "3.23.0"
 
 checkoutSCM:
     -
         scm: url
         url: ${GITHUB_MIRROR}/Kitware/CMake/archive/v${PKG_VERSION}.zip
-        digestSHA1: "8288e37a9041e03a955b316ca0ea2ae93c3df4ba"
+        digestSHA1: "fbb633fa99d2ebe2670070d5c0428dfa0459e08f"
         dir: cmake.src
     # Since there is unfortunately no possibility to bootstrap cmake like under linux,
     # we must download a pre build binary for windows to build cmake from source.
     -
         scm: url
-        url: ${GITHUB_MIRROR}/Kitware/CMake/releases/download/v${PKG_VERSION}/cmake-${PKG_VERSION}-win64-x64.zip
-        digestSHA1: "51e611bb39f8f4c49a160085048e0dd24ec22812"
+        url: ${GITHUB_MIRROR}/Kitware/CMake/releases/download/v${PKG_VERSION}/cmake-${PKG_VERSION}-windows-x86_64.zip
+        digestSHA1: "0d03acb4a50ba6110d71685778d4645de384f9a4"
         dir: cmake.bin
 
 multiPackage:
@@ -32,7 +32,7 @@ multiPackage:
         buildScript: |
 
             # Append the path to the prebuild cmake binary
-            $Env:PATH="$($args[0])\cmake.bin\cmake-${Env:PKG_VERSION}-win64-x64\bin\;$Env:PATH"
+            $Env:PATH="$($args[0])\cmake.bin\cmake-${Env:PKG_VERSION}-windows-x86_64\bin\;$Env:PATH"
 
             mkdir -Force build >$null
             pushd build
