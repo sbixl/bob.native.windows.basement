@@ -183,4 +183,3 @@ Here are a few tips how to speed up the build process:
 # Planned features
 
 - [ ] Add example projects which use the layer
-- [ ] Improve recipes of the clang host toolchain
