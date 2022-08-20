@@ -1,5 +1,5 @@
 packageScript: |
-    function InstallCopy
+    function __installCopy
     {
         Param(
             # mandaotry
@@ -38,7 +38,7 @@ packageScript: |
             [String]$BUILD_OUTPUT_PATH
         )
 
-        installCopy $BUILD_OUTPUT_PATH
+        __installCopy $BUILD_OUTPUT_PATH
     }
 
     function InstallPackageTgt
@@ -62,7 +62,7 @@ packageScript: |
         )
 
         # TODO: add exclude filter
-        installCopy $BUILD_OUTPUT_PATH
+        __installCopy $BUILD_OUTPUT_PATH
     }
 
     # Only copy shared libraries.
@@ -75,5 +75,5 @@ packageScript: |
         )
 
         # TODO: add exclude filter
-        installCopy $BUILD_OUTPUT_PATH
+        __installCopy $BUILD_OUTPUT_PATH
     }

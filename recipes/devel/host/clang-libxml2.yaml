@@ -16,7 +16,6 @@ buildVars: [PKG_VERSION]
 buildScript: |
     # Disable everything except WITH_TREE and WITH_OUTPUT, both needed by LLVM's
     # WindowsManifestMerger.
-    # Also enable WITH_THREADS, else libxml doesn't compile on Linux.
 
     cmakeBuild "$($args[0])\libxml2-${Env:PKG_VERSION}" `
                "-DCMAKE_BUILD_TYPE=Release" `
@@ -49,7 +48,7 @@ buildScript: |
                "-DLIBXML2_WITH_SCHEMAS=OFF" `
                "-DLIBXML2_WITH_SCHEMATRON=OFF" `
                "-DLIBXML2_WITH_TESTS=OFF" `
-               "-DLIBXML2_WITH_THREADS=ON" `
+               "-DLIBXML2_WITH_THREADS=OFF" `
                "-DLIBXML2_WITH_THREAD_ALLOC=OFF" `
                "-DLIBXML2_WITH_TREE=ON" `
                "-DLIBXML2_WITH_VALID=OFF" `
