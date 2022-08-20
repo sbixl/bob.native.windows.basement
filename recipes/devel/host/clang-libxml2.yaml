@@ -9,7 +9,7 @@ depends:
 
 checkoutSCM:
     scm: url
-    url: ${GITHUB_MIRROR}/GNOME/libxml2/archive/refs/tags/libxml2-${PKG_VERSION}.zip
+    url: ${GITHUB_MIRROR}/GNOME/libxml2/archive/refs/tags/v${PKG_VERSION}.zip
     digestSHA256: 098874b65c98c755fe3430cb9d88d0399e254e70daaa6c8dbcd214ba00a36314
 
 buildVars: [PKG_VERSION]
