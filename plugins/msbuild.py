@@ -16,10 +16,10 @@ def msbuild(args, **options):
         vswargs = (os.path.join(os.environ["ProgramFiles(x86)"],
                                 "Microsoft Visual Studio/Installer/vswhere.exe"),
                 '-find', 'MSBuild\**\Bin\MSBuild.exe',
-                '-latest',
+                '-version', '[16.0,17.0)',
                 '-products', '*',
                 '-requires', 'Microsoft.Component.MSBuild')
-        
+
         path = subprocess.check_output(vswargs, universal_newlines=True).strip()
 
         if isMSYS:
