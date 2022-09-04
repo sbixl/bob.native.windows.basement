@@ -8,14 +8,14 @@ depends:
     - devel::cross-toolchain-llvm-embedded-toolchain-for-arm
     - name: devel::doxygen
       use: [tools]
-      forward: True 
+      forward: True
     - name: devel::graphviz
       use: [tools]
-      forward: True 
+      forward: True
     - name: devel::sphinx
       use: [tools]
-      forward: True    
-      
+      forward: True
+
 buildScript: |
     $null
 
@@ -26,4 +26,4 @@ packageTools:
     - python3
     - doxygen
     - graphviz
-    - sphinx    
+    - sphinx

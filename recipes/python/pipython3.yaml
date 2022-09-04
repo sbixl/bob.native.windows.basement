@@ -32,28 +32,28 @@ checkoutSCM:
         scm: url
         url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/xz-5.2.2.zip
         extract: no
-        dir: deps/xz        
+        dir: deps/xz
     -
         scm: url
         url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/zlib-1.2.11.zip
         extract: no
-        dir: deps/zlib        
+        dir: deps/zlib
     # Fetching external binaries...
     -
         scm: url
         url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/libffi-3.3.0.zip
         extract: no
-        dir: deps/libffi        
+        dir: deps/libffi
     -
         scm: url
         url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/openssl-bin-1.1.1d.zip
         extract: no
-        dir: deps/openssl-bin        
+        dir: deps/openssl-bin
     -
         scm: url
         url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/tcltk-8.6.9.0.zip
         extract: no
-        dir: deps/tcltk        
+        dir: deps/tcltk
 
 checkoutTools: [ 7z ]
 checkoutVars: [ PKG_VERSION ]
@@ -67,7 +67,7 @@ checkoutScript: |
     robocopy . .. /S /IM /NFL /NDL /NJH /NJS /nc /ns
     popd
     rm -Force -r Python-${Env:PKG_VERSION}
-    
+
     if( Test-Path .git)
     {
         # revert patch in order to apply it again
@@ -96,7 +96,7 @@ buildScript: |
             [Parameter(Position = 1)]
             [String]$VER
         )
-        
+
         pushd src/externals
         Check-Command { 7z x -y $SRC_PATH/deps/$DEP/$DEP-$VER.zip }
         Rename-Item cpython-source-deps-$DEP-$VER $DEP-$VER
@@ -112,13 +112,13 @@ buildScript: |
             [Parameter(Position = 1)]
             [String]$VER
         )
-        
+
         pushd src/externals
         Check-Command { 7z x -y $SRC_PATH/deps/$DEP/$DEP-$VER.zip }
         Rename-Item cpython-bin-deps-$DEP-$VER $DEP-$VER
         popd
     }
-    
+
     function buildMe
     {
         mkdir -Force -p $("src", "src/externals") >$null
@@ -126,18 +126,18 @@ buildScript: |
 
         $env:MSBUILD=${Env:MSB_PATH}
         $env:HOST_PYTHON=$(Get-Command python3).Path
-        
+
         # copy dependencies
         addLib "bzip2"       "1.0.6"
         addLib "sqlite"      "3.28.0.0"
         addLib "xz"          "5.2.2"
-        addLib "zlib"        "1.2.11"                        
+        addLib "zlib"        "1.2.11"
         addBin "libffi"      "3.3.0"
-        addBin "openssl-bin" "1.1.1d" 
+        addBin "openssl-bin" "1.1.1d"
         addBin "tcltk"       "8.6.9.0"
-        
+
         Check-Command { src/PCbuild/build.bat -p x64 }
-        
+
         $installdir="src/PCbuild/amd64"
 
         mkdir -p @("install/usr/bin", "install/usr/lib", "install/usr/include") >$null

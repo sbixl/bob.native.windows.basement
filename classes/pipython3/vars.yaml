@@ -1,15 +1,15 @@
 checkoutTools: [python3]
 checkoutSetup: &ref |
     $PYTHONDESTLIB=$(python3 -c "import sysconfig; print(sysconfig.get_config_var('DESTLIB'))")
-    
+
     if("None" -eq $PYTHONDESTLIB)
     {
         $PYTHONDESTLIB="\usr\lib"
     }
-    
+
     $env:PYTHONDESTLIB=$PYTHONDESTLIB
     $env:PYTHONVERSION=$(python3 -c "import sysconfig; print(sysconfig.get_config_var('py_version_short'))")
-    
+
     $PYTHONPATH=""
     foreach($entry in  $BOB_ALL_PATHS.GetEnumerator())
     {
@@ -19,10 +19,10 @@ checkoutSetup: &ref |
             foreach ($i in @("", "lib-dynload", "site-packages"))
             {
                 $PYTHONPATH=${PYTHONPATH}+$PREFIX+"\$i;"
-            }  
+            }
         }
     }
-    
+
     $Env:PYTHONPATH=$PYTHONPATH
 
 buildTools: [python3]

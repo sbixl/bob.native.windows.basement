@@ -27,6 +27,6 @@ packageScript: |
     rm usr/win_flex.pdb
     rm usr/FlexLexer.h
     mv usr/win_bison.exe usr/bison.exe
-       
+
 provideTools:
     bison: usr

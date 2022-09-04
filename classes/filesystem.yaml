@@ -10,8 +10,8 @@ checkoutSetup: &ref |
             # optional
             [Parameter(Position = 2)]
             [bool]$VERBOSITY = $false
-        )    
-        
+        )
+
         if($VERBOSITY -eq $false)
         {
             robocopy $SRC $DST /MIR /NDL /NJH /NJS | %{$data = $_.Split([char]9); if("$($data[4])" -ne "") { $file = "$($data[4])"} ;Write-Progress "Percentage $($data[0])" -Activity "Robocopy" -CurrentOperation "$($file)"  -ErrorAction SilentlyContinue; }
@@ -21,7 +21,7 @@ checkoutSetup: &ref |
             robocopy $SRC $DST /MIR /NDL /NJH /NJS
         }
     }
-    
+
     function DeleteDirectory
     {
         param(
@@ -31,7 +31,7 @@ checkoutSetup: &ref |
         if (Test-Path $DIR)
         {
             cmd.exe /c "rmdir /s /q $DIR"
-        }        
+        }
     }
 
 buildSetup: *ref

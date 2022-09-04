@@ -56,7 +56,7 @@ buildScript: |
                "-DLIBXML2_WITH_XINCLUDE=OFF" `
                "-DLIBXML2_WITH_XPATH=OFF" `
                "-DLIBXML2_WITH_XPTR=OFF" `
-               "-DLIBXML2_WITH_ZLIB=OFF"             
+               "-DLIBXML2_WITH_ZLIB=OFF"
 
 packageScript: |
     cmakePackageBin

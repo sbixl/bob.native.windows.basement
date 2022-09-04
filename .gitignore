@@ -1,5 +1,5 @@
-/dev
-/work
+dev
+work
 .bob-*
 user.yaml
-__pycache__/
+__pycache__

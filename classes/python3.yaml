@@ -6,7 +6,7 @@ buildSetup: |
 
     ########################################################################################
     #
-    # \brief: This function will install a pip package and all its dependencies with or  
+    # \brief: This function will install a pip package and all its dependencies with or
     #         without external internet access (depends on bob environment variable
     #         PYTHON_PYPI_MIRROR).
     #
@@ -21,7 +21,7 @@ buildSetup: |
     #         pipInstallLocal "$MyLocalPath/MyPyModule" "MyPyModuleDependencies"
     #
     # \note: If bob environment variable PYTHON_PYPI_MIRROR is not set or points to
-    #        an invalid location, pip will use the external network (pypi.org) to 
+    #        an invalid location, pip will use the external network (pypi.org) to
     #        donwload the required pip package. Furthermore if the required pip package
     #        is not found in PYTHON_PYPI_MIRROR, pip will use external network access
     #        as fallback solution too!
@@ -39,7 +39,7 @@ buildSetup: |
         )
 
         mkdir -Force -p install/usr/lib >$null
-        # add -q for verbosity off 
+        # add -q for verbosity off
         Check-Command {
             python3 -m pip install $PIP_PACKAGE `
                 --root ${PWD}/install `
@@ -48,6 +48,7 @@ buildSetup: |
                 --disable-pip-version-check `
                 --no-warn-script-location `
                 --no-cache-dir `
+                --no-index `
                 --ignore-installed
         }
 
@@ -56,18 +57,18 @@ buildSetup: |
         foreach ($i in @("", "lib-dynload", "site-packages"))
         {
             $PYTHONPATH=${PYTHONPATH}+"install\$PYTHONDESTLIB"+"\$i;"
-        }  
+        }
         $Env:PYTHONPATH=$PYTHONPATH
 
     }
 
     ########################################################################################
     #
-    # \brief: This function will install a list of pip packages and all its dependencies 
+    # \brief: This function will install a list of pip packages and all its dependencies
     #         with or  without external internet access (depends on bob environment variable
     #         PYTHON_PYPI_MIRROR) from a file.
     #
-    # \args[in]: REQUIREMENTS_FILE Path to the file contianing the required pip packages
+    # \args[in]: REQUIREMENTS_FILE Path to the file containing the required pip packages
     # \args[in]: RELATIVE_SEARCH_PATH relative search path in PYTHON_PYPI_MIRROR
     #
     # \example:
@@ -75,12 +76,12 @@ buildSetup: |
     #        'breathe==4.31.0
     #         mlx.traceability==7.5.0
     #         Sphinx==4.3.0' | Out-File -encoding ASCII ${PWD}\requirements.txt
-    #         
+    #
     #         pipInstallFromFile requirements.txt
     #
     # \note: If bob environment variable PYTHON_PYPI_MIRROR is not set or points to
-    #        an invalid location, pip will use the external network (pypi.org) to 
-    #        donwload the required pip package. Furthermore if the required pip package
+    #        an invalid location, pip will use the external network (pypi.org) to
+    #        download the required pip package. Furthermore if the required pip package
     #        is not found in PYTHON_PYPI_MIRROR, pip will use external network access
     #        as fallback solution too!
     #
@@ -97,7 +98,7 @@ buildSetup: |
         )
 
         mkdir -Force -p install/usr/lib >$null
-        # add -q for verbosity off 
+        # add -q for verbosity off
         Check-Command {
             python3 -m pip install -r $REQUIREMENTS_FILE `
                 --root ${PWD}/install `
@@ -106,19 +107,20 @@ buildSetup: |
                 --disable-pip-version-check `
                 --no-warn-script-location `
                 --no-cache-dir `
+                --no-index `
                 --ignore-installed
         }
-        
+
         # append previous installed pip module to python path
         $PYTHONPATH=""
         foreach ($i in @("", "lib-dynload", "site-packages"))
         {
             $PYTHONPATH=${PYTHONPATH}+"install\$PYTHONDESTLIB"+"\$i;"
-        }  
+        }
         $Env:PYTHONPATH=$PYTHONPATH
 
     }
-    
+
 packageSetup: |
     $BUILD_DIR="$($args[0])"
     function installPythonModule

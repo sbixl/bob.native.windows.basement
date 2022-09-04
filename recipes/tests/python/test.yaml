@@ -8,14 +8,14 @@ depends:
 
 checkoutTools: [generator]
 checkoutScript: |
-    Check-Command {    
-        python3 "$($BOB_TOOL_PATHS["generator"])\generator.py" -o "$PWD" 
+    Check-Command {
+        python3 "$($BOB_TOOL_PATHS["generator"])\generator.py" -o "$PWD"
     }
-    
+
 
 buildScript: |
-    Check-Command {    
-        python3 "$($BOB_TOOL_PATHS["generator"])\generator.py" -o "$PWD" 
+    Check-Command {
+        python3 "$($BOB_TOOL_PATHS["generator"])\generator.py" -o "$PWD"
     }
 
 packageScript: |

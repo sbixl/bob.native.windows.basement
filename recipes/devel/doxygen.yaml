@@ -35,4 +35,4 @@ packageScript: |
     cmakePackageBin
 
 provideTools:
-    doxygen: usr/bin    
+    doxygen: usr/bin
