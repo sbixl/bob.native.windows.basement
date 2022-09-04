@@ -16,7 +16,7 @@ multiPackage:
     gcc:
         depends:
             - name: devel::gcc
-       
+
         provideTools:
             target-toolchain:
                 path: "usr/bin"
@@ -39,23 +39,31 @@ multiPackage:
                     AUTOCONF_HOST: "${AUTOCONF_TARGET}"
                     CROSS_COMPILE: "${AUTOCONF_TARGET}-"
                     TOOLCHAIN_SYSROOT: "../${AUTOCONF_TARGET}"
-                    
+
                     # CMake dependent
                     CMAKE_TOOLCHAIN_FILE: ..\\..\\${AUTOCONF_TARGET}.toolchain
 
-                    # compiler flags
-                    CPPFLAGS:   "-Wdate-time"
-                    CFLAGS:     "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
-                    CXXFLAGS:   "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
+                    ### common compiler flags
+
+                    # -pipe       - Avoid temporary files, speeding up builds
+                    # -Wdate-time - Warn when macros __TIME__, __DATE__ or __TIMESTAMP__ are
+                    #               encountered as they might prevent bit-wise-identical reproducible
+                    #               compilations.
+                    CFLAGS:     "-pipe"
+                    CXXFLAGS:   "-Wdate-time -pipe"
+
+                    ### common linker flags
+
+                    # --hash-style=gnu - Use the GNU hash-table format because it is slightly faster.
                     LDFLAGS:    "-Wl,-O1 -Wl,--hash-style=gnu"
 
         packageVars: [AUTOCONF_TARGET, ARCH]
         packageScript: |
-      
+
             # get version number
             $version="Unknown"
             $dirList = Get-ChildItem -Path usr\${Env:AUTOCONF_TARGET}\include\c++ -Directory
-            
+
             if($dirList -is [array])
             {
                 Write-Error "Can't determinae version info!"
@@ -92,18 +100,18 @@ multiPackage:
             # do not look into package registries
             set(CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY ON)
             set(CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY ON)
-            
+
             # specify standard system include directories
             set(CMAKE_ASM_STANDARD_INCLUDE_DIRECTORIES "${{CMAKE_ASM_STANDARD_INCLUDE_DIRECTORIES}} ${{CMAKE_CURRENT_LIST_DIR}}/usr/{0}/include")
             set(CMAKE_C_STANDARD_INCLUDE_DIRECTORIES   "${{CMAKE_C_STANDARD_INCLUDE_DIRECTORIES}}   ${{CMAKE_CURRENT_LIST_DIR}}/usr/{0}/include")
-            set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES "${{CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES}} ${{CMAKE_CURRENT_LIST_DIR}}/usr/{0}/include/c++/{1}")' -f "${Env:AUTOCONF_TARGET}", "${version}" | 
+            set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES "${{CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES}} ${{CMAKE_CURRENT_LIST_DIR}}/usr/{0}/include/c++/{1}")' -f "${Env:AUTOCONF_TARGET}", "${version}" |
             Out-File -encoding utf8 ${PWD}\${Env:AUTOCONF_TARGET}.toolchain
 
             mkdir -Force -p usr/etc/ide >$null
             pushd usr/etc/ide
             # Create setup file which can be used by an IDE Generator.
             'defines: []
-            
+
             toolchain:
                 name: "{1}"
                 arch: "{0}"
@@ -118,7 +126,7 @@ multiPackage:
             popd
 
         multiPackage:
-            
+
             # ARMv7 bare metal toolchain
             arm-none-eabi:
                 environment:
@@ -147,7 +155,7 @@ multiPackage:
                     AUTOCONF_TARGET: "aarch64-none-linux-gnu"
                     ARCH: "arm64"
                     GCC_TARGET_ARCH: "armv8-a"
-    
+
     llvm:
         depends:
             - devel::llvm
@@ -156,7 +164,7 @@ multiPackage:
             embedded-toolchain-for-arm:
                 environment:
                     ARCH: "arm"
-            
+
                 provideTools:
                     target-toolchain:
                         path: "usr/bin"
@@ -177,8 +185,17 @@ multiPackage:
                             ARCH: "${ARCH}"
                             TOOLCHAIN_SYSROOT: ".."
 
-                            # compiler flags
+                            ### common compiler flags
+
+                            # -pipe       - Avoid temporary files, speeding up builds
+                            # -Wdate-time - Warn when macros __TIME__, __DATE__ or __TIMESTAMP__ are
+                            #               encountered as they might prevent bit-wise-identical reproducible
+                            #               compilations.
                             CPPFLAGS:   "-Wdate-time"
-                            CFLAGS:     "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
-                            CXXFLAGS:   "-O${BASEMENT_OPTIMIZE}$(if-then-else,${BASEMENT_DEBUG}, -g,) -pipe"
+                            CFLAGS:     "-pipe"
+                            CXXFLAGS:   "-Wdate-time -pipe"
+
+                            ### common linker flags
+
+                            # --hash-style=gnu - Use the GNU hash-table format because it is slightly faster.
                             LDFLAGS:    "-Wl,-O1 -Wl,--hash-style=gnu"
