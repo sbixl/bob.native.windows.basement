@@ -13,23 +13,6 @@ buildScript: |
 packageScript: |
     cp -r "$($args[0])\*" .
 
-    mkdir -Force -p usr/etc/ide >$null
-    pushd usr/etc/ide
-    # Create setup file which can be used by an IDE Generator.
-    'defines: []
-    
-    toolchain:
-        name: "clang"
-        arch: "x86_64"
-        cxx:  "usr/bin/clang++.exe"
-        cc:   "usr/bin/clang.exe"
-        dbg:  "usr/bin/lldb.exe"
-
-    publicHeader:
-        - usr\lib\clang\{0}\include
-        - usr\include\c++\v1' -f ${Env:PKG_VERSION} | Out-File -encoding ASCII toolchain.cfg
-    popd
-
 provideTools:
     host-toolchain:
         path: usr/bin
@@ -51,7 +34,7 @@ provideVars:
     OBJDUMP: "llvm-objdump"
     RANLIB:  "llvm-ranlib"
     STRIP:   "llvm-strip"
-    
+
     ARCH:   "x86_64"
 
     # Define our build and host systems because we define the host- and

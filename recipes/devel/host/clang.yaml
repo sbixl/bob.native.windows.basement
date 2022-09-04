@@ -107,9 +107,9 @@ packageScript: |
 
 multiPackage:
     # Bootstrap LLVM using the MSVC compiler from the visual studio build tools.
-    # This minimal compiler (clang) is required later to build the entire clang toolchain 
-    # for the accordant target (architecture). The MSVC compiler is not able to compile 
-    # the entire toolchain due to some internal limitations (especially the libc++ could 
+    # This minimal compiler (clang) is required later to build the entire clang toolchain
+    # for the accordant target (architecture). The MSVC compiler is not able to compile
+    # the entire toolchain due to some internal limitations (especially the libc++ could
     # not build with it).
     bootstrap:
         environment:
@@ -166,3 +166,22 @@ multiPackage:
                        -DLLVM_ENABLE_LTO=Thin `
                        -DCMAKE_AR="$AR" `
                        -DCMAKE_RANLIB="$RANLIB"
+
+        packageVars: [PKG_VERSION]
+        packageScript: |
+            mkdir -Force -p usr/etc/ide >$null
+            pushd usr/etc/ide
+            # Create setup file which can be used by an IDE Generator.
+            'defines: []
+
+            toolchain:
+                name: "clang"
+                arch: "x86_64"
+                cxx:  "usr/bin/clang++.exe"
+                cc:   "usr/bin/clang.exe"
+                dbg:  ""
+
+            publicHeader:
+                - usr\lib\clang\{0}\include
+                - usr\include\c++\v1' -f ${Env:PKG_VERSION} | Out-File -encoding ASCII toolchain.cfg
+            popd
