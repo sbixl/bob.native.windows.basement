@@ -1,0 +1,35 @@
+inherit: [cmake]
+
+metaEnvironment:
+    PKG_VERSION: "1.10.0"
+
+environment:
+    BUILD_TYPE: "$(Release_getCMakeReleaseMode,$WENDY_BUILD_TYPE)"
+
+checkoutSCM:
+    scm: url
+    url: ${GITHUB_MIRROR}/google/googletest/archive/refs/tags/release-1.10.0.zip
+    digestSHA1: 9ea36bf6dd6383beab405fd619bdce05e66a6535
+
+buildVars: [PKG_VERSION, BUILD_TYPE]
+buildScript: |
+    cmakeBuild "$($args[0])/googletest-release-${Env:PKG_VERSION}" `
+               -Dgtest_build_samples=OFF `
+               -DCMAKE_BUILD_TYPE="${Env:BUILD_TYPE}"
+
+packageScript: |
+    cmakePackageTgt
+
+    mkdir -Force -p usr/etc/ide >$null
+    pushd usr/etc/ide
+
+    # Required for the IDE Setup.
+    'defines: []
+
+    publicHeader:
+        - googletest-release-{0}\googlemock\include
+        - googletest-release-{0}\googletest\include
+    privateHeader:
+        - googletest-release-{0}\googlemock\src
+        - googletest-release-{0}\googletest\src' -f "${Env:PKG_VERSION}" | Out-File -encoding ASCII package.cfg
+    popd
