@@ -38,18 +38,29 @@ buildSetup: |
             [String]$RELATIVE_SEARCH_PATH = ""
         )
 
+        if( Test-Path "${Env:PYTHON_PYPI_MIRROR}\${RELATIVE_SEARCH_PATH}" )
+        {
+            # do not search on PyPi, search int the local file system or network instead!
+            $ARGS = @("--find-links=${Env:PYTHON_PYPI_MIRROR}\\${RELATIVE_SEARCH_PATH}", "--no-index")
+        }
+        else
+        {
+            $ARGS = ""
+        }
+
+        $_OPTIONS = $($ARGS | select)
+
         mkdir -Force -p install/usr/lib >$null
         # add -q for verbosity off
         Check-Command {
             python3 -m pip install $PIP_PACKAGE `
                 --root ${PWD}/install `
-                --find-links="${Env:PYTHON_PYPI_MIRROR}\${RELATIVE_SEARCH_PATH}" `
                 --prefix usr `
                 --disable-pip-version-check `
                 --no-warn-script-location `
                 --no-cache-dir `
-                --no-index `
-                --ignore-installed
+                --ignore-installed `
+                $_OPTIONS
         }
 
         # append previous installed pip module to python path
@@ -97,18 +108,29 @@ buildSetup: |
             [String]$RELATIVE_SEARCH_PATH = ""
         )
 
+        if( Test-Path "${Env:PYTHON_PYPI_MIRROR}\${RELATIVE_SEARCH_PATH}" )
+        {
+            # do not search on PyPi, search int the local file system or network instead!
+            $ARGS = @("--find-links=${Env:PYTHON_PYPI_MIRROR}\\${RELATIVE_SEARCH_PATH}", "--no-index")
+        }
+        else
+        {
+            $ARGS = ""
+        }
+
+        $_OPTIONS = $($ARGS | select)
+
         mkdir -Force -p install/usr/lib >$null
         # add -q for verbosity off
         Check-Command {
             python3 -m pip install -r $REQUIREMENTS_FILE `
                 --root ${PWD}/install `
-                --find-links="${Env:PYTHON_PYPI_MIRROR}\${RELATIVE_SEARCH_PATH}" `
                 --prefix usr `
                 --disable-pip-version-check `
                 --no-warn-script-location `
                 --no-cache-dir `
-                --no-index `
-                --ignore-installed
+                --ignore-installed `
+                $_OPTIONS
         }
 
         # append previous installed pip module to python path
