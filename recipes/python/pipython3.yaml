@@ -15,43 +15,51 @@ checkoutSCM:
     -
         scm: url
         url: ${PYTHON_MIRROR}/${PKG_VERSION}/Python-${PKG_VERSION}.tar.xz
+        digestSHA256: b356244e13fb5491da890b35b13b2118c3122977c2cd825e3eb6e7d462030d84
         extract: no
         dir: python
     # Fetching external libraries...
     -
         scm: url
         url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/bzip2-1.0.6.zip
+        digestSHA256: c42fd1432a2667b964a74bc423bb7485059c4a6d5dc92946d59dbf9a6bdb988d
         extract: no
         dir: deps/bzip2
     -
         scm: url
         url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/sqlite-3.28.0.0.zip
+        digestSHA256: 5317f6bc6cd9d0e1423613179f3bbd463510e3944bc2dd0c7e017a053e5864cc
         extract: no
         dir: deps/sqlite
     -
         scm: url
         url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/xz-5.2.2.zip
+        digestSHA256: 02b6d6f1e0369940e7e1f0d324992e069d09f5f3d32d86e2d22cd8b82ac3fb3f
         extract: no
         dir: deps/xz
     -
         scm: url
         url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/zlib-1.2.11.zip
+        digestSHA256: debb1952945fa6c25817a40abe90641b572c83171f244937b70b9fe156f5a63a
         extract: no
         dir: deps/zlib
     # Fetching external binaries...
     -
         scm: url
         url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/libffi-3.3.0.zip
+        digestSHA256: 69e3f7235108a75033cb9325a0a3535ba271d144ec66fccefe134eda27d7bcfe
         extract: no
         dir: deps/libffi
     -
         scm: url
         url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/openssl-bin-1.1.1d.zip
+        digestSHA256: 8c8686a109b95e87e96e5b25d848d8dcac439a48c44552197664ce4e6a3418a9
         extract: no
         dir: deps/openssl-bin
     -
         scm: url
         url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/tcltk-8.6.9.0.zip
+        digestSHA256: 37cd629a75d2a34974a3d771ccab5c9e3caf3d138cea81040f9cdba1aded1cf2
         extract: no
         dir: deps/tcltk
 
