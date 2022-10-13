@@ -183,5 +183,6 @@ multiPackage:
 
             publicHeader:
                 - usr\lib\clang\{0}\include
+                - usr\include\x86_64-pc-windows-msvc\c++\v1
                 - usr\include\c++\v1' -f ${Env:PKG_VERSION} | Out-File -encoding ASCII toolchain.cfg
             popd
