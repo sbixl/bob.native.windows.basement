@@ -1,13 +1,13 @@
 inherit: [cpackage, ninja, install, filesystem]
 
 metaEnvironment:
-    PKG_VERSION: "14.0.6"
+    PKG_VERSION: "15.0.7"
 
 checkoutSCM:
     -
         scm: url
         url: ${GITHUB_MIRROR}/llvm/llvm-project/releases/download/llvmorg-${PKG_VERSION}/llvm-project-${PKG_VERSION}.src.tar.xz
-        digestSHA1: 346fddc248bca9820af3e4ca51a8c02a99e01bdd
+        digestSHA1: bfda06ab090154d289013912266209595a2e3914
         extract: no
         dir: llvm
     # Use rpmalloc. For faster ThinLTO linking.
