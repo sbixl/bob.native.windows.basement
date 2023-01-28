@@ -38,14 +38,14 @@ buildSetup: |
             [String]$RELATIVE_SEARCH_PATH = ""
         )
 
-        if( Test-Path "${Env:PYTHON_PYPI_MIRROR}\${RELATIVE_SEARCH_PATH}" )
+        if([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR}))
         {
-            # do not search on PyPi, search int the local file system or network instead!
-            $ARGS = @("--find-links=${Env:PYTHON_PYPI_MIRROR}\\${RELATIVE_SEARCH_PATH}", "--no-index")
+            $ARGS = ""
         }
         else
         {
-            $ARGS = ""
+            # do not search on PyPi, search int the local file system or network instead!
+            $ARGS = @("--find-links=${Env:PYTHON_PYPI_MIRROR}\\${RELATIVE_SEARCH_PATH}", "--no-index")
         }
 
         $_OPTIONS = $($ARGS | select)
@@ -108,14 +108,14 @@ buildSetup: |
             [String]$RELATIVE_SEARCH_PATH = ""
         )
 
-        if( Test-Path "${Env:PYTHON_PYPI_MIRROR}\${RELATIVE_SEARCH_PATH}" )
+        if([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR}))
         {
-            # do not search on PyPi, search int the local file system or network instead!
-            $ARGS = @("--find-links=${Env:PYTHON_PYPI_MIRROR}\\${RELATIVE_SEARCH_PATH}", "--no-index")
+            $ARGS = ""
         }
         else
         {
-            $ARGS = ""
+            # do not search on PyPi, search int the local file system or network instead!
+            $ARGS = @("--find-links=${Env:PYTHON_PYPI_MIRROR}\\${RELATIVE_SEARCH_PATH}", "--no-index")
         }
 
         $_OPTIONS = $($ARGS | select)
