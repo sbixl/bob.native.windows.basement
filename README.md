@@ -24,6 +24,9 @@ and common GCC as well as an embedded LLVM toolchain are ready-to-use.
   * Visual Studio Build Tools 2019 with minimal settings:
     ![Alt text](doc/vs_build_tools_2019_setup.PNG "Visual Studio Build Tools 2019")
     Note: A full installation of the Visual Studio 2019 should be work too
+  * [Windows 10 SDK version 10.0.20348.1](https://go.microsoft.com/fwlink/?linkid=2164145)
+    The Windows SDK is required to build the position independent Python 3.11.x 
+    ![Alt text](doc/windows_sdk.PNG "Windows SDK Setup")
   * powershell 5.x
 
 * Windows 10 system configuration
@@ -68,7 +71,7 @@ which use the basement layer. They act as smoke tests for this project.
 First you need to add the `basement` layer to your project. To do so add a
 `layers` entry to `config.yaml`:
 
-    bobMinimumVersion: "0.21"
+    bobMinimumVersion: "0.22"
     layers:
         - basement
 
