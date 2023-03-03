@@ -1,4 +1,4 @@
-bobMinimumVersion: "0.21.0"
+bobMinimumVersion: "0.22.0"
 scriptLanguage: PowerShell
 
 plugins:
