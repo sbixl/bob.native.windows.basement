@@ -1,7 +1,7 @@
 inherit: [cmake]
 
 metaEnvironment:
-    PKG_VERSION: "1_9_4"
+    PKG_VERSION: "1_9_6"
 
 depends:
     - name: devel::flex
@@ -14,7 +14,7 @@ depends:
 checkoutSCM:
     scm: url
     url: ${GITHUB_MIRROR}/doxygen/doxygen/archive/refs/tags/Release_${PKG_VERSION}.zip
-    digestSHA256: fb67813ca79e2d5cbd8ca4a89e5e26ba54a3b23007e9b0dd370bf383d7e778e8
+    digestSHA256: 28ab2c5d2ba1d3ed56c538125f1cad7ca8a09992e8b3892e9533736268ff6426
 
 buildTools: [flex, bison]
 buildVars: [PKG_VERSION]
