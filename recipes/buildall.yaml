@@ -15,6 +15,7 @@ depends:
     - name: devel::sphinx
       use: [tools]
       forward: True
+    - devel::google-test
 
 buildScript: |
     $null
