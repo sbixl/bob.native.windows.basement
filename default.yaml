@@ -27,4 +27,4 @@ environment:
     PYTHON_PYPI_MIRROR:   ""
 
 include:
-    - user
+    - url-overrides
