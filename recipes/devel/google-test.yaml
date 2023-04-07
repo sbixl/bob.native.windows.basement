@@ -43,9 +43,5 @@ packageScript: |
     'defines: []
 
     publicHeader:
-        - googletest-{0}\googlemock\include
-        - googletest-{0}\googletest\include
-    privateHeader:
-        - googletest-{0}\googlemock\src
-        - googletest-{0}\googletest\src' -f "${Env:PKG_VERSION}" | Out-File -encoding ASCII package.cfg
+        - usr\include' | Out-File -encoding ASCII package.cfg
     popd
