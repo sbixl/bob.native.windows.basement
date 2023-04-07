@@ -1,12 +1,11 @@
 # since we can't build gcc native or cross compiling toolchain on windows we must download pre build binaries
 checkoutSCM:
     -
-        # the arm-none-eabi gdb debugger in version 11.2 does not work so we use 10.3!
         if: !expr |
             "${AUTOCONF_TARGET}" == "arm-none-eabi"
         scm: url
-        url: ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-win32.zip
-        digestSHA256: "d287439b3090843f3f4e29c7c41f81d958a5323aecefcf705c203bfd8ae3f2e7"
+        url: ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2.mpacbti-rel1-mingw-w64-i686-arm-none-eabi.zip
+        digestSHA256: "9f5f5492447212001aa8b708e237cdfecb1296ba0f1c699e2aa2fd87249e5b00"
         dir: ${AUTOCONF_TARGET}
         extract: no
     -
