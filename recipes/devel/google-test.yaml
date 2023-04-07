@@ -11,10 +11,30 @@ checkoutSCM:
 buildVars: [PKG_VERSION]
 buildScript: |
     cmakeBuild "$($args[0])/googletest-${Env:PKG_VERSION}" `
+               -Dgtest_force_shared_crt=ON `
                -Dgtest_build_samples=OFF `"
 
 packageScript: |
     cmakePackageTgt
+    
+    # This is a ugly patch using versions of googletest > 1.10.0 in combination
+    # with the self build clang compiler. In case google test enables the
+    # INTERFACE_COMPILE_FEATURES for cxx_std_14 or cxx_std_11, CMake will fail
+    # later on with the error:
+    #
+    # CMake Error in CMakeLists.txt:
+    #    No known features for CXX compiler
+    #
+    #   "Clang"
+    #
+    #       version 15.0.7.
+    #
+    # If uncommenting all sections (which was introduced in version 1.11.0) it
+    # works like expected.
+    #
+    $content = Get-Content -Path 'usr\lib\cmake\GTest\GTestTargets.cmake'
+    $newContent = $content -replace 'INTERFACE_COMPILE_FEATURES "cxx_std_14"', '#INTERFACE_COMPILE_FEATURES "cxx_std_14"'
+    $newContent | Set-Content -Path 'usr\lib\cmake\GTest\GTestTargets.cmake'
 
     mkdir -Force -p usr/etc/ide >$null
     pushd usr/etc/ide
