@@ -18,6 +18,12 @@ checkoutSCM:
         dir: rpmalloc
 
 depends:
+    - name: devel::vs2019-toolchain-vc142-amd64
+      use: [environment, tools]
+    - name: devel::ninja-bootstrap
+      use: [tools]
+    - name: devel::cmake-bootstrap
+      use: [tools]
     # link libxml2 to make lld-link not require mt.exe on Windows
     - devel::host::clang-libxml2
 
@@ -136,7 +142,7 @@ multiPackage:
                 name: devel::host::clang-bootstrap
                 use: [tools]
 
-        buildTools: [ clang-bootstrap ]
+        buildTools: [ clang-bootstrap, target-toolchain ]
         buildScript: |
             $archtable = @{
                 "x64"   = "-m64";

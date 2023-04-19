@@ -6,6 +6,10 @@ metaEnvironment:
 depends:
     - name: devel::vs2019-toolchain-vc142-amd64
       use: [environment, tools]
+    - name: devel::ninja-bootstrap
+      use: [tools]
+    - name: devel::cmake-bootstrap
+      use: [tools]
 
 checkoutSCM:
     scm: url

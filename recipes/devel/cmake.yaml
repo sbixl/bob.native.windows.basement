@@ -18,6 +18,11 @@ checkoutSCM:
 multiPackage:
     "":
         inherit: [cmake]
+
+        depends:
+            - name: devel::cmake-bootstrap
+              use: [tools]
+
         buildVars: [PKG_VERSION]
         buildScript: |
             cmakeBuild "$($args[0])\cmake.src\CMake-${Env:PKG_VERSION}" `
@@ -28,6 +33,13 @@ multiPackage:
 
     bootstrap:
         inherit: [cpackage, ninja, install]
+
+        depends:
+            - name: devel::vs2019-toolchain-vc142-amd64
+              use: [environment, tools]
+            - name: devel::ninja-bootstrap
+              use: [tools]
+
         buildVars: [ PKG_VERSION ]
         buildScript: |
 

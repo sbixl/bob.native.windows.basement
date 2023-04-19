@@ -3,6 +3,10 @@ inherit: [cpackage, install, patch]
 metaEnvironment:
     PKG_VERSION: "22.00"
 
+depends:
+    - name: devel::vs2019-toolchain-vc142-amd64
+      use: [environment, tools]
+
 checkoutSCM:
     scm: url
     url: ${GITHUB_MIRROR}/kornelski/7z/archive/${PKG_VERSION}.zip

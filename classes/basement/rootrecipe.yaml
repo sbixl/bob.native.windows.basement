@@ -4,11 +4,6 @@ depends:
     - if: !expr |
         "${BOB_HOST_PLATFORM}" == "win32"
       depends:
-        # the msvc toolchain is a mandatory dependency since it is always needed regardless
-        # of whether clang is selected as host toolchain.
-        - name: devel::vs2019-toolchain-vc142-amd64
-          use: [environment, tools]
-          forward: True
         - name: devel::msbuild
           use: [tools]
           forward: True
@@ -22,10 +17,8 @@ depends:
         # bootstrap ninja and cmake with the msvc compiler
         - name: devel::ninja-bootstrap
           use: [tools]
-          forward: True
         - name: devel::cmake-bootstrap
           use: [tools]
-          forward: True
         - name: devel::host-toolchain
           use: [environment, tools]
           forward: True

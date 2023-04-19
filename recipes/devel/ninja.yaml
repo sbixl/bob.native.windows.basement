@@ -11,6 +11,13 @@ checkoutSCM:
 multiPackage:
     "":
         inherit: [cmake]
+
+        depends:
+            - name: devel::ninja-bootstrap
+              use: [tools]
+            - name: devel::cmake-bootstrap
+              use: [tools]
+
         buildVars: [PKG_VERSION]
         buildScript: |
             cmakeBuild "$($args[0])\ninja-${Env:PKG_VERSION}.g95dee.kitware.jobserver-1" `
@@ -21,6 +28,11 @@ multiPackage:
 
     bootstrap:
         inherit: [cpackage, install]
+
+        depends:
+            - name: devel::vs2019-toolchain-vc142-amd64
+              use: [environment, tools]
+
         buildVars: [CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION]
         buildScript: |
             $SRC_PATH = "$($args[0])\ninja-${Env:PKG_VERSION}.g95dee.kitware.jobserver-1\configure.py"
