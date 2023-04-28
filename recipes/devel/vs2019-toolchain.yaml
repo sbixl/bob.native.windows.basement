@@ -60,6 +60,11 @@ multiPackage:
             amd64:
                 privateEnvironment:
                     VC_ARCH: "amd64"
+                provideVars:
+                    PROCESSOR_ARCHITECTURE: "$(vsvars2019,PROCESSOR_ARCHITECTURE,$VC_ARCH,-vcvars_ver=$VC_VERSION)"
+                    
             x86:
                 privateEnvironment:
                     VC_ARCH: "x86"
+                provideVars:
+                    PROCESSOR_ARCHITECTURE: "$(vsvars2019,PROCESSOR_ARCHITECTURE,$VC_ARCH,-vcvars_ver=$VC_VERSION)"

@@ -43,7 +43,6 @@ def vsvars2019(args, **options):
                     v = subprocess.check_output(["cygpath", "-u", "-p", v], universal_newlines=True).strip()
                 env[k] = v
             cache[tag] = env
-
         return cache[tag][varname]
     except (OSError, subprocess.SubprocessError) as e:
         raise ParseError("$(vsvars2019) failed: " + str(e))

@@ -3,6 +3,24 @@ inherit: [ "pipython3::vars" ]
 buildVars: [PYTHON_PYPI_MIRROR]
 buildTools: [python3]
 buildSetup: |
+    $global:PIP_RELATIVE_SEARCH_PATH=""
+
+    ########################################################################################
+    #
+    # \brief: This function will set the relative search path in case PYTHON_PYPI_MIRROR is
+    #         configured.
+    #
+    # \args[in]: RELATIVE_SEARCH_PATH relative search path in PYTHON_PYPI_MIRROR
+    ########################################################################################
+    function SetRelativeSearchPath
+    {
+        Param(
+            # mandatory
+            [Parameter(Position = 0)]
+            [String]$RELATIVE_SEARCH_PATH     
+        )
+        $global:PIP_RELATIVE_SEARCH_PATH=$RELATIVE_SEARCH_PATH
+    }
 
     ########################################################################################
     #
@@ -11,14 +29,13 @@ buildSetup: |
     #         PYTHON_PYPI_MIRROR).
     #
     # \args[in]: PIP_PACKAGE pypi package to be installed or path to a local directory
-    # \args[in]: SRC_PATH path to the source directory of the pip  package
     #
     # \example:
     #     buildScript: |
     #         pipInstallLocal "jinja2==3.1.2"
     #
     #     buildScript: |
-    #         pipInstallLocal "MyPyModule" "$MyLocalSourcePath"
+    #         pipInstallLocal "$MyLocalPath/MyPyModule"
     #
     # \note: If bob environment variable PYTHON_PYPI_MIRROR is not set or points to
     #        an invalid location, pip will use the external network (pypi.org) to
@@ -32,36 +49,32 @@ buildSetup: |
         Param(
             # mandatory
             [Parameter(Position = 0)]
-            [String]$PIP_PACKAGE,
-            [Parameter(Position = 1)]
-            [String]$SRC_PATH          
+            [String]$PIP_PACKAGE      
         )
+        
+        $LOCAL_PIP_SEARCH_PATH = "${Env:PYTHON_PYPI_MIRROR}\\${global:PIP_RELATIVE_SEARCH_PATH}"
+        
+        Write-Host $(Test-Path($LOCAL_PIP_SEARCH_PATH))
+        Write-Host $([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR}))
 
-        if([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR}))
+        if(([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR})) -Or ( -Not (Test-Path($LOCAL_PIP_SEARCH_PATH))))
         {
+            Write-Host "Downlowding pip package ${PIP_PACKAGE} from pypi.org ..."
             $ARGS = ""
         }
         else
         {
+            Write-Host "Downlowding pip package ${PIP_PACKAGE} from internal storage ${LOCAL_PIP_SEARCH_PATH} ..."
             # do not search on PyPi, search int the local file system or network instead!
-            $ARGS = @("--find-links=${Env:PYTHON_PYPI_MIRROR}\\${PIP_PACKAGE}", "--no-index")
+            $ARGS = @("--find-links=${LOCAL_PIP_SEARCH_PATH}", "--no-index")
         }
 
         $_OPTIONS = $($ARGS | select)
-        
-        # because pip creates a build directory in the sources
-        if(Test-Path src)
-        {
-            rm -Force -r src
-        }
-        mkdir -Force -p src >$null
-        # copy sources but exclude git directory
-        robocopy $SRC_PATH src/$PIP_PACKAGE /mir /xd .git >$null
 
         mkdir -Force -p install/usr/lib >$null
         # add -q for verbosity off
         Check-Command {
-            python3 -m pip install src/$PIP_PACKAGE `
+            python3 -m pip install $PIP_PACKAGE `
                 --root ${PWD}/install `
                 --prefix usr `
                 --disable-pip-version-check `
@@ -72,13 +85,10 @@ buildSetup: |
         }
 
         # append previous installed pip module to python path
-        $PYTHONPATH=""
         foreach ($i in @("", "lib-dynload", "site-packages"))
         {
-            $PYTHONPATH=${PYTHONPATH}+"install\$PYTHONDESTLIB"+"\$i;"
+            ${Env:PYTHONPATH}=${Env:PYTHONPATH}+"install\$PYTHONDESTLIB"+"\$i;"
         }
-        $Env:PYTHONPATH=$PYTHONPATH
-
     }
 
     ########################################################################################
@@ -88,7 +98,6 @@ buildSetup: |
     #         PYTHON_PYPI_MIRROR) from a file.
     #
     # \args[in]: REQUIREMENTS_FILE Path to the file containing the required pip packages
-    # \args[in]: RELATIVE_SEARCH_PATH relative search path in PYTHON_PYPI_MIRROR
     #
     # \example:
     #     buildScript: |
@@ -110,20 +119,24 @@ buildSetup: |
         Param(
             # mandatory
             [Parameter(Position = 0)]
-            [String]$REQUIREMENTS_FILE,
-            # optional
-            [Parameter(Mandatory=$false,Position = 1)]
-            [String]$RELATIVE_SEARCH_PATH = ""
+            [String]$REQUIREMENTS_FILE
         )
 
-        if([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR}))
+        $LOCAL_PIP_SEARCH_PATH = "${Env:PYTHON_PYPI_MIRROR}\\${global:PIP_RELATIVE_SEARCH_PATH}"
+
+        Write-Host $(Test-Path($LOCAL_PIP_SEARCH_PATH))
+        Write-Host $([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR}))
+
+        if(([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR})) -Or ( -Not (Test-Path($LOCAL_PIP_SEARCH_PATH))))
         {
+            Write-Host "Downlowding pip packages from pypi.org ..."
             $ARGS = ""
         }
         else
         {
+            Write-Host "Downlowding pip packages from internal storage ${LOCAL_PIP_SEARCH_PATH} ..."
             # do not search on PyPi, search int the local file system or network instead!
-            $ARGS = @("--find-links=${Env:PYTHON_PYPI_MIRROR}\\${RELATIVE_SEARCH_PATH}", "--no-index")
+            $ARGS = @("--find-links=${LOCAL_PIP_SEARCH_PATH}", "--no-index")
         }
 
         $_OPTIONS = $($ARGS | select)
@@ -142,13 +155,10 @@ buildSetup: |
         }
 
         # append previous installed pip module to python path
-        $PYTHONPATH=""
         foreach ($i in @("", "lib-dynload", "site-packages"))
         {
-            $PYTHONPATH=${PYTHONPATH}+"install\$PYTHONDESTLIB"+"\$i;"
+            ${Env:PYTHONPATH}=${Env:PYTHONPATH}+"install\$PYTHONDESTLIB"+"\$i;"
         }
-        $Env:PYTHONPATH=$PYTHONPATH
-
     }
 
 packageSetup: |

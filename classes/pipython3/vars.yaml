@@ -1,4 +1,5 @@
 checkoutTools: [python3]
+checkoutVars: [PROCESSOR_ARCHITECTURE]
 checkoutSetup: &ref |
     $PYTHONDESTLIB=$(python3 -c "import sysconfig; print(sysconfig.get_config_var('DESTLIB'))")
 
@@ -26,7 +27,9 @@ checkoutSetup: &ref |
     $Env:PYTHONPATH=$PYTHONPATH
 
 buildTools: [python3]
+buildVars: [PROCESSOR_ARCHITECTURE]
 buildSetup: *ref
 
 packageTools: [python3]
+packageVars: [PROCESSOR_ARCHITECTURE]
 packageSetup: *ref

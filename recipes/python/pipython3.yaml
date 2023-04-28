@@ -10,6 +10,7 @@ metaEnvironment:
 depends:
     - name: devel::vs2019-toolchain-vc142-amd64
       use: [environment, tools]
+      forward: true
     - name: python::pipython3-minimal
       use: [tools]
 
@@ -172,3 +173,7 @@ provideTools:
         # because we do not use the default stdLib directory "lib"
         libs: [ "usr/lib" ]
         netAccess: True
+        environment:
+            # the python platform library require this enviroment variable
+            PROCESSOR_ARCHITECTURE: "${PROCESSOR_ARCHITECTURE}"
+            
