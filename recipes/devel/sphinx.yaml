@@ -9,7 +9,15 @@ buildScript: |
     sphinx-prompt==1.5.0
     sphinxcontrib-jsmath==1.0.1' | Out-File -encoding ASCII ${PWD}\requirements.txt
 
-    pipInstallFromFile requirements.txt "sphinx"
+    # Search for any pip package in local storage (if available, otherwise use pypi.org as source)
+    pipSetRelativeSearchPath sphinx
+
+    pipInstallFromFile requirements.txt
+    pipInstall sphinx
+
+    # unset local search path
+    pipSetRelativeSearchPath ""
+
 
 packageScript: |
     installPythonModule
