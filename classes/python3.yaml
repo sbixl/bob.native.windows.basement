@@ -4,6 +4,34 @@ buildVars: [PYTHON_PYPI_MIRROR]
 buildTools: [python3]
 buildSetup: |
     $global:PIP_RELATIVE_SEARCH_PATH=""
+    
+    function __selectSource
+    {
+        $LOCAL_PIP_SEARCH_PATH = "${Env:PYTHON_PYPI_MIRROR}\\${global:PIP_RELATIVE_SEARCH_PATH}"
+
+        if(([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR})) -Or           # the environment variable PYTHON_PYPI_MIRROR must explicit set by the user
+           ([string]::IsNullOrWhiteSpace(${global:PIP_RELATIVE_SEARCH_PATH})) -Or  # the environment variable PIP_RELATIVE_SEARCH_PATH must explicit set by the user
+           ( -Not (Test-Path($LOCAL_PIP_SEARCH_PATH))))                            # the path must exist
+        {
+            $ARGS = ""
+        }
+        else
+        {
+            # do not search on PyPi, search int the local file system or network instead!
+            $ARGS = @("--find-links=${LOCAL_PIP_SEARCH_PATH}", "--no-index")
+        }
+
+        return $ARGS
+    }
+    
+    function __append2PythpnPath
+    {
+        # append previous installed pip module to python path
+        foreach ($i in @("", "lib-dynload", "site-packages"))
+        {
+            ${Env:PYTHONPATH}=${Env:PYTHONPATH}+"install\$PYTHONDESTLIB"+"\$i;"
+        }
+    }
 
     ########################################################################################
     #
@@ -36,12 +64,6 @@ buildSetup: |
     #     buildScript: |
     #         pipInstall "jinja2==3.1.2"
     #
-    # \note: If bob environment variable PYTHON_PYPI_MIRROR is not set or points to
-    #        an invalid location, pip will use the external network (pypi.org) to
-    #        donwload the required pip package. Furthermore if the required pip package
-    #        is not found in PYTHON_PYPI_MIRROR, pip will use external network access
-    #        as fallback solution too!
-    #
     ########################################################################################
     function pipInstall
     {
@@ -51,18 +73,15 @@ buildSetup: |
             [String]$PIP_PACKAGE      
         )
         
-        $LOCAL_PIP_SEARCH_PATH = "${Env:PYTHON_PYPI_MIRROR}\\${global:PIP_RELATIVE_SEARCH_PATH}"
+        $ARGS = __selectSource
 
-        if(([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR})) -Or ( -Not (Test-Path($LOCAL_PIP_SEARCH_PATH))))
+        if([string]::IsNullOrWhiteSpace(${ARGS}))
         {
             Write-Host "Downlowding pip package ${PIP_PACKAGE} from pypi.org ..."
-            $ARGS = ""
         }
         else
         {
             Write-Host "Downlowding pip package ${PIP_PACKAGE} from internal storage ${LOCAL_PIP_SEARCH_PATH} ..."
-            # do not search on PyPi, search int the local file system or network instead!
-            $ARGS = @("--find-links=${LOCAL_PIP_SEARCH_PATH}", "--no-index")
         }
 
         $_OPTIONS = $($ARGS | select)
@@ -79,19 +98,16 @@ buildSetup: |
                 --ignore-installed `
                 $_OPTIONS
         }
+        
+        __append2PythpnPath
 
-        # append previous installed pip module to python path
-        foreach ($i in @("", "lib-dynload", "site-packages"))
-        {
-            ${Env:PYTHONPATH}=${Env:PYTHONPATH}+"install\$PYTHONDESTLIB"+"\$i;"
-        }
     }
 
     ########################################################################################
     #
     # \brief: This function will install a list of pip packages and all its dependencies
-    #         with or  without external internet access (depends on bob 
-    #         environment variable PYTHON_PYPI_MIRROR and if the releative search path is valid).
+    #         with or without external internet access (depends on bob  environment variable 
+    #         PYTHON_PYPI_MIRROR and if the releative search path is valid).
     #
     # \args[in]: REQUIREMENTS_FILE Path to the file containing the required pip packages
     #
@@ -103,12 +119,6 @@ buildSetup: |
     #
     #         pipInstallFromFile requirements.txt
     #
-    # \note: If bob environment variable PYTHON_PYPI_MIRROR is not set or points to
-    #        an invalid location, pip will use the external network (pypi.org) to
-    #        download the required pip package. Furthermore if the required pip package
-    #        is not found in PYTHON_PYPI_MIRROR, pip will use external network access
-    #        as fallback solution too!
-    #
     ########################################################################################
     function pipInstallFromFile
     {
@@ -118,18 +128,15 @@ buildSetup: |
             [String]$REQUIREMENTS_FILE
         )
 
-        $LOCAL_PIP_SEARCH_PATH = "${Env:PYTHON_PYPI_MIRROR}\\${global:PIP_RELATIVE_SEARCH_PATH}"
+        $ARGS = __selectSource
 
-        if(([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR})) -Or ( -Not (Test-Path($LOCAL_PIP_SEARCH_PATH))))
+        if([string]::IsNullOrWhiteSpace(${ARGS}))
         {
             Write-Host "Downlowding pip packages from pypi.org ..."
-            $ARGS = ""
         }
         else
         {
             Write-Host "Downlowding pip packages from internal storage ${LOCAL_PIP_SEARCH_PATH} ..."
-            # do not search on PyPi, search int the local file system or network instead!
-            $ARGS = @("--find-links=${LOCAL_PIP_SEARCH_PATH}", "--no-index")
         }
 
         $_OPTIONS = $($ARGS | select)
@@ -147,11 +154,7 @@ buildSetup: |
                 $_OPTIONS
         }
 
-        # append previous installed pip module to python path
-        foreach ($i in @("", "lib-dynload", "site-packages"))
-        {
-            ${Env:PYTHONPATH}=${Env:PYTHONPATH}+"install\$PYTHONDESTLIB"+"\$i;"
-        }
+        __append2PythpnPath
     }
 
     ########################################################################################
@@ -164,24 +167,10 @@ buildSetup: |
     # \args[in]: SRC_PATH path to the local source directory of the pip package
     #
     # \example:
-    #     buildScript: |
-    #         pipInstallFromLocalSource MyPyModule "$MyLocalSourcePath"
-    #
-    # \note: If bob environment variable PYTHON_PYPI_MIRROR is not set or points to
-    #        an invalid location, pip will use the external network (pypi.org) to
-    #        donwload the required pip package. Furthermore if the required pip package
-    #        is not found in PYTHON_PYPI_MIRROR, pip will use external network access
-    #        as fallback solution too!
-    #
-    #        If you want to search in a specific directory relativ to PYTHON_PYPI_MIRROR you
-    #        can call pipSetRelativeSearchPath with the reative search path comapred to 
-    #        PYTHON_PYPI_MIRROR.
-    #
-    #          For example:
-    #              buildScript: |
-    #                  # search in ${PYTHON_PYPI_MIRROR}/test for all dependencies of MyPyModule
-    #                  pipSetRelativeSearchPath test
-    #                  pipInstallFromLocalSource MyPyModule "$($args[0])\MyPyModule"
+    #       buildScript: |
+    #           # search in ${PYTHON_PYPI_MIRROR}/test for all dependencies of MyPyModule
+    #           pipSetRelativeSearchPath test
+    #           pipInstallFromLocalSource MyPyModule "$($args[0])\MyPyModule"
     #
     ########################################################################################
     function pipInstallFromLocalSource
@@ -194,18 +183,15 @@ buildSetup: |
             [String]$SRC_PATH          
         )     
 
-        $LOCAL_PIP_SEARCH_PATH = "${Env:PYTHON_PYPI_MIRROR}\\${global:PIP_RELATIVE_SEARCH_PATH}"
+        $ARGS = __selectSource
 
-        if(([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR})) -Or ( -Not (Test-Path($LOCAL_PIP_SEARCH_PATH))))
+        if([string]::IsNullOrWhiteSpace(${ARGS}))
         {
             Write-Host "Downlowding pip packages from pypi.org ..."
-            $ARGS = ""
         }
         else
         {
             Write-Host "Downlowding pip packages from internal storage ${LOCAL_PIP_SEARCH_PATH} ..."
-            # do not search on PyPi, search int the local file system or network instead!
-            $ARGS = @("--find-links=${LOCAL_PIP_SEARCH_PATH}", "--no-index")
         }
 
         $_OPTIONS = $($ARGS | select)
@@ -233,11 +219,7 @@ buildSetup: |
                 $_OPTIONS
         }        
 
-        # append previous installed pip module to python path
-        foreach ($i in @("", "lib-dynload", "site-packages"))
-        {
-            ${Env:PYTHONPATH}=${Env:PYTHONPATH}+"install\$PYTHONDESTLIB"+"\$i;"
-        }
+        __append2PythpnPath
     }    
 
 packageSetup: |
