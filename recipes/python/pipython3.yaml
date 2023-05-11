@@ -1,11 +1,11 @@
 inherit: [patch, msbuild]
 
 metaEnvironment:
-    PYTHON_VERSION:     "3.11.2"
-    GET_PIP_VERSION:    "22.3.1"
-    PIP_VERSION:        "23.0"
-    SETUPTOOLS_VERSION: "67.0.0"
-    WHEEL_VERSION:      "0.38.4"
+    PYTHON_VERSION:     "3.11.3"
+    GET_PIP_VERSION:    "23.1.2"
+    PIP_VERSION:        "23.1.2"
+    SETUPTOOLS_VERSION: "67.7.2"
+    WHEEL_VERSION:      "0.40.0"
 
 depends:
     - name: devel::vs2019-toolchain-vc142-amd64
@@ -18,13 +18,13 @@ checkoutSCM:
     -
         scm: url
         url: ${PYTHON_MIRROR}/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz
-        digestSHA256: 29e4b8f5f1658542a8c13e2dd277358c9c48f2b2f7318652ef1675e402b9d2af
+        digestSHA256: 8a5db99c961a7ecf27c75956189c9602c968751f11dbeae2b900dbff1c085b5e
         extract: no
         dir: python
     -
         scm: url
         url: ${GITHUB_MIRROR}/pypa/get-pip/archive/refs/tags/${GET_PIP_VERSION}.zip
-        digestSHA256: 4007f79b7a1cbf457aa84e714f553bae07984e6ea18707d8bb2d9831e05e6a94
+        digestSHA256: ed147827ce5554674c481d89735e3a78248e89d725c34922c4bb339addcfe378
         dir: get-pip
     # Fetching external libraries...
     -
@@ -35,8 +35,8 @@ checkoutSCM:
         dir: deps/bzip2
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/sqlite-3.39.4.0.zip
-        digestSHA256: a0271dc0d7bd0f50813f6bf8c3a6f9120d676c056a0d899bd59203acfd2d5279
+        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/sqlite-3.40.1.0.zip
+        digestSHA256: 39adcf18b275197e819f3997f96b9d4c28563739edbcfda5305199004b627d01
         extract: no
         dir: deps/sqlite
     -
@@ -54,14 +54,14 @@ checkoutSCM:
     # Fetching external binaries...
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/libffi-3.4.3.zip
-        digestSHA256: 0c4be404ff307ee27807c2f3e4b9e601750dfbcb3afd5b28fec2e77834ed02b0
+        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/libffi-3.4.4.zip
+        digestSHA256: 681c0e6306b4bcb54ecce8305f67ca88ab03be922b6c4dcfd18240ad46e357d8
         extract: no
         dir: deps/libffi
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/openssl-bin-1.1.1q.zip
-        digestSHA256: 1c208f0bb38ac8bfa9c4647d23e8a4b07c965abebe5c693885d00755b5b19018
+        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/openssl-bin-1.1.1t.zip
+        digestSHA256: 941a04de5ec108954a0cda957a0ef574230618a57202dade81b6b9ecc0469e13
         extract: no
         dir: deps/openssl-bin
     -
@@ -137,11 +137,11 @@ buildScript: |
 
     # copy dependencies
     __addLib "bzip2"       "1.0.8"
-    __addLib "sqlite"      "3.39.4.0"
+    __addLib "sqlite"      "3.40.1.0"
     __addLib "xz"          "5.2.5"
     __addLib "zlib"        "1.2.13"
-    __addBin "libffi"      "3.4.3"
-    __addBin "openssl-bin" "1.1.1q"
+    __addBin "libffi"      "3.4.4"
+    __addBin "openssl-bin" "1.1.1t"
     __addBin "tcltk"       "8.6.12.1"
 
     Check-Command { src/PCbuild/build.bat -p x64 }
