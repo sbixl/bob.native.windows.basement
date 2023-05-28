@@ -1,0 +1,61 @@
+inherit: [ "basement::rootrecipe", "python3" ]
+
+checkoutSCM:
+    scm: import
+    url: recipes/tests/src/sphinx
+    prune: True
+
+depends:
+    - name: devel::sphinx
+      use: [tools]
+
+buildTools: [sphinx]
+buildScript: |
+    $MODULE_SOURCE_PATH=$args[0]
+
+    function __DeleteDirectory
+    {
+        param(
+            [string]$DIR
+        )
+
+        if (Test-Path $DIR)
+        {
+            cmd.exe /c "rmdir /s /q $DIR"
+        }
+    }
+
+    __DeleteDirectory sphinx
+
+    mkdir -Force -p sphinx >$null
+
+    Check-Command {
+        python3 "$($BOB_TOOL_PATHS["sphinx"])\sphinx-build.exe" -b html "${MODULE_SOURCE_PATH}\doc\source" "${PWD}\sphinx"
+    }
+
+packageScript: |
+    $BUILD_DIRECTORY=$args[0]
+
+    function __DeleteDirectory
+    {
+        param(
+            [string]$DIR
+        )
+
+        if (Test-Path $DIR)
+        {
+            cmd.exe /c "rmdir /s /q $DIR"
+        }
+    }
+
+    mkdir -Force -p doc >$null
+
+    cp -Path $BUILD_DIRECTORY\sphinx -Destination $PWD\doc -Recurse    
+
+    # clean-up (remove temporary files)
+    pushd doc\sphinx
+    __DeleteDirectory .doctrees
+    __DeleteDirectory _sources
+    rm .buildinfo
+    rm objects.inv
+    popd

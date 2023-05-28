@@ -64,6 +64,7 @@ which use the basement layer. They act as smoke tests for this project.
     bob dev tests::cmake::greeter-host
     bob dev tests::cmake::greeter-cross
     bob dev tests::python::test
+    bob dev tests::sphinx::doc
 ```
 
 # How to use
