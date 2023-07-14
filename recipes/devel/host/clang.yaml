@@ -1,13 +1,13 @@
 inherit: [cpackage, ninja, install, filesystem]
 
 metaEnvironment:
-    PKG_VERSION: "15.0.7"
+    PKG_VERSION: "16.0.6"
 
 checkoutSCM:
     -
         scm: url
         url: ${GITHUB_MIRROR}/llvm/llvm-project/releases/download/llvmorg-${PKG_VERSION}/llvm-project-${PKG_VERSION}.src.tar.xz
-        digestSHA1: bfda06ab090154d289013912266209595a2e3914
+        digestSHA256: ce5e71081d17ce9e86d7cbcfa28c4b04b9300f8fb7e78422b1feb6bc52c3028e
         extract: no
         dir: llvm
     # Use rpmalloc. For faster ThinLTO linking.
@@ -90,7 +90,6 @@ buildScript: |
                   -DLLVM_ENABLE_BINDINGS=OFF `
                   -DLLVM_ENABLE_PLUGINS=OFF `
                   -DLLVM_ENABLE_IDE=OFF `
-                  -DLLVM_ENABLE_LLD=ON `
                   -DLLVM_BUILD_EXAMPLES=OFF `
                   -DLLVM_BUILD_TESTS=OFF `
                   -DLLVM_BUILD_BENCHMARKS=OFF `
@@ -162,6 +161,7 @@ multiPackage:
                        -DLLVM_FORCE_BUILD_RUNTIME=ON `
                        -DLLVM_STATIC_LINK_CXX_STDLIB=TRUE `
                        -DLLVM_ENABLE_RUNTIMES=libcxx `
+                       -DLLVM_ENABLE_LLD=ON `
                        -DLIBCXX_ENABLE_SHARED=OFF `
                        -DLIBCXX_ENABLE_STATIC=ON `
                        -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=NO `
