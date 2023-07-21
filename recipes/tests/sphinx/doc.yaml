@@ -8,8 +8,14 @@ checkoutSCM:
 depends:
     - name: devel::sphinx
       use: [tools]
+    - name: devel::openjdk
+      use: [tools]
+      forward: True
+    - name: devel::plantuml
+      use: [tools]
+      forward: True      
 
-buildTools: [sphinx]
+buildTools: [sphinx, java, plantuml]
 buildScript: |
     $MODULE_SOURCE_PATH=$args[0]
 
@@ -28,6 +34,22 @@ buildScript: |
     __DeleteDirectory sphinx
 
     mkdir -Force -p sphinx >$null
+
+    ###################################################################################################
+    # CONFIGURE PlantUML                                                                              #
+    ###################################################################################################
+
+    $env:PLANTUML_PATH = "$($BOB_TOOL_PATHS["plantuml"])"
+    
+    Write-Host "Checking Java version required for PlantUML plugin..."
+    Check-Command {
+        java -version
+    }
+
+    Write-Host "Checking PlantUML version..."
+    Check-Command {
+        java -jar ${env:PLANTUML_PATH}\plantuml.jar -version
+    }
 
     Check-Command {
         python3 "$($BOB_TOOL_PATHS["sphinx"])\sphinx-build.exe" -b html "${MODULE_SOURCE_PATH}\doc\source" "${PWD}\sphinx"
