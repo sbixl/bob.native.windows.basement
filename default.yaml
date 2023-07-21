@@ -16,6 +16,8 @@ environment:
     GITLAB_MIRROR:        "https://gitlab.com"
     PYTHON_MIRROR:        "https://www.python.org/ftp/python"
     DEVELOPER_ARM_MIRROR: "https://developer.arm.com"
+    JAVA_MIRROR:          "https://download.java.net"
+    SOURCEFORGE_MIRROR:   "https://sourceforge.net"
 
     # This is for local (user) specific usage. Let this environment variable
     # point to you internal PIPY Mirror storage in order to install pip packages
