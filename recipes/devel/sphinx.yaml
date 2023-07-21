@@ -1,10 +1,14 @@
 inherit: [python3]
 
+depends:
+    - devel::plantuml
+
 buildScript: |
     'breathe==4.35.0
     mlx.traceability==7.5.0
     sphinx_rtd_theme==1.2.1
     sphinx_tabs==3.4.1
+    sphinxcontrib-plantuml==0.25
     sphinx-prompt==1.5.0' | Out-File -encoding ASCII ${PWD}\addons.txt
 
     # Search for any pip package in local storage (if available, otherwise use pypi.org as source)
