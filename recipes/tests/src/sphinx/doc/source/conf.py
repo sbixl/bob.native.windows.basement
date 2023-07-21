@@ -10,6 +10,7 @@ extensions = [
     'sphinx.ext.todo',
     #'breathe',
     'sphinx_rtd_theme',
+    'sphinxcontrib.plantuml'
 ]
 
 exclude_patterns = []
@@ -39,3 +40,7 @@ todo_include_todos = True
 # !!! Don't change the two lines below !!!
 #breathe_projects = { project:os.environ['SPHINX_DOXYGEN_XML_PATH'] }
 #breathe_default_project = project
+
+# PlantUML configuration
+plantuml = 'java -jar {}/plantuml.jar'.format(os.environ['PLANTUML_PATH'])
+plantuml_output_format = 'svg'

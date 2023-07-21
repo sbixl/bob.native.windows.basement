@@ -1,7 +1,4 @@
 Software
 ========
 
-Contents:
-
-.. toctree::
-   :maxdepth: 2
+.. uml:: plantuml\software.uml

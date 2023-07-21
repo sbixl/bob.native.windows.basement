@@ -1,7 +1,5 @@
 Hardware
 ========
 
-Contents:
+.. uml:: plantuml\hardware.uml
 
-.. toctree::
-   :maxdepth: 2
