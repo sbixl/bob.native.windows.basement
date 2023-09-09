@@ -6,9 +6,58 @@ shared: True
 # independent of the actual install location. To let Bob see that the different
 # flavours of the toolchain we consume the relevant variables here to taint the
 # "target-toolchain" tool accordingly.
-packageVars: [VC_ARCH, VC_VERSION]
+packageVars: [VC_ARCH, VC_VERSION, VC_WIN_SDK_VERSION]
 packageScript: |
     echo "VS2019 VSVARSALL" > version.txt
+
+# This fingerprintScript checks if the 'native' host toolchain is installed with
+# the correct tools and versions on the host. It will output nothing but will 
+# fail if the host does not have installed the correct versions and tools.
+fingerprintVars: [VC_ARCH, VC_VERSION, VC_WIN_SDK_VERSION] 
+fingerprintIf: "$(eq,${ENABLE_NATIVE_TOOLCHAIN_FINGERPRINTING},True)"
+fingerprintScriptPwsh: |
+    $VSWHERE_TOOL = "${Env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+
+    $WSWHERE_ARGS = "-property", "installationPath",
+                    "-version", "[16.0,17.0)",
+                    "-products", "Microsoft.VisualStudio.Product.BuildTools",
+                    "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+
+    if(-Not (Test-Path $VSWHERE_TOOL))
+    {
+        Write-Host "Could not find vswhere.exe on the HOST machine!"
+        throw "Aborting..."    
+    }
+
+    # get the root path to the visual studio build tools
+    $VS_BUILD_TOOLS = & $VSWHERE_TOOL $WSWHERE_ARGS
+
+    if($VS_BUILD_TOOLS -eq $null)
+    {
+        Write-Host "No Visual Studio Buildtools 2019 installed on the HOST machine!"
+        throw "Aborting..."
+        
+    }
+
+    # Visual Studio Buildtools 2019 available, now check the architecture, version and Windows SDK.    
+    $VCVARSALL_BATCH = "$VS_BUILD_TOOLS\VC\Auxiliary\Build\vcvarsall.bat"
+    
+    $VCVARSALL_BATCH_ARGS = "${Env:VC_ARCH}", 
+                            "${Env:VC_WIN_SDK_VERSION}", 
+                            "-vcvars_ver=${Env:VC_VERSION}"
+    
+    if(-Not (Test-PAth $VCVARSALL_BATCH))
+    {
+        Write-Host "Could not find vcvarsall.bat!"
+        throw "Aborting..." 
+    }
+
+    $VCVARSALL_BATCH_RETURN = & $VCVARSALL_BATCH $VCVARSALL_BATCH_ARGS | Out-String
+    if(${VCVARSALL_BATCH_RETURN}.Contains("[ERROR:"))
+    {
+        Write-Host $VCVARSALL_BATCH_RETURN
+        throw "Aborting..."
+    }
 
 provideTools:
     target-toolchain:
@@ -16,11 +65,11 @@ provideTools:
         environment:
             AUTOCONF_HOST: "x86_64-pc-win32"
 
-            INCLUDE: "$(vsvars2019,INCLUDE,$VC_ARCH,-vcvars_ver=$VC_VERSION)"
-            LIBPATH: "$(vsvars2019,LIBPATH,$VC_ARCH,-vcvars_ver=$VC_VERSION)"
-            LIB: "$(vsvars2019,LIB,$VC_ARCH,-vcvars_ver=$VC_VERSION)"
-            VS_PATH: "$(vsvars2019,PATH,$VC_ARCH,-vcvars_ver=$VC_VERSION)"
-            PLATFORM: "$(vsvars2019,PLATFORM,$VC_ARCH,-vcvars_ver=$VC_VERSION)"
+            INCLUDE: "$(vsvars2019,INCLUDE,$VC_ARCH,$VC_WIN_SDK_VERSION,-vcvars_ver=$VC_VERSION)"
+            LIBPATH: "$(vsvars2019,LIBPATH,$VC_ARCH,$VC_WIN_SDK_VERSION,-vcvars_ver=$VC_VERSION)"
+            LIB: "$(vsvars2019,LIB,$VC_ARCH,$VC_WIN_SDK_VERSION,-vcvars_ver=$VC_VERSION)"
+            VS_PATH: "$(vsvars2019,PATH,$VC_ARCH,$VC_WIN_SDK_VERSION,-vcvars_ver=$VC_VERSION)"
+            PLATFORM: "$(vsvars2019,PLATFORM,$VC_ARCH,$VC_WIN_SDK_VERSION,-vcvars_ver=$VC_VERSION)"
 
             CC: "cl"
             CXX: "cl"
@@ -30,41 +79,22 @@ provideTools:
             CXXFLAGS: ""
             LDFLAGS: ""
 
+provideVars:
+    PROCESSOR_ARCHITECTURE: "$(vsvars2019,PROCESSOR_ARCHITECTURE,$VC_ARCH,$VC_WIN_SDK_VERSION,-vcvars_ver=$VC_VERSION)"
+    VCToolsInstallDir: "$(vsvars2019,VCTOOLSINSTALLDIR,$VC_ARCH,$VC_WIN_SDK_VERSION,-vcvars_ver=$VC_VERSION)"       
+
 multiPackage:
-    vc140:
-        privateEnvironment:
-            VC_VERSION: "14.0"
-        multiPackage:
-            amd64:
-                privateEnvironment:
-                    VC_ARCH: "amd64"
-            x86:
-                privateEnvironment:
-                    VC_ARCH: "x86"
-
-    vc141:
-        privateEnvironment:
-            VC_VERSION: "14.1"
-        multiPackage:
-            amd64:
-                privateEnvironment:
-                    VC_ARCH: "amd64"
-            x86:
-                privateEnvironment:
-                    VC_ARCH: "x86"
-
     vc142:
         privateEnvironment:
             VC_VERSION: "14.2"
+            VC_WIN_SDK_VERSION: "10.0.20348.0"
+
         multiPackage:
             amd64:
                 privateEnvironment:
                     VC_ARCH: "amd64"
-                provideVars:
-                    PROCESSOR_ARCHITECTURE: "$(vsvars2019,PROCESSOR_ARCHITECTURE,$VC_ARCH,-vcvars_ver=$VC_VERSION)"
-                    
+   
             x86:
                 privateEnvironment:
                     VC_ARCH: "x86"
-                provideVars:
-                    PROCESSOR_ARCHITECTURE: "$(vsvars2019,PROCESSOR_ARCHITECTURE,$VC_ARCH,-vcvars_ver=$VC_VERSION)"
+                    

@@ -28,5 +28,18 @@ environment:
     #
     PYTHON_PYPI_MIRROR:   ""
 
+    # This will enable/disable the finger-printing script of the vs2019 native toolchain.
+    # The variable should always set to True but can be changed to False during development 
+    # to speed up the build execution time because fingerprinting is executed every time a 
+    # build is triggered. 
+    ENABLE_NATIVE_TOOLCHAIN_FINGERPRINTING: "True"
+
 include:
-    - url-overrides
+    # optional include for user specific settings.
+    # note: This file (user.yaml) is not under version control and shall be placed 
+    #       in the root directory of the repository adjacent to the default.yaml.
+    - user
+    # optional include for user specific binary archives.
+    # note: This file (archive.yaml) is not added to .gitignore and shall be placed 
+    #       in the root directory of the repository adjacent to the default.yaml.
+    - archive
