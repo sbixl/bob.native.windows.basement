@@ -34,6 +34,13 @@ environment:
     # build is triggered. 
     ENABLE_NATIVE_TOOLCHAIN_FINGERPRINTING: "True"
 
+    # This will enable/disable the clang host toolchain if required by the user. If set to
+    # "True" some initial tools will be boostrapped using the native MSVC compiler because
+    # they are required to build the clang toolchain. After building the clang toolchain, the
+    # clang toolchain earns the role of the master host toolchain.
+    # If set to "False" the MSVC compiler is the master toolchain.
+    USE_CLANG_AS_HOST_TOOLCHAIN: "False"
+
 include:
     # optional include for user specific settings.
     # note: This file (user.yaml) is not under version control and shall be placed 

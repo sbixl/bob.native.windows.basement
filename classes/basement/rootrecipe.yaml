@@ -7,24 +7,34 @@ depends:
         - name: devel::msbuild
           use: [tools]
           forward: True
-        # unfortunately we can build 7z only with nmake and must use the msvc compiler
         - name: utils::7z
           use: [tools]
           forward: True
         - name: python::pipython3
           use: [tools]
           forward: True
-        # bootstrap ninja and cmake with the msvc compiler
-        - name: devel::ninja-bootstrap
-          use: [tools]
-        - name: devel::cmake-bootstrap
-          use: [tools]
-        - name: devel::host-toolchain
-          use: [environment, tools]
-          forward: True
-        - name: devel::ninja
-          use: [tools]
-          forward: True
-        - name: devel::cmake
-          use: [tools]
-          forward: True
+        - if: !expr |
+            "${USE_CLANG_AS_HOST_TOOLCHAIN}" == "True"
+          depends:
+            - name: devel::host-toolchain
+              use: [environment, tools]
+              forward: True
+            - name: devel::ninja
+              use: [tools]
+              forward: True
+            - name: devel::cmake
+              use: [tools]
+              forward: True              
+        - if: !expr |
+            "${USE_CLANG_AS_HOST_TOOLCHAIN}" == "False"
+          depends:
+            - name: devel::vs2019-toolchain-vc142-amd64
+              use: [environment, tools]
+              forward: True
+            - name: devel::ninja
+              use: [tools]
+              forward: True
+            - name: devel::cmake
+              use: [tools]
+              forward: True
+
