@@ -34,12 +34,21 @@ and common GCC as well as an embedded LLVM toolchain are ready-to-use.
 
 # How to build
 
-You have the possibility to choose between two different host toolchain.
+There is the possibility to choose between two different host toolchains.
 
-By default, the MSVC 2019 compiler (toolset vc142) with  is configured as host toolchain
-in the recipes. If you want ot use clang as host toolchain you can switch to it by
-modifying the bob environment variable `USE_CLANG_AS_HOST_TOOLCHAIN` which is defined
-in the file `default.yaml` located in the root direcory of this repository.
+By default, the MSVC 2019 compiler (vc142) is configured as host toolchain. If you want ot use
+clang as host toolchain you can switch to it by modifying the bob environment variable
+`USE_CLANG_AS_HOST_TOOLCHAIN` which is defined in the `default.yaml` located in the root
+directory of this repository.
+
+```yaml
+    # This will enable/disable the clang host toolchain if required by the user. If set to
+    # "True" some initial tools will be bootstrapped using the native MSVC compiler because
+    # they are required to build the clang toolchain. After building the clang toolchain, the
+    # clang toolchain earns the role of the master host toolchain.
+    # If set to "False" the MSVC compiler becomes the master host toolchain.
+    USE_CLANG_AS_HOST_TOOLCHAIN: "False"
+```
 
 While building the clang host toolchain, take care using a flat folder structure.
 Regardless of whether or not long paths are enabled, if the paths are too long, the
@@ -53,39 +62,35 @@ can clone the recipes and build them with Bob in development mode:
 ```shell
     git clone https://github.com/sbixl/bob.native.windows.basement.git
     cd bob.native.windows.basement
-    # building all tools with the native host toolchain (MSVC 2019 compiler)
+    # building all packages with the native host toolchain (MSVC 2019 compiler)
     bob dev buildall
-    # or building all tools using a self built clang host toolchain
+    # OR building all packages using a self built clang host toolchain
     bob dev buildall -DUSE_CLANG_AS_HOST_TOOLCHAIN=True
 ```
 
-Note: If building clang toolchain, some tools must be bootstrapped first with MSVC 2019 compiler.
-
 Building the clang compiler can take some time, so have a bit of patience. It is recommended
-to build the tools on a Jenkins Node and uploading the artifacts to an binary archive. If you do
-not have the infrastructure to use or setup a Jenkins you can also build all tools on your local
-PC and upload them to a binary archive. Using a binary archive has the benefit that the tools
-only needs to be built once and then they can simply downloaded from the archive without
-building it again and again from scratch. The binary archive does not necessarily have to be
-a server, you can also upload the artefact to a local storage (on your hard-disk of your PC) or
-a network-drive (e.g. on your NAS).
+to build all packages on a Jenkins Node and uploading the artifacts to an binary archive.
+If you do not have the infrastructure to use or setup a Jenkins you can also use your local
+workstation and upload the packages to a binary archive.
 
-The project is prepared to configure user specific binary archives. As you can see at the bottom
-of `default.yaml` there is a include section:
+Using a binary archive has the benefit that packages only needs to be built once and then can simply downloaded from the archive instead building it again and again from scratch. The binary archive does not necessarily have to be a server. You can also upload the artefact to a local storage (on your hard-disk of your workstation) or a network-drive.
+
+The basement project is prepared to configure user specific binary archives. As you can see at
+the bottom of the `default.yaml` there is a include section:
 
 ```yaml
 include:
     # optional include for user specific settings.
     # note: This file (user.yaml) is not under version control and shall be placed
-    #       in the root directory of the repository adjacent to the default.yaml.
+    #       in the root directory of the project relative to the default.yaml.
     - user
     # optional include for user specific binary archives.
     # note: This file (archive.yaml) is not added to .gitignore and shall be placed
-    #       in the root directory of the repository adjacent to the default.yaml.
+    #       in the root directory of the project relative to the default.yaml.
     - archive
 ```
 
-For example, place a file `archive.yaml` in the root directory of this project and add the
+For example, place the file `archive.yaml` relative to the `default.yaml` and add the
 following content:
 
 ```yaml
@@ -100,13 +105,13 @@ Now you have configured a local binary archive on your workstation. If you execu
 the argument `--upload`, bob will automatically upload the artifacts to `D:\archives\basement`.
 
 ```shell
-# The binary archive is empty, start building all tools and upload it to the binary archive
+# The binary archive is empty, start building all packages and upload it to the binary archive
 bob dev buildall --upload
 ...
 Duration: 1:10:57.792153, 17 checkouts (0 overrides active), 28 packages built, 0 downloaded.
 ```
 
-As you can see building all tools needs approx. 1 hour and 11 minutes. Now lets check if the
+As you can see building all packages needs approx. 1 hour and 11 minutes. Now lets check if the
 previous configured binary archive works:
 
 ```shell
@@ -120,12 +125,10 @@ Duration: 0:07:34.162274, 0 checkouts (0 overrides active), 1 package built, 13 
 ```
 
 As you can see it is now about 17 times faster which is much more practicable. If you have
-multiple work stations where you want to work you can share this binary archive between all
-workstations or team members. So everyone can download the pre-build artifacts from there. As
+multiple workstations you want to work on you can share this binary archive between all
+workstations or team members. So everyone can download the pre-build packages from there. As
 long es the recipes as well as the input of the recipes did not change bob will always download
-artifacts. If a recipe  or their input (e.g by changing a bob environment variable) has been
-changed bob will not find a suitable artefact in the binary archive and build the package from
-scratch.
+packages from there. If a recipe or their input has changed bob will not find a suitable artefact in the binary archive and build the concerned package(s) from scratch.
 
 In the directory tests there are a couple of recipes that build small test packages which use
 the basement layer. They act as smoke tests for this project.
