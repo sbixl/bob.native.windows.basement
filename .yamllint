@@ -1,0 +1,23 @@
+extends: default
+
+rules:
+    trailing-spaces: {}
+    colons:
+        max-spaces-after: -1
+    comments:
+        min-spaces-from-content: 1
+        require-starting-space: false
+    indentation:
+        spaces: 4
+        indent-sequences: consistent
+    line-length:
+        max: 140
+        allow-non-breakable-words: true
+        allow-non-breakable-inline-mappings: true
+    new-lines:
+        type: dos
+    document-start:
+        present: false
+    truthy:
+        allowed-values: ['True', 'False', 'no', 'true']
+        check-keys: false
