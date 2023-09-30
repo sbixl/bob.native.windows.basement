@@ -1,17 +1,19 @@
-inherit: [ "pipython3::vars" ]
+inherit: ["pipython3::vars"]
 
 buildVars: [PYTHON_PYPI_MIRROR]
 buildTools: [python3]
 buildSetup: |
     $global:PIP_RELATIVE_SEARCH_PATH=""
-    
+
     function __selectSource
     {
         $LOCAL_PIP_SEARCH_PATH = "${Env:PYTHON_PYPI_MIRROR}\\${global:PIP_RELATIVE_SEARCH_PATH}"
-
-        if(([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR})) -Or           # the environment variable PYTHON_PYPI_MIRROR must explicit set by the user
-           ([string]::IsNullOrWhiteSpace(${global:PIP_RELATIVE_SEARCH_PATH})) -Or  # the environment variable PIP_RELATIVE_SEARCH_PATH must explicit set by the user
-           ( -Not (Test-Path($LOCAL_PIP_SEARCH_PATH))))                            # the path must exist
+        # the environment variable PYTHON_PYPI_MIRROR must explicit set by the user
+        if(([string]::IsNullOrWhiteSpace(${Env:PYTHON_PYPI_MIRROR})) -Or
+           # the environment variable PIP_RELATIVE_SEARCH_PATH must explicit set by the use
+           ([string]::IsNullOrWhiteSpace(${global:PIP_RELATIVE_SEARCH_PATH})) -Or
+           # the path must exist
+           ( -Not (Test-Path($LOCAL_PIP_SEARCH_PATH))))
         {
             $ARGS = ""
         }
@@ -23,7 +25,7 @@ buildSetup: |
 
         return $ARGS
     }
-    
+
     function __append2PythpnPath
     {
         # append previous installed pip module to python path
@@ -46,7 +48,7 @@ buildSetup: |
         Param(
             # mandatory
             [Parameter(Position = 0)]
-            [String]$RELATIVE_SEARCH_PATH     
+            [String]$RELATIVE_SEARCH_PATH
         )
         $global:PIP_RELATIVE_SEARCH_PATH=$RELATIVE_SEARCH_PATH
     }
@@ -54,7 +56,7 @@ buildSetup: |
     ########################################################################################
     #
     # \brief: This function will install a pip package and all its dependencies with or
-    #         without external internet access (depends on bob  environment variable 
+    #         without external internet access (depends on bob  environment variable
     #         PYTHON_PYPI_MIRROR and if the releative search path is valid).
     #
     #
@@ -70,9 +72,9 @@ buildSetup: |
         Param(
             # mandatory
             [Parameter(Position = 0)]
-            [String]$PIP_PACKAGE      
+            [String]$PIP_PACKAGE
         )
-        
+
         $ARGS = __selectSource
 
         if([string]::IsNullOrWhiteSpace(${ARGS}))
@@ -98,7 +100,7 @@ buildSetup: |
                 --ignore-installed `
                 $_OPTIONS
         }
-        
+
         __append2PythpnPath
 
     }
@@ -106,7 +108,7 @@ buildSetup: |
     ########################################################################################
     #
     # \brief: This function will install a list of pip packages and all its dependencies
-    #         with or without external internet access (depends on bob  environment variable 
+    #         with or without external internet access (depends on bob  environment variable
     #         PYTHON_PYPI_MIRROR and if the releative search path is valid).
     #
     # \args[in]: REQUIREMENTS_FILE Path to the file containing the required pip packages
@@ -159,8 +161,8 @@ buildSetup: |
 
     ########################################################################################
     #
-    # \brief: This function will install a pip package from a local path. All its dependencies 
-    #         will be downloaded with or without external internet access (depends on bob 
+    # \brief: This function will install a pip package from a local path. All its dependencies
+    #         will be downloaded with or without external internet access (depends on bob
     #         environment variable PYTHON_PYPI_MIRROR and if the releative search path is valid).
     #
     # \args[in]: PIP_PACKAGE pypi package to be installed or path to a local directory
@@ -180,8 +182,8 @@ buildSetup: |
             [Parameter(Position = 0)]
             [String]$PIP_PACKAGE,
             [Parameter(Position = 1)]
-            [String]$SRC_PATH          
-        )     
+            [String]$SRC_PATH
+        )
 
         $ARGS = __selectSource
 
@@ -195,7 +197,7 @@ buildSetup: |
         }
 
         $_OPTIONS = $($ARGS | select)
-        
+
         # because pip creates a build directory in the sources
         if(Test-Path src)
         {
@@ -217,10 +219,10 @@ buildSetup: |
                 --no-cache-dir `
                 --ignore-installed `
                 $_OPTIONS
-        }        
+        }
 
         __append2PythpnPath
-    }    
+    }
 
 packageSetup: |
     $BUILD_DIR="$($args[0])"

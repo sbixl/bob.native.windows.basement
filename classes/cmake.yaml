@@ -40,7 +40,9 @@ buildScript: |
         set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
         set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
         set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-        set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)' -f "$CMAKE_SYSTEM_NAME", "${Env:CC}", "${Env:CXX}" | Out-File -encoding utf8 ${PWD}\toolchain.cmake
+        set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)' -f "$CMAKE_SYSTEM_NAME",
+                                                        "${Env:CC}",
+                                                        "${Env:CXX}" | Out-File -encoding utf8 ${PWD}\toolchain.cmake
 
         $CMAKE_TOOLCHAIN_FILE="${PWD}/toolchain.cmake"
     }

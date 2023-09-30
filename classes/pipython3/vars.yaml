@@ -31,5 +31,4 @@ buildVars: [PROCESSOR_ARCHITECTURE]
 buildSetup: *ref
 
 packageTools: [python3]
-packageVars: [PROCESSOR_ARCHITECTURE]
-packageSetup: *ref
+packageVars: [PROCESSOR_ARCHITECTURE]packageSetup: *ref
