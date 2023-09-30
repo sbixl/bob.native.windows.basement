@@ -1,20 +1,23 @@
+metaEnvironment:
+    PKG_VERSION: "1.2023.7"
+
+depends:
+    - base::openjdk
+
 checkoutSCM:
     scm: url
-    url: ${SOURCEFORGE_MIRROR}/projects/plantuml/files/1.2023.7/plantuml-jar-mit-1.2023.7.zip
+    url: ${SOURCEFORGE_MIRROR}/projects/plantuml/files/${PKG_VERSION}/plantuml-jar-mit-${PKG_VERSION}.zip
     digestSHA256: "db20262e8ca4516286398085d531e4773305e3391cd1845aff8c588e2ee6825b"
     dir: plantuml
     sslVerify: False
     extract: no
 
-depends:
-    - devel::openjdk
-
 buildScript: |
     # create a symlink to avoid wasting memory
     $ArchiveName = $(Get-ChildItem "$($args[0])/plantuml" -File '*.zip')
-    New-Item -ItemType SymbolicLink -Path "plantuml.zip"  -Target "$($args[0])/plantuml/$ArchiveName" >$null
+    New-Item -ItemType SymbolicLink -Force -Path "plantuml.zip"  -Target "$($args[0])/plantuml/$ArchiveName" >$null
 
-packageTools: [7z]
+packageToolsWeak: [7z]
 packageScript: |
     $ArchivPath = "$($args[0])"
     mkdir -p usr/bin > $null
