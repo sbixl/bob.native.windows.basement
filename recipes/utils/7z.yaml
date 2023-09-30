@@ -12,7 +12,7 @@ checkoutSCM:
     url: ${GITHUB_MIRROR}/kornelski/7z/archive/${PKG_VERSION}.zip
     digestSHA1: 5e62173d6189611341e9aebe004b6cd063ef1069
 
-checkoutVars: [ PKG_VERSION ]
+checkoutVars: [PKG_VERSION]
 checkoutDeterministic: True
 checkoutScript: |
     pushd 7z-${Env:PKG_VERSION}
@@ -27,7 +27,7 @@ checkoutScript: |
         Check-Command { git add -A }
         Check-Command { git commit -m "added for patching" }
     }
-    
+
     # It seems to be there is a bug in the Microsoft Windows 10 SDK
     # version 10.0.20348.0, in the MAPI subsystem. Because we only
     # use the command line tool, disabling the MAPI functionality
@@ -35,7 +35,7 @@ checkoutScript: |
     patchApply $<<7z/0001-bugfix-win-10-sdk-10-0-20348-0-issue.patch>>
     popd
 
-buildVars: [ CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION ]
+buildVars: [CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION]
 buildScript: |
     mkdir -Force build >$null
     cp -Force -r "$($args[0])\7z-${Env:PKG_VERSION}\*" build

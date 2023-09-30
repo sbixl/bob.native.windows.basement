@@ -27,8 +27,8 @@ depends:
     # link libxml2 to make lld-link not require mt.exe on Windows
     - devel::host::clang-libxml2
 
-checkoutTools: [ 7z ]
-checkoutVars: [ PKG_VERSION ]
+checkoutTools: [7z]
+checkoutVars: [PKG_VERSION]
 checkoutDeterministic: True
 checkoutScript: |
      pushd llvm
@@ -39,7 +39,7 @@ checkoutScript: |
      popd
 
 buildToolsWeak: [cmake]
-buildVars: [ LLVM_TARGETS, LLVM_PROJECTS, CFLAGS, CXXFLAGS ]
+buildVars: [LLVM_TARGETS, LLVM_PROJECTS, CFLAGS, CXXFLAGS]
 buildScript: |
     # Attention: While building Clang within a CI environment, the absolute paths used on Jenkins
     # are longer than for a local build. For this reason, the entire source directory is copied to
@@ -141,7 +141,7 @@ multiPackage:
                 name: devel::host::clang-bootstrap
                 use: [tools]
 
-        buildTools: [ clang-bootstrap, target-toolchain ]
+        buildTools: [clang-bootstrap, target-toolchain]
         buildScript: |
             $archtable = @{
                 "x64"   = "-m64";

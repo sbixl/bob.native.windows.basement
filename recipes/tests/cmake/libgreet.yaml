@@ -4,7 +4,7 @@ depends:
     - tests::cmake::libholler-dev
     - use: []
       depends:
-        - tests::cmake::libholler-tgt
+          - tests::cmake::libholler-tgt
 
 checkoutSCM:
     scm: import
@@ -18,8 +18,8 @@ multiPackage:
     dev:
         packageScript: |
            cmakePackageDev
-        provideDeps: [ "*-dev" ]
+        provideDeps: ["*-dev"]
     tgt:
         packageScript: |
            cmakePackageTgt
-        provideDeps: [ "*-tgt" ]
+        provideDeps: ["*-tgt"]

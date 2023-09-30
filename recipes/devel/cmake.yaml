@@ -20,13 +20,13 @@ multiPackage:
         inherit: [cmake]
 
         depends:
-        - if: !expr |
-            "${USE_CLANG_AS_HOST_TOOLCHAIN}" == "False"
-          depends:
-            - name: devel::ninja-bootstrap
+            - if: !expr |
+                "${USE_CLANG_AS_HOST_TOOLCHAIN}" == "False"
+              depends:
+                  - name: devel::ninja-bootstrap
+                    use: [tools]
+            - name: devel::cmake-bootstrap
               use: [tools]
-        - name: devel::cmake-bootstrap
-          use: [tools]
 
         buildVars: [PKG_VERSION]
         buildScript: |
@@ -45,7 +45,7 @@ multiPackage:
             - name: devel::ninja-bootstrap
               use: [tools]
 
-        buildVars: [ PKG_VERSION ]
+        buildVars: [PKG_VERSION]
         buildScript: |
 
             # Append the path to the prebuild cmake binary

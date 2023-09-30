@@ -1,4 +1,4 @@
-inherit: [ "basement::rootrecipe", "python3" ]
+inherit: ["basement::rootrecipe", "python3"]
 
 checkoutSCM:
     scm: import
@@ -13,7 +13,7 @@ depends:
       forward: True
     - name: devel::plantuml
       use: [tools]
-      forward: True      
+      forward: True
 
 buildTools: [sphinx, java, plantuml]
 buildScript: |
@@ -40,7 +40,7 @@ buildScript: |
     ###################################################################################################
 
     $env:PLANTUML_PATH = "$($BOB_TOOL_PATHS["plantuml"])"
-    
+
     Write-Host "Checking Java version required for PlantUML plugin..."
     Check-Command {
         java -version
@@ -72,7 +72,7 @@ packageScript: |
 
     mkdir -Force -p doc >$null
 
-    cp -Path $BUILD_DIRECTORY\sphinx -Destination $PWD\doc -Recurse    
+    cp -Path $BUILD_DIRECTORY\sphinx -Destination $PWD\doc -Recurse
 
     # clean-up (remove temporary files)
     pushd doc\sphinx

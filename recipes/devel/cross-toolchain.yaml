@@ -1,6 +1,6 @@
 shared: True
 
-buildVars: [ AUTOCONF_TARGET ]
+buildVars: [AUTOCONF_TARGET]
 buildScript: |
     rm -r -Force *
     cp -r "$($args | select -skip 1)/*" .
@@ -58,6 +58,7 @@ multiPackage:
                     LDFLAGS:    "-Wl,-O1 -Wl,--hash-style=gnu"
 
         packageVars: [AUTOCONF_TARGET, ARCH]
+        # yamllint disable rule:line-length
         packageScript: |
 
             # get version number
@@ -125,6 +126,7 @@ multiPackage:
                 - usr\lib\gcc\{1}\{2}\include' -f "${Env:ARCH}", "${Env:AUTOCONF_TARGET}", "${version}" | Out-File -encoding ASCII toolchain.cfg
             popd
 
+        # yamllint enable rule:line-length
         multiPackage:
 
             # ARMv7 bare metal toolchain

@@ -1,4 +1,4 @@
-inherit: [ "basement::rootrecipe", python3 ]
+inherit: ["basement::rootrecipe", python3]
 
 depends:
     - name: tests::python::generator

@@ -71,8 +71,8 @@ checkoutSCM:
         extract: no
         dir: deps/tcltk
 
-checkoutTools: [ 7z ]
-checkoutVars: [ PYTHON_VERSION, PIP_VERSION, SETUPTOOLS_VERSION, WHEEL_VERSION, GET_PIP_VERSION ]
+checkoutTools: [7z]
+checkoutVars: [PYTHON_VERSION, PIP_VERSION, SETUPTOOLS_VERSION, WHEEL_VERSION, GET_PIP_VERSION]
 checkoutDeterministic: True
 checkoutScript: |
     pushd python
@@ -124,7 +124,7 @@ buildScript: |
         Rename-Item cpython-bin-deps-$DEP-$VER $DEP-$VER
         popd
     }
-    
+
     ########################################################################
     # Build Python
     ########################################################################
@@ -155,14 +155,14 @@ buildScript: |
     cp -Force -r src/Lib/* install/Lib/
     cp -Force -r src/Include/* install/usr/include/
     cp -Include @("*.h", "*/") -Force -r src/PC/* install/usr/include/
-    
+
     # install pip, setuptools and wheel into the current environment
     ./install/usr/bin/python.exe $SRC_PATH/get-pip/get-pip-${Env:GET_PIP_VERSION}/public/get-pip.py `
             "pip == ${Env:PIP_VERSION}" `
             "setuptools == ${Env:SETUPTOOLS_VERSION}" `
             "wheel == ${Env:WHEEL_VERSION}" `
             --root "$PWD/install" `
-            --prefix usr   
+            --prefix usr
 
 packageScript: |
     cp -Force -r "$($args[0])/install/*" .
@@ -171,9 +171,8 @@ provideTools:
     python3:
         path: usr/bin
         # because we do not use the default stdLib directory "lib"
-        libs: [ "usr/lib" ]
+        libs: ["usr/lib"]
         netAccess: True
         environment:
             # the python platform library require this enviroment variable
             PROCESSOR_ARCHITECTURE: "${PROCESSOR_ARCHITECTURE}"
-            

@@ -22,4 +22,4 @@ packageScript: |
 
 provideTools:
     plantuml:
-        path: "usr/bin"    
+        path: "usr/bin"

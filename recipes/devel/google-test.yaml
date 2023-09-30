@@ -16,7 +16,7 @@ buildScript: |
 
 packageScript: |
     cmakePackageTgt
-    
+
     # This is a ugly patch using versions of googletest > 1.10.0 in combination
     # with the self build clang compiler. In case google test enables the
     # INTERFACE_COMPILE_FEATURES for cxx_std_14 or cxx_std_11, CMake will fail

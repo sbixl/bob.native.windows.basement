@@ -11,9 +11,9 @@ packageScript: |
     echo "VS2019 VSVARSALL" > version.txt
 
 # This fingerprintScript checks if the 'native' host toolchain is installed with
-# the correct tools and versions on the host. It will output nothing but will 
+# the correct tools and versions on the host. It will output nothing but will
 # fail if the host does not have installed the correct versions and tools.
-fingerprintVars: [VC_ARCH, VC_VERSION, VC_WIN_SDK_VERSION] 
+fingerprintVars: [VC_ARCH, VC_VERSION, VC_WIN_SDK_VERSION]
 fingerprintIf: "$(eq,${ENABLE_NATIVE_TOOLCHAIN_FINGERPRINTING},True)"
 fingerprintScriptPwsh: |
     $VSWHERE_TOOL = "${Env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -26,7 +26,7 @@ fingerprintScriptPwsh: |
     if(-Not (Test-Path $VSWHERE_TOOL))
     {
         Write-Host "Could not find vswhere.exe on the HOST machine!"
-        throw "Aborting..."    
+        throw "Aborting..."
     }
 
     # get the root path to the visual studio build tools
@@ -36,20 +36,20 @@ fingerprintScriptPwsh: |
     {
         Write-Host "No Visual Studio Buildtools 2019 installed on the HOST machine!"
         throw "Aborting..."
-        
+
     }
 
-    # Visual Studio Buildtools 2019 available, now check the architecture, version and Windows SDK.    
+    # Visual Studio Buildtools 2019 available, now check the architecture, version and Windows SDK.
     $VCVARSALL_BATCH = "$VS_BUILD_TOOLS\VC\Auxiliary\Build\vcvarsall.bat"
-    
-    $VCVARSALL_BATCH_ARGS = "${Env:VC_ARCH}", 
-                            "${Env:VC_WIN_SDK_VERSION}", 
+
+    $VCVARSALL_BATCH_ARGS = "${Env:VC_ARCH}",
+                            "${Env:VC_WIN_SDK_VERSION}",
                             "-vcvars_ver=${Env:VC_VERSION}"
-    
+
     if(-Not (Test-PAth $VCVARSALL_BATCH))
     {
         Write-Host "Could not find vcvarsall.bat!"
-        throw "Aborting..." 
+        throw "Aborting..."
     }
 
     $VCVARSALL_BATCH_RETURN = & $VCVARSALL_BATCH $VCVARSALL_BATCH_ARGS | Out-String
@@ -81,7 +81,7 @@ provideTools:
 
 provideVars:
     PROCESSOR_ARCHITECTURE: "$(vsvars2019,PROCESSOR_ARCHITECTURE,$VC_ARCH,$VC_WIN_SDK_VERSION,-vcvars_ver=$VC_VERSION)"
-    VCToolsInstallDir: "$(vsvars2019,VCTOOLSINSTALLDIR,$VC_ARCH,$VC_WIN_SDK_VERSION,-vcvars_ver=$VC_VERSION)"       
+    VCToolsInstallDir: "$(vsvars2019,VCTOOLSINSTALLDIR,$VC_ARCH,$VC_WIN_SDK_VERSION,-vcvars_ver=$VC_VERSION)"
 
 multiPackage:
     vc142:
@@ -93,8 +93,7 @@ multiPackage:
             amd64:
                 privateEnvironment:
                     VC_ARCH: "amd64"
-   
+
             x86:
                 privateEnvironment:
                     VC_ARCH: "x86"
-                    
