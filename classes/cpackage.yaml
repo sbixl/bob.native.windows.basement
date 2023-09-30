@@ -27,7 +27,7 @@ buildScript: |
     # Get desired library type: "static", "shared" or "both".
     #
     # By default shared libraries are built when cross-compiling and static
-    # libraries on host builds. This can be overridded by setting BASEMENT_LIBS
+    # libraries on host builds. This can be overridden by setting BASEMENT_LIBS
     # to "static", "shared" or "both".
     function cpackageLibraryType
     {
