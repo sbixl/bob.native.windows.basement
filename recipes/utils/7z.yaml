@@ -1,16 +1,28 @@
 inherit: [cpackage, install, patch]
 
 metaEnvironment:
-    PKG_VERSION: "22.00"
+    PKG_VERSION: "23.01"
 
 depends:
     - name: devel::vs2019-toolchain-vc142-amd64
       use: [environment, tools]
 
 checkoutSCM:
-    scm: url
-    url: ${GITHUB_MIRROR}/kornelski/7z/archive/${PKG_VERSION}.zip
-    digestSHA1: 5e62173d6189611341e9aebe004b6cd063ef1069
+    -
+        scm: git
+        url: ${GITHUB_MIRROR}/mcmilk/7-Zip.git
+        commit: 826145b86107fc0a778ac673348226db180e4532
+        if: !expr |
+                "${GITHUB_MIRROR}" == "https://github.com"
+    -
+        # there are no archives available on GitHub so we must prepare one
+        # and download this archive instep of mirroring the GitHub repository
+        # into our internal GitLab.
+        scm: url
+        url: ${GITHUB_MIRROR}/mcmilk/7z-${PKG_VERSION}.zip
+        digestSHA256: 4c193deda63ef8e813746b78f73a337c983cc07170b533b29dfcca53d43b40ee
+        if: !expr |
+                "${GITHUB_MIRROR}" != "https://github.com"
 
 checkoutVars: [PKG_VERSION]
 checkoutDeterministic: True
@@ -24,15 +36,19 @@ checkoutScript: |
 buildVars: [CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION]
 buildScript: |
     mkdir -Force build >$null
-    cp -Force -r "$($args[0])\7z-${Env:PKG_VERSION}\*" build
+    cp -Force -r "$($args[0])\*" build
 
-    pushd "build\CPP\7zip"
-    Check-Command { nmake NEW_COMPILER=1 MY_STATIC_LINK=1 }
+    pushd "build\CPP\7zip\Bundles\Format7zF"
+    Check-Command { nmake }
+    popd
+
+    pushd "build\CPP\7zip\UI\Console"
+    Check-Command { nmake }
     popd
 
     mkdir -Force install\usr\bin >$null
-    cp build\CPP\7zip\Bundles\Alone\x64\7za.exe install\usr\bin
-    mv install\usr\bin\7za.exe install\usr\bin\7z.exe
+    cp build\CPP\7zip\UI\Console\x64\7z.exe install\usr\bin
+    cp build\CPP\7zip\Bundles\Format7zF\x64\7z.dll install\usr\bin
 
 packageScript: |
     InstallPackageTgt "$($args[0])\install"

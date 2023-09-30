@@ -1,46 +1,36 @@
 diff --git a/CPP/7zip/UI/Common/Update.cpp b/CPP/7zip/UI/Common/Update.cpp
-index 042991d..4c71053 100644
+index 92c03352..c8834571 100644
 --- a/CPP/7zip/UI/Common/Update.cpp
 +++ b/CPP/7zip/UI/Common/Update.cpp
-@@ -1161,10 +1161,12 @@ static HRESULT EnumerateInArchiveItems(
+@@ -1027,6 +1027,7 @@ static HRESULT EnumerateInArchiveItems(
    return S_OK;
  }
  
 +#if 0
  #if defined(_WIN32) && !defined(UNDER_CE)
  
+ #if defined(__MINGW32__) || defined(__MINGW64__)
+@@ -1034,6 +1035,7 @@ static HRESULT EnumerateInArchiveItems(
+ #else
  #include <MAPI.h>
- 
-+#endif
  #endif
++#endif
  
- HRESULT UpdateArchive(
-@@ -1426,9 +1428,11 @@ HRESULT UpdateArchive(
+ extern "C" {
+ 
+@@ -1354,9 +1356,11 @@ HRESULT UpdateArchive(
  
        dirItems.SymLinks = options.SymLinks.Val;
  
-+      #if 0
++	  #if 0
        #if defined(_WIN32) && !defined(UNDER_CE)
        dirItems.ReadSecure = options.NtSecurity.Val;
        #endif
-+      #endif
++	  #endif
  
        dirItems.ScanAltStreams = options.AltStreams.Val;
        dirItems.ExcludeDirItems = censor.ExcludeDirItems;
-@@ -1475,10 +1479,12 @@ HRESULT UpdateArchive(
-             parentDirItem_Ptr = &parentDirItem;
- 
-             int secureIndex = -1;
-+            #if 0
-             #if defined(_WIN32) && !defined(UNDER_CE)
-             if (options.NtSecurity.Val)
-               dirItems.AddSecurityItem(prefix, secureIndex);
-             #endif
-+            #endif
-             parentDirItem.SecureIndex = secureIndex;
-           }
-       }
-@@ -1690,7 +1696,7 @@ HRESULT UpdateArchive(
+@@ -1624,7 +1628,7 @@ HRESULT UpdateArchive(
      }
    }
  
@@ -49,8 +39,8 @@ index 042991d..4c71053 100644
    #if defined(_WIN32) && !defined(UNDER_CE)
    
    if (options.EMailMode)
-@@ -1781,6 +1787,7 @@ HRESULT UpdateArchive(
-     }
+@@ -1774,6 +1778,7 @@ HRESULT UpdateArchive(
+    }
    }
    
 +  #endif
