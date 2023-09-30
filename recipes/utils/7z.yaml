@@ -15,25 +15,11 @@ checkoutSCM:
 checkoutVars: [PKG_VERSION]
 checkoutDeterministic: True
 checkoutScript: |
-    pushd 7z-${Env:PKG_VERSION}
-    if( Test-Path .git)
-    {
-        # revert patch in order to apply it again
-        Check-Command { git clean -f }
-    }
-    else
-    {
-        Check-Command { git init }
-        Check-Command { git add -A }
-        Check-Command { git commit -m "added for patching" }
-    }
-
     # It seems to be there is a bug in the Microsoft Windows 10 SDK
     # version 10.0.20348.0, in the MAPI subsystem. Because we only
     # use the command line tool, disabling the MAPI functionality
     # does not effect use. The UI may not work as expected.
-    patchApply $<<7z/0001-bugfix-win-10-sdk-10-0-20348-0-issue.patch>>
-    popd
+    patchApplySeries $<<7z/*.patch>>
 
 buildVars: [CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION]
 buildScript: |

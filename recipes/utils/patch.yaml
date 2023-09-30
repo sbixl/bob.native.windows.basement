@@ -1,0 +1,19 @@
+shared: True
+
+# Because there is no suitable stand-alone package of the native windows support GNU Patch tool we
+# reuse the one which comes with the Tool Windows For Git. This tool is a mandatory tool which
+# must be installed on every developer and CI host machine. The plugin 'patch' stored under
+# 'plugins' is a string parser which searches the patch.exe executable in the root directory of
+# Windows For Git and returns the path to it if found.
+
+packageScript: |
+    echo "patch" > version.txt
+
+provideTools:
+    patch:
+        path: "just_a_placeholder"
+        environment:
+            PATCH_PATH: "$(patch)"
+
+provideVars:
+    PATCH_PATH: "$(patch)"

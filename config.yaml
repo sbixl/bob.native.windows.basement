@@ -5,3 +5,4 @@ plugins:
     - multiarch
     - vsenv
     - msbuild
+    - patch
