@@ -2,7 +2,7 @@ metaEnvironment:
     PKG_VERSION: "1.2023.7"
 
 depends:
-    - base::openjdk
+    - devel::openjdk
 
 checkoutSCM:
     scm: url
