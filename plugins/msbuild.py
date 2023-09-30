@@ -17,7 +17,7 @@ def msbuild(args, **options):
                                 "Microsoft Visual Studio/Installer/vswhere.exe"),
                 '-find', 'MSBuild\**\Bin\MSBuild.exe',
                 '-version', '[16.0,17.0)',
-                '-products', '*',
+                '-products', 'Microsoft.VisualStudio.Product.BuildTools',
                 '-requires', 'Microsoft.Component.MSBuild')
 
         path = subprocess.check_output(vswargs, universal_newlines=True).strip()
