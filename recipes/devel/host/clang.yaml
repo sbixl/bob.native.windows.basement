@@ -10,7 +10,7 @@ checkoutSCM:
         digestSHA256: ce5e71081d17ce9e86d7cbcfa28c4b04b9300f8fb7e78422b1feb6bc52c3028e
         extract: no
         dir: llvm
-    # Use rpmalloc. For faster ThinLTO linking.
+    # Use rpmalloc, for faster ThinLTO linking.
     -
         scm: url
         url: ${GITHUB_MIRROR}/mjansson/rpmalloc/archive/refs/tags/1.4.4.zip
@@ -18,16 +18,12 @@ checkoutSCM:
         dir: rpmalloc
 
 depends:
-    - name: devel::vs2019-toolchain-vc142-amd64
-      use: [environment, tools]
-    - name: devel::ninja-bootstrap
-      use: [tools]
-    - name: devel::cmake-bootstrap
-      use: [tools]
     # link libxml2 to make lld-link not require mt.exe on Windows
     - devel::host::clang-libxml2
+    - name: devel::vs2019-toolchain-vc142-amd64
+      use: [environment, tools]
 
-checkoutTools: [7z]
+checkoutToolsWeak: [7z]
 checkoutVars: [PKG_VERSION]
 checkoutDeterministic: True
 checkoutScript: |
@@ -132,7 +128,7 @@ multiPackage:
     native:
         environment:
             LLVM_TARGETS:  "X86"
-            # while building in a CI-Environement, it is not possible to build the project
+            # while building in a CI-Environment, it is not possible to build the project
             # clang-tools-extra because the paths will get to long and the build fails!
             LLVM_PROJECTS: "clang;compiler-rt;lld"
 

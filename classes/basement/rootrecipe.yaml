@@ -10,30 +10,19 @@ depends:
           - name: utils::7z
             use: [tools]
             forward: True
+          - name: devel::ninja
+            use: [tools]
+            forward: True
+          - name: devel::cmake
+            use: [tools]
+            forward: True
           - name: python::pipython3
             use: [tools]
             forward: True
-          - if: !expr |
-              "${USE_CLANG_AS_HOST_TOOLCHAIN}" == "True"
-            depends:
-                - name: devel::host-toolchain
-                  use: [environment, tools]
-                  forward: True
-                - name: devel::ninja
-                  use: [tools]
-                  forward: True
-                - name: devel::cmake
-                  use: [tools]
-                  forward: True
-          - if: !expr |
-              "${USE_CLANG_AS_HOST_TOOLCHAIN}" == "False"
-            depends:
-                - name: devel::vs2019-toolchain-vc142-amd64
-                  use: [environment, tools]
-                  forward: True
-                - name: devel::ninja
-                  use: [tools]
-                  forward: True
-                - name: devel::cmake
-                  use: [tools]
-                  forward: True
+          # The general native host toolchain is the MSVC 2019 compiler.
+          # If required, the toolchain can be overwritten by the application
+          # in a upstream class or recipe. An example would be to use clang
+          # as host-toolchain for unit-testing.
+          - name: devel::vs2019-toolchain-vc142-amd64
+            use: [environment, tools]
+            forward: True

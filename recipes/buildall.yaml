@@ -6,6 +6,10 @@ depends:
     - devel::cross-toolchain-gcc-aarch64-none-eabi
     - devel::cross-toolchain-gcc-aarch64-linux-gnu
     - devel::cross-toolchain-llvm-embedded-toolchain-for-arm
+    - if: !expr |
+        "${ENABLE_NATIVE_CLANG_HOST_TOOLCHAIN}" == "True"
+      depends:
+          - devel::host-toolchain
     - name: devel::doxygen
       use: [tools]
       forward: True
@@ -15,16 +19,17 @@ depends:
     - name: devel::sphinx
       use: [tools]
       forward: True
-    - devel::google-test
 
 buildScript: |
     $null
 
 packageTools:
+    # general tools
     - 7z
     - ninja
     - cmake
     - python3
+    # For Sphinx and Doxygen documentation
     - doxygen
     - graphviz
     - sphinx

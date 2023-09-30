@@ -20,7 +20,7 @@ environment:
     SOURCEFORGE_MIRROR:   "https://sourceforge.net"
 
     # This is for local (user) specific usage. Let this environment variable
-    # point to you internal PIPY Mirror storage in order to install pip packages
+    # point to your internal PiPy Mirror storage in order to install pip packages
     # without the usage of external internet access.
     #
     # example:
@@ -39,7 +39,7 @@ environment:
     # they are required to build the clang toolchain. After building the clang toolchain, the
     # clang toolchain earns the role of the master host toolchain.
     # If set to "False" the MSVC compiler becomes the master host toolchain.
-    USE_CLANG_AS_HOST_TOOLCHAIN: "True"
+    ENABLE_NATIVE_CLANG_HOST_TOOLCHAIN: "False"
 
 include:
     # optional include for user specific settings.

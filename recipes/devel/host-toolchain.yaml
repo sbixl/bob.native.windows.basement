@@ -6,6 +6,10 @@ environment:
 depends:
     # build the native clang compiler
     - devel::host::clang-native
+    # mandatory dependency (must be changed if clang is build with a different MSVC toolset)
+    - name: devel::vs2019-toolchain-vc142-amd64
+      use: [environment]
+      forward: True
 
 buildScript: |
     cp -r -Force "$($BOB_DEP_PATHS["devel::host::clang-native"])\*" .
