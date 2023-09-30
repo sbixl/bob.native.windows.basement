@@ -1,7 +1,7 @@
 inherit: [cmake]
 
 metaEnvironment:
-    PKG_VERSION: "1.13.0"
+    PKG_VERSION: "1.14.0"
 
 checkoutSCM:
     scm: url
@@ -43,5 +43,9 @@ packageScript: |
     'defines: []
 
     publicHeader:
-        - usr\include' | Out-File -encoding ASCII package.cfg
+        - googletest-{0}\googlemock\include
+        - googletest-{0}\googletest\include
+    privateHeader:
+        - googletest-{0}\googlemock\src
+        - googletest-{0}\googletest\src' -f "${Env:PKG_VERSION}" | Out-File -encoding ASCII package.cfg
     popd
