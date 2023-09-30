@@ -14,17 +14,21 @@ checkoutSCM:
 
 buildVars: [PKG_VERSION]
 buildScript: |
-    $SRC_PATH="$($args[0])\winflexbison-${Env:PKG_VERSION}"
+    # bison by default creates an "bin" directory in the source directory which will
+    # influence the build-id of bob, which means a flex build is triggered twice.
+    # This is hardcoded in the CMakeLists.txt and can't modify from the outside.
 
-    cmakeBuild $SRC_PATH
+    cp -r -Force "$($args[0])\winflexbison-${Env:PKG_VERSION}" src
+    $SRC_PATH="..\src"
+
+    cmakeBuild $SRC_PATH `
+               -DCMAKE_BUILD_TYPE=Release
 
 packageScript: |
     cmakePackageBin
 
     rm -r usr/custom_build_rules
     rm usr/win_flex.exe
-    rm usr/win_flex.ilk
-    rm usr/win_flex.pdb
     rm usr/FlexLexer.h
     mv usr/win_bison.exe usr/bison.exe
 
