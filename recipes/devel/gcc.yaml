@@ -37,9 +37,12 @@ buildVars: [AUTOCONF_TARGET]
 buildScript: |
     # create a symlink to avoid wasting memory
     $ArchiveName = $(Get-ChildItem "$($args[0])/${Env:AUTOCONF_TARGET}" -File '*.zip')
-    New-Item -ItemType SymbolicLink -Path "${Env:AUTOCONF_TARGET}.zip"  -Target "$($args[0])/${Env:AUTOCONF_TARGET}/$ArchiveName" >$null
+    New-Item -ItemType SymbolicLink `
+             -Force `
+             -Path "${Env:AUTOCONF_TARGET}.zip" `
+             -Target "$($args[0])/${Env:AUTOCONF_TARGET}/$ArchiveName" >$null
 
-packageTools: [7z]
+packageToolsWeak: [7z]
 packageScript: |
     $ArchivPath = "$($args[0])"
     mkdir usr > $null
