@@ -1,6 +1,9 @@
+metaEnvironment:
+    PKG_VERSION: "20.0.2"
+
 checkoutSCM:
     scm: url
-    url: ${JAVA_MIRROR}/java/GA/jdk20.0.2/6e380f22cbe7469fa75fb448bd903d8e/9/GPL/openjdk-20.0.2_windows-x64_bin.zip
+    url: ${JAVA_MIRROR}/java/GA/jdk${PKG_VERSION}/6e380f22cbe7469fa75fb448bd903d8e/9/GPL/openjdk-${PKG_VERSION}_windows-x64_bin.zip
     digestSHA256: "7e5870fd2e19b87cbd1981c4ff7203897384c2eb104977f40ce4951b40ab433e"
     dir: openjdk
     extract: no
@@ -8,10 +11,10 @@ checkoutSCM:
 buildScript: |
     # create a symlink to avoid wasting memory
     $ArchiveName = $(Get-ChildItem "$($args[0])/openjdk" -File '*.zip')
-    New-Item -ItemType SymbolicLink -Path "openjdk.zip"  -Target "$($args[0])/openjdk/$ArchiveName" >$null
+    New-Item -ItemType SymbolicLink -Force -Path "openjdk.zip"  -Target "$($args[0])/openjdk/$ArchiveName" >$null
 
 
-packageTools: [7z]
+packageToolsWeak: [7z]
 packageScript: |
     $ArchivPath = "$($args[0])"
     mkdir usr > $null
