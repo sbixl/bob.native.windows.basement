@@ -41,6 +41,30 @@ def vsvars2019(args, **options):
                 if k == 'PATH' and isMSYS:
                     # convert to POSIX path to be mergeable
                     v = subprocess.check_output(["cygpath", "-u", "-p", v], universal_newlines=True).strip()
+                elif k == 'PATH':
+                    # Only append the VS specific parts of the PATH variable and not the paths
+                    # again which are already part of the SYSTEM/USER Path variable. If we will
+                    # not this, the paths appended by bob during build time will be overwritten
+                    # (first come first served) and some tool is picked up from the local file
+                    # system instead of the one provided by the recipes of bob (e.g. a different
+                    # python executable may be chosen in the build-step of a recipe)
+                    #
+                    #  Order in which the paths are stored in the PATH variable:
+                    #
+                    #      - VSENV_PATHS (the paths we gather in this script)
+                    #      - BOB_BATHS   (the paths bob will append during execution)
+                    #      - USER_PATHS  (if not provided by bob, use as last chance tools from the host)
+                    #
+                    system_paths = os.getenv('PATH').split(";")
+                    vsenv_paths = v.split(";")
+                    # rebuild the VSENV path variable
+                    v = ""
+                    for path in vsenv_paths:
+                        # do not append duplicates already stored in the PATH variable
+                        if path not in system_paths:
+                            if v != "":
+                                v += ";"
+                            v += path
                 env[k] = v
             cache[tag] = env
 
