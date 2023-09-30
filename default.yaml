@@ -29,9 +29,9 @@ environment:
     PYTHON_PYPI_MIRROR:   ""
 
     # This will enable/disable the finger-printing script of the vs2019 native toolchain.
-    # The variable should always set to True but can be changed to False during development 
-    # to speed up the build execution time because fingerprinting is executed every time a 
-    # build is triggered. 
+    # The variable should always set to True but can be changed to False during development
+    # to speed up the build execution time because fingerprinting is executed every time a
+    # build is triggered.
     ENABLE_NATIVE_TOOLCHAIN_FINGERPRINTING: "True"
 
     # This will enable/disable the clang host toolchain if required by the user. If set to
