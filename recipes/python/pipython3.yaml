@@ -1,4 +1,4 @@
-inherit: [patch, msbuild]
+inherit: [msbuild]
 
 metaEnvironment:
     PYTHON_VERSION:     "3.11.4"
