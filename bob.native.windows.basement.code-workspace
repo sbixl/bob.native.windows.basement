@@ -1,0 +1,45 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+        "cSpell.language": "en,de",
+        "cSpell.diagnosticLevel": "Hint",
+        "cSpell.enableFiletypes": ["yaml"],
+        "files.trimTrailingWhitespace": true,
+        "files.encoding": "utf8",
+        "files.exclude": {
+            "**/.git": true,
+            "**/.svn": true,
+            "**/.hg": true,
+            "dev/": true,
+            ".bob-*": true,
+            "projects": true,
+            "**/__pycache__": true,
+            "**/.ruff_cache": true,
+            "**/venv": true,
+        },
+		"[markdown]": {
+            "files.encoding": "utf8",
+            "files.trimTrailingWhitespace": true,
+            "editor.insertSpaces": true,
+            "editor.tabSize": 4,
+			"editor.wordWrap": "wordWrapColumn",
+			"editor.wordWrapColumn": 100,
+			"editor.rulers": [100]
+		},
+        "[yaml]": {
+            "files.encoding": "utf8",
+            "files.eol": "\r\n",
+            "files.trimTrailingWhitespace": true,
+            "editor.detectIndentation": false,
+            "editor.insertSpaces": true,
+            "editor.tabSize": 4,
+            "editor.autoIndent": "none",
+            "diffEditor.ignoreTrimWhitespace": false,
+        },
+		"search.exclude": {"**/.git": true, "**/.svn": true, "**/.hg": true},
+	}
+}
