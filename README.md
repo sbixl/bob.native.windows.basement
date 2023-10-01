@@ -3,15 +3,15 @@
 Most of the recipes and classes included in this project were widely adopted from the
 [basement project](https://github.com/BobBuildTool/basement). But since the project
 currently only supports bash as shell script language, this is a attempt to introduce
-the PowerShell script language to be used on native windows without MSYS. For this the
+the PowerShell script language to be used on native windows without MSYS. For this, the
 recipes and classes were ported from bash to PowerShell as far as possible.
 
 # Native Windows Basement
 
-These basement project is a collection of useful recipes and classes that can be
-used by other projects. Most importantly it provides standard classes to handle
-common build systems and other standard tasks. Optional a native host clang
-and common GCC as well as an embedded LLVM toolchain are ready-to-use.
+These basement project is a collection of useful recipes and classes that can be used by other
+projects. Most importantly it provides standard classes to handle common build systems and other
+standard tasks. Optional a native host clang and common GCC as well as an embedded LLVM toolchain
+are ready-to-use.
 
 # Prerequisites
 
@@ -36,9 +36,9 @@ and common GCC as well as an embedded LLVM toolchain are ready-to-use.
 
 There is the possibility to choose between two different host toolchains.
 
-By default, the MSVC 2019 compiler (vc142) is configured as host toolchain. If you want ot use
-clang as host toolchain you can switch to it by modifying the bob environment variable
-`USE_CLANG_AS_HOST_TOOLCHAIN` which is defined in the `default.yaml` located in the root
+By default, the MSVC 2019 compiler (vc142) is configured as host toolchain. If you want to use
+clang as host toolchain you can switch to it by modifying the environment variable
+`ENABLE_NATIVE_CLANG_HOST_TOOLCHAIN` which is defined in the `default.yaml` located in the root
 directory of this repository.
 
 ```yaml
@@ -47,26 +47,35 @@ directory of this repository.
     # they are required to build the clang toolchain. After building the clang toolchain, the
     # clang toolchain earns the role of the master host toolchain.
     # If set to "False" the MSVC compiler becomes the master host toolchain.
-    USE_CLANG_AS_HOST_TOOLCHAIN: "False"
+    ENABLE_NATIVE_CLANG_HOST_TOOLCHAIN: "False"
 ```
 
-While building the clang host toolchain, take care using a flat folder structure.
-Regardless of whether or not long paths are enabled, if the paths are too long, the
-build process of the clang compiler will fail as some paths could not be resolved,
-created or deleted. The best way is to clone the  repository e.g under "C:\Work"
-or something similar.
+While building the clang host toolchain, take care using a flat folder structure. Regardless of
+whether or not long paths are enabled, if the paths are too long, the build process of the clang
+compiler will fail as some paths could not be resolved, created or deleted. The best way is to
+clone the  repository e.g under "C:\Work" or something similar.
 
-Since there are currently no examples that attract this project as a layer you
-can clone the recipes and build them with Bob in development mode:
+Since there are currently no examples that attract this project as a layer you can clone the recipes and build them with Bob in development mode:
 
 ```shell
     git clone https://github.com/sbixl/bob.native.windows.basement.git
     cd bob.native.windows.basement
-    # building all packages with the native host toolchain (MSVC 2019 compiler)
+    # building all packages (native host toolchain is MSVC 2019 compiler)
     bob dev buildall
-    # OR building all packages using a self built clang host toolchain
-    bob dev buildall -DUSE_CLANG_AS_HOST_TOOLCHAIN=True
+    # OR building all packages including a self built clang host toolchain
+    bob dev buildall -DENABLE_NATIVE_CLANG_HOST_TOOLCHAIN=True
 ```
+
+---
+**NOTE**
+
+Building the clang host-toolchain is independent from the rest of the packages. Since it can take a
+long time to build the clang host-toolchain it should not affect other packages. The common use
+case is to use the clang host-toolchain for building unittest targets. if you don't want to use the
+clang host-toolchain then the other tools should be made available as soon as possible. This was
+not the case in older revision of this project.
+
+---
 
 Building the clang compiler can take some time, so have a bit of patience. It is recommended
 to build all packages on a Jenkins Node and uploading the artifacts to an binary archive.
@@ -107,24 +116,26 @@ the argument `--upload`, bob will automatically upload the artifacts to `D:\arch
 ```shell
 # The binary archive is empty, start building all packages and upload it to the binary archive
 bob dev buildall --upload
+# or with additional self built clang host-toolchain
+bob dev buildall -DENABLE_NATIVE_CLANG_HOST_TOOLCHAIN=True --upload
 ...
-Duration: 1:10:57.792153, 17 checkouts (0 overrides active), 28 packages built, 0 downloaded.
+Duration: 0:54:24.442231, 16 checkouts (0 overrides active), 27 packages built, 0 downloaded.
 ```
 
-As you can see building all packages needs approx. 1 hour and 11 minutes. Now lets check if the
-previous configured binary archive works:
+As you can see building all packages needs approx. one hour (without clang host-toolchain). Now
+lets check if the previous configured binary archive works:
 
 ```shell
 # cleanup-up project
 rm -r .\dev\
 rm .bob-*
-# build again all tools
+# "build" (download) again all packages
 bob dev buildall
 ...
-Duration: 0:07:34.162274, 0 checkouts (0 overrides active), 1 package built, 13 downloaded.
+Duration: 0:08:47.917908, 0 checkouts (0 overrides active), 1 package built, 12 downloaded.
 ```
 
-As you can see it is now about 17 times faster which is much more practicable. If you have
+As you can see it is now about six times faster which is much more practicable. If you have
 multiple workstations you want to work on you can share this binary archive between all
 workstations or team members. So everyone can download the pre-build packages from there. As
 long es the recipes as well as the input of the recipes did not change bob will always download
@@ -135,16 +146,22 @@ the basement layer. They act as smoke tests for this project.
 
 ```shell
     cd tests
-    bob dev tests::cmake::greeter-host
-    bob dev tests::cmake::greeter-cross
-    bob dev tests::python::test
-    bob dev tests::sphinx::doc
+    # use the default MSVC host-toolchain
+    bob dev tests::cmake::greeter-host -v
+    # use the clang host-toolchain
+    bob dev tests::cmake::greeter-host -DENABLE_NATIVE_CLANG_HOST_TOOLCHAIN=True -v
+    # crosscompile the same sources with the gcc-aarch64-linux-gnu cross-toolchain
+    bob dev tests::cmake::greeter-cross -v
+    # build a simple code generator example
+    bob dev tests::python::test -v
+    # build a simple sphinx documentation
+    bob dev tests::sphinx::doc -v
 ```
 
 # How to use
 
-First you need to add the `basement` layer to your project. To do so add a
-`layers` entry to `config.yaml`:
+First you need to add the `basement` layer to your project. To do so add a `layers` entry to
+`config.yaml`:
 
     bobMinimumVersion: "0.23.1"
     layers:
@@ -159,36 +176,42 @@ class in your root recipe:
 
     inherit: [ "basement::rootrecipe" ]
 
-This will make your recipe a root recipe. See the next chapter what tools
-and toolchains are readily available.
+This will make your recipe a root recipe. See the next chapter what tools and toolchains are
+readily available.
 
 # Provided tools and toolchains
 
 The following tools can be used by naming them in `{checkout,build,package}Tools`:
 
-* 7z
-* ninja
-* cmake
-* python3
+  * 7z
+  * ninja
+  * cmake
+  * python3
 
-Since windows does not have a native compiler by default, the msvc compiler must
-be installed. Independently of this, a native host clang compiler is build optional
-downstream as host toolchain. The clang compiler uses the gnu command line by default
-and not the msvc command line.
+The following tools are not available by default but can be attracted as a dependency (see the test
+examples for more information how to do):
 
-The following cross compiling toolchains are available pre-configured. If you need
-other targets you can depend on `devel::cross-toolchain` directly and configure it
+  * sphinx (including PlantUML plugin)
+  * doxygen
+  * google-test
+
+Since windows does not have a native compiler by default, the MSVC compiler must be installed.
+Independently of this, a native host clang compiler is build optional downstream as host toolchain.
+The clang compiler uses the gnu command line by default and not the msvc command line.
+
+The following cross compiling toolchains are available pre-configured. If you need other targets
+you can depend on `devel::cross-toolchain` directly and configure it
 as you like.
 
-* `devel::cross-toolchain-gcc-aarch64-linux-gnu`: ARMv8-A AArch64 Linux with glibc.
-* `devel::cross-toolchain-gcc-arm-linux-gnueabihf`: ARMv7-A Linux with glibc. Hard
-  floating point ABI.
-* `devel::cross-toolchain-gcc-arm-none-eabi`: 32-bit Arm Cortex-A,-M,-R bare metal toolchain with
-  newlib libc.
-* `devel::cross-toolchain-gcc-x86_64-linux-gnu`: x86_64 toolchain for Linux with glibc.
-* `devel::cross-toolchain-llvm-embedded-toolchain-for-arm`: 32-bit Arm Cortex-M bare metal toolchain with newlib libc.
+  * `devel::cross-toolchain-gcc-aarch64-linux-gnu`: ARMv8-A AArch64 Linux with glibc.
+  * `devel::cross-toolchain-gcc-arm-linux-gnueabihf`: ARMv7-A Linux with glibc. Hard
+    floating point ABI.
+  * `devel::cross-toolchain-gcc-arm-none-eabi`: 32-bit Arm Cortex-A,-M,-R bare metal toolchain with
+    newlib libc.
+  * `devel::cross-toolchain-gcc-x86_64-linux-gnu`: x86_64 toolchain for Linux with glibc.
+  * `devel::cross-toolchain-llvm-embedded-toolchain-for-arm`: 32-bit Arm Cortex-M bare metal toolchain with newlib libc.
 
-To use a cross compiling toolchain include it where needed via:
+To use a cross as well as the clang host-toolchain include it where needed via:
 
     depends:
         - name: <recipe name here>
@@ -197,32 +220,31 @@ To use a cross compiling toolchain include it where needed via:
 
 # Continuos Integration (Bob Jenkins support for native Windows)
 
-Recently it is possible to use bob in combination with Jenkins for Continuos
-Integration (CI) by still remaining under native windows. The basement project
-is ready for CI and can be build using distributed Jenkins-Nodes.
+Recently it is possible to use bob in combination with Jenkins for Continuos Integration (CI) by
+still remaining under native windows. The basement project is ready for CI and can be build using
+distributed Jenkins-Nodes.
 
-While setting up the CI infrastructure and especially the Jenkins-Nodes, the
-`JENKINS_HOME` environment variable should always set to a short path e.g
-`C:\data\jenkins_home` because otherwise the build of some artifacts (especially
-the host clang compiler) will fail due to path limitations under native windows!
+While setting up the CI infrastructure and especially the Jenkins-Nodes, the `JENKINS_HOME`
+environment variable should always set to a short path e.g `C:\data\jenkins_home` because otherwise
+the build of some artifacts (especially the host clang compiler) will fail due to path limitations
+under native windows!
 
-The following example briefly shows, how easy it is to configure the accordant
-Jenkins-Jobs with the use of the Bob-Jenkins-Interface. The option `-n windows`,
-will tell the Jenkins-Master to schedule the jobs only on build nodes which are
-tagged with the label **windows**.
+The following example briefly shows, how easy it is to configure the accordant Jenkins-Jobs with
+the use of the Bob-Jenkins-Interface. The option `-n windows`, will tell the Jenkins-Master to
+schedule the jobs only on build nodes which are tagged with the label **windows**.
 
 ```shell
     bob jenkins add local http://user@localhost:8080 --r buildall --host-platform win32 -n windows --upload
     bob jenkins set-options local --clean
+    bob jenkins set-options local --download
     bob jenkins set-options local -o jobs.update=lazy
     bob jenkins push local
 ```
 
-The option `-- upload` will tell the Jenkins to copy the build artifacts to a
-dedicated binary archiv. In my setup this is a simple nginx based HTTP
-server, located in the Jenkins-Master host device. In order to tell bob the
-location where the binary archive can be found, you have to add the
-following configuration to the `default.yaml`, `user.yaml` or `archive.yaml`:
+The option `-- upload` will tell the Jenkins to copy the build artifacts to a dedicated binary
+archiv. In my setup this is a simple nginx based HTTP server, located in the Jenkins-Master host
+device. In order to tell bob the location where the binary archive can be found, you have to add
+the following configuration to the `default.yaml`, `user.yaml` or `archive.yaml`:
 
     archive:
         -
@@ -246,9 +268,9 @@ artifact server unless it is expressly so desired.
 
 # Some words about performance
 
-Unfortunately the building process under windows is slower than under Linux. Especially
-the CMake configure step can take several seconds to finish. There are some conversations
-and issue about this but there seems to be no real solution yet.
+Unfortunately the building process under windows is slower than under Linux. Especially the CMake
+configure step can take several seconds to finish. There are some conversations and issue about
+this but there seems to be no real solution yet.
 
 Here are a few tips how to speed up the build process:
 
