@@ -18,7 +18,13 @@ packageScript: |
 
 multiPackage:
     host:
-        depends: &deps
+        depends:
+            - if: !expr |
+                "${ENABLE_NATIVE_CLANG_HOST_TOOLCHAIN}" == "True"
+              depends:
+                  - name: devel::host-toolchain
+                    use: [environment, tools]
+                    forward: True
             - tests::cmake::libgreet-dev
             - tests::cmake::libgreet-tgt
     cross:
@@ -28,4 +34,5 @@ multiPackage:
               name: devel::cross-toolchain-gcc-aarch64-linux-gnu
               use: [environment, tools]
               forward: True
-            - depends: *deps
+            - tests::cmake::libgreet-dev
+            - tests::cmake::libgreet-tgt
