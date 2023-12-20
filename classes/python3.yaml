@@ -224,6 +224,23 @@ buildSetup: |
         __append2PythpnPath
     }
 
+    function pipDownloadFromFile
+    {
+        Param(
+            # mandatory
+            [Parameter(Position = 0)]
+            [String]$REQUIREMENTS_FILE
+        )
+
+        mkdir -Force download >$null
+        Get-ChildItem download -Recurse | Remove-Item -Recurse
+
+        Check-Command {
+            python3 -m pip download -r $REQUIREMENTS_FILE `
+                -d download
+        }
+    }
+
 packageSetup: |
     $BUILD_DIR="$($args[0])"
     function installPythonModule
