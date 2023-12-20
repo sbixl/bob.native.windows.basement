@@ -1,11 +1,11 @@
 inherit: [msbuild]
 
 metaEnvironment:
-    PYTHON_VERSION:     "3.11.4"
-    GET_PIP_VERSION:    "23.1.2"
-    PIP_VERSION:        "23.1.2"
-    SETUPTOOLS_VERSION: "67.7.2"
-    WHEEL_VERSION:      "0.40.0"
+    PYTHON_VERSION:     "3.11.6"
+    GET_PIP_VERSION:    "23.3.1"
+    PIP_VERSION:        "23.3.1"
+    SETUPTOOLS_VERSION: "69.0.2"
+    WHEEL_VERSION:      "0.42.0"
 
 depends:
     - name: devel::vs2019-toolchain-vc142-amd64
@@ -18,13 +18,13 @@ checkoutSCM:
     -
         scm: url
         url: ${PYTHON_MIRROR}/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz
-        digestSHA256: 2f0e409df2ab57aa9fc4cbddfb976af44e4e55bf6f619eee6bc5c2297264a7f6
+        digestSHA256: 0fab78fa7f133f4f38210c6260d90d7c0d5c7198446419ce057ec7ac2e6f5f38
         extract: no
         dir: python
     -
         scm: url
         url: ${GITHUB_MIRROR}/pypa/get-pip/archive/refs/tags/${GET_PIP_VERSION}.zip
-        digestSHA256: ed147827ce5554674c481d89735e3a78248e89d725c34922c4bb339addcfe378
+        digestSHA256: 369b52b1140e22ecf05ff699124d565c5754dd156e9ba0d98c2dce8af167b73b
         dir: get-pip
     # Fetching external libraries...
     -
@@ -60,8 +60,8 @@ checkoutSCM:
         dir: deps/libffi
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/openssl-bin-1.1.1u.zip
-        digestSHA256: 2a2bad0324a381ff796381e8235b00a7f6b4fbf9ed950dc8805392c81195ecb7
+        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/openssl-bin-3.0.11.zip
+        digestSHA256: a7f00e8d7023ad8565087bd45520d736cd1211d77875f100c3cf232bea56db8f
         extract: no
         dir: deps/openssl-bin
     -
@@ -141,7 +141,7 @@ buildScript: |
     __addLib "xz"          "5.2.5"
     __addLib "zlib"        "1.2.13"
     __addBin "libffi"      "3.4.4"
-    __addBin "openssl-bin" "1.1.1u"
+    __addBin "openssl-bin" "3.0.11"
     __addBin "tcltk"       "8.6.12.1"
 
     Check-Command { src/PCbuild/build.bat -p x64 }
@@ -174,5 +174,5 @@ provideTools:
         libs: ["usr/lib"]
         netAccess: True
         environment:
-            # the python platform library require this enviroment variable
+            # the python platform library require this environment variable
             PROCESSOR_ARCHITECTURE: "${PROCESSOR_ARCHITECTURE}"
