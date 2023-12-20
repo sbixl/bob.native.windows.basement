@@ -4,7 +4,7 @@ metaEnvironment:
 checkoutSCM:
     scm: url
     url: ${GITHUB_MIRROR}/Kitware/ninja/archive/refs/tags/v${PKG_VERSION}.g95dee.kitware.jobserver-1.zip
-    digestSHA1: 6283d5fcfe2f6d2e2b0ac61fd784d54d0b41ffe9
+    digestSHA256: d605f36bce5cf50799ad3a56e7d388d7c0cf6731db40f46334e076c7e036bfaa
 
 depends:
     - name: devel::vs2019-toolchain-vc142-amd64
