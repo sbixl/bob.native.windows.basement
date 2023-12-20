@@ -1,3 +1,5 @@
+shared: True
+
 metaEnvironment:
     PKG_VERSION: "20.0.2"
 
