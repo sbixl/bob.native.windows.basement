@@ -4,8 +4,9 @@ checkoutSCM:
         if: !expr |
             "${AUTOCONF_TARGET}" == "arm-none-eabi"
         scm: url
-        url: ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/12.2.mpacbti-rel1/binrel/arm-gnu-toolchain-12.2.mpacbti-rel1-mingw-w64-i686-arm-none-eabi.zip
-        digestSHA256: "9f5f5492447212001aa8b708e237cdfecb1296ba0f1c699e2aa2fd87249e5b00"
+        url: ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1-mingw-w64-i686-arm-none-eabi.zip
+        digestSHA256: "d52888bf59c5262ebf3e6b19b9f9e6270ecb60fd218cf81a4e793946e805a654"
+        sslVerify: False
         dir: ${AUTOCONF_TARGET}
         extract: no
     -
@@ -14,6 +15,7 @@ checkoutSCM:
         scm: url
         url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-mingw-w64-i686-arm-none-linux-gnueabihf.zip
         digestSHA256: "2c2d3d9c91419f38867d69876570dd039fd3fd70a2c3ad22299dfc312ed82a6b"
+        sslVerify: False
         dir: ${AUTOCONF_TARGET}
         extract: no
     -
@@ -22,6 +24,7 @@ checkoutSCM:
         scm: url
         url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-mingw-w64-i686-aarch64-none-elf.zip
         digestSHA256: "4ce6d3f1c063e40b6b70063156d7796f86c224149c241ede22c622958e763034"
+        sslVerify: False
         dir: ${AUTOCONF_TARGET}
         extract: no
     -
@@ -30,6 +33,7 @@ checkoutSCM:
         scm: url
         url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-mingw-w64-i686-aarch64-none-linux-gnu.zip
         digestSHA256: "4ede5507bb03395e597cb206202a9b65b128c9b5825c951d8e09acdc487dcc5a"
+        sslVerify: False
         dir: ${AUTOCONF_TARGET}
         extract: no
 
