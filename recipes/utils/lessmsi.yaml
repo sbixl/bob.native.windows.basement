@@ -1,0 +1,23 @@
+metaEnvironment:
+    PKG_VERSION: "2.1.1"
+
+checkoutSCM:
+    -
+        scm: url
+        url: ${GITHUB_MIRROR}/activescott/lessmsi/releases/download/v${PKG_VERSION}/lessmsi-v${PKG_VERSION}.zip
+        digestSHA256: "e307396280ae7ae9fbf7f97dddd085fcdca60ebbcf020cedb534647ca33fa10e"
+        extract: no
+
+buildVars: [PKG_VERSION]
+buildScript: |
+    Expand-Archive "$($args[0])\lessmsi-v${Env:PKG_VERSION}.zip" -DestinationPath .
+
+packageScript: |
+    mkdir -Force -p usr/bin >$null
+    pushd usr/bin
+    cp -r "$($args[0])\*.dll" .
+    cp -r "$($args[0])\lessmsi.exe" .
+    popd
+
+provideTools:
+    lessmsi: usr/bin
