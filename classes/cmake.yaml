@@ -1,7 +1,7 @@
 inherit: [cpackage, ninja, install]
 
 buildToolsWeak: [cmake]
-# The variable VCToolsInstallDir is provided by host-toolchain recipe (transitiv dependency to vs2019-toolchain).
+# The variable VCToolsInstallDir is provided by host-toolchain recipe (transitive dependency to vs2019-toolchain).
 # The content of this variable contains the path to the Visual Studio MSVC toolset from which the host-toolchain
 # (Clang) is build. This path is mandatory for CMake because if not set, it will pick up some different toolset (if
 # multiple toolset's are installed e.g a Visual Studio 2019 and 2022) which can lead to build errors or other trouble.
