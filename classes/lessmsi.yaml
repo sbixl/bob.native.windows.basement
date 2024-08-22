@@ -1,0 +1,35 @@
+depends:
+    - name: utils::lessmsi
+      use: [tools]
+
+buildToolsWeak: [lessmsi]
+buildSetup: |
+    function LessmsiExtractFromDirectory
+    {
+        Param(
+            # mandaotry
+            [Parameter(Position = 0, mandatory=$true)]
+            [String]$SRC_DIR,
+            # optional
+            [Parameter(Position = 1, mandatory=$true)]
+            [String]$DEST_DIR
+        )
+
+        $msi_files = $(get-ChildItem ${SRC_DIR} -recurse | where {$_.name -like "*.msi"} | select name | foreach { $_.Name })
+
+        if(!(Test-Path  ${DEST_DIR}))
+        {
+            mkdir -p ${DEST_DIR} >$null
+        }
+
+        pushd ${DEST_DIR}
+        foreach ($msi_file in $msi_files)
+        {
+            Write-Host Extract MSI package ${msi_file} ...
+
+            Check-Command{
+                lessmsi x "${SRC_DIR}\${msi_file}" "$msi_file".Replace(".msi","")  >$null
+            }
+        }
+        popd
+    }
