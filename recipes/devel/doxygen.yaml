@@ -29,6 +29,7 @@ buildScript: |
                -Duse_sqlite3=OFF `
                -Duse_libclang=OFF `
                -Dwin_static=ON `
+               -DCMAKE_BUILD_TYPE=Release `
                "$($args[0])\doxygen-Release_${Env:PKG_VERSION}"
 
 packageScript: |
