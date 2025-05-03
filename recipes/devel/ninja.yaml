@@ -30,7 +30,12 @@ multiPackage:
     bootstrap:
         inherit: [cpackage, install]
 
+        depends:
+          - name: python::pipython3
+            use: [tools]
+
         buildVars: [CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION]
+        buildTools: [python3]
         buildScript: |
             # copy sources to build directory while bootstrapping because this influence
             # the build-id and ninja is build twice (seems to be that the bootstrap command
