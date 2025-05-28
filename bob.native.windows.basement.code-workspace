@@ -7,7 +7,8 @@
 	"settings": {
         "cSpell.language": "en,de",
         "cSpell.diagnosticLevel": "Hint",
-        "cSpell.enableFiletypes": ["yaml", "md"],
+        "cSpell.enabledFiletypes": ["yaml", "md"],
+        "files.insertFinalNewline": true,
         "files.trimTrailingWhitespace": true,
         "files.encoding": "utf8",
         "files.exclude": {
@@ -32,7 +33,7 @@
 		},
         "[yaml]": {
             "files.encoding": "utf8",
-            "files.eol": "\r\n",
+            "files.eol": "\n",
             "files.trimTrailingWhitespace": true,
             "editor.detectIndentation": false,
             "editor.insertSpaces": true,
