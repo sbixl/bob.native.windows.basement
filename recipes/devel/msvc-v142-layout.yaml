@@ -1,0 +1,91 @@
+inherit: [filesystem]
+
+environment:
+    # https://learn.microsoft.com/en-us/visualstudio/releases/2019/history
+    PKG_VERSION:         "16.11.47"
+    PKG_BUILD_NUMBER:    "16.11.36107.64"
+
+checkoutSCM:
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" == ""
+        # https://learn.microsoft.com/en-us/visualstudio/releases/2019/history#installing-an-earlier-release
+        scm: url
+        url: https://download.visualstudio.microsoft.com/download/pr/cf1cac1b-fb13-472e-ab99-c6bba41c62b7/6786217633d3705eadd3dca13615def0314c0e4382c33172d8c84917d98e99f2/vs_BuildTools.exe
+        digestSHA256: "6786217633d3705eadd3dca13615def0314c0e4382c33172d8c84917d98e99f2"
+        extract: no
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" != ""
+        scm: url
+        url: ${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}/vs_2019_build_tools_${PKG_BUILD_NUMBER}_layout.zip
+        digestSHA256: "1708beffe421c0429b7fe81a11f84bd229e697f15422a784a81daff3e0a95c2e"
+        extract: no
+
+buildVars: [PKG_BUILD_NUMBER]
+buildVarsWeak: [SCM_VS_OFFLINE_BUNDLE_DIRECTORY]
+buildScript: |
+    if(!${Env:SCM_VS_OFFLINE_BUNDLE_DIRECTORY})
+    {
+        $SYMLINK_PATH = "C:\.bob_temp_vs_buildtools_layout"
+
+        if (Test-Path $SYMLINK_PATH)
+        {
+            # delete the symlink using 'rmdir' from cmd (this will delete the symlink but keep the contents in the target directory)
+            cmd /c "rmdir $SYMLINK_PATH"
+        }
+
+        # always build the layout from scratch
+        DeleteDirectory layout
+
+        # Append the path to vs_BuildTools.exe
+        $Env:PATH="$($args[0]);$Env:PATH"
+
+        # Note: This is a hack because the path to the storage location shall be not longer than 80 Bytes.
+        #       By using a symlink we can workaround the issue. This problem mainly affects builds in a Jenkins
+        #       environment, as the paths are much longer here than in a local build.
+        #
+        #       Although it contradicts Bob's specifications, there is no other solution.
+        #
+        #       see: https://learn.microsoft.com/de-de/visualstudio/install/create-a-network-installation-of-visual-studio?view=vs-2019
+
+        mkdir -p layout > $null
+        New-Item -ItemType SymbolicLink -Path "$SYMLINK_PATH" -Target "${PWD}\layout" > $null
+
+        Write-Host "Downloading and building layout. Be patient, this may take some time..."
+
+        # Download all workloads and components to an offline layout
+        Start-Process vs_BuildTools.exe -Wait -ArgumentList "--layout $SYMLINK_PATH",
+                                        "--add Microsoft.VisualStudio.Workload.MSBuildTools",
+                                        "--add Microsoft.VisualStudio.Workload.VCTools",
+                                        "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+                                        "--add Microsoft.VisualStudio.Component.VC.ATL",
+                                        "--lang De-de",
+                                        "--quiet",
+                                        "--wait"
+
+        # delete the symlink using 'rmdir' from cmd (this will delete the symlink but keep the contents in the target directory)
+        cmd /c "rmdir $SYMLINK_PATH"
+    }
+    else
+    {
+        # Extract the offline layout cache so that it is ready for the build step!
+        Expand-Archive -LiteralPath "$($args[0])\vs_2019_build_tools_${Env:PKG_BUILD_NUMBER}_layout.zip" -DestinationPath ${PWD}
+    }
+
+multiPackage:
+    "":
+        packageScript: |
+            cp -r "$($args[0])/layout" .
+
+    bundle:
+        root: True
+        packageVars: [PKG_BUILD_NUMBER]
+        packageScript: |
+            Compress-Archive -Path "$($args[0])\*" -DestinationPath vs_2019_build_tools_${Env:PKG_BUILD_NUMBER}_layout.zip
+
+provideVars:
+    VS_VERSION:          "16.11"
+    TOOLSET_VERSION:     "142"
+    MSVC_VERSION:        "14.29"
+    MSVC_FULL_VERSION:   "14.29.30133"

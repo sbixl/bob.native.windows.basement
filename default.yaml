@@ -61,6 +61,7 @@ environment:
     #  You can build an offline bundle by executing e.g:
     #
     #                -  'bob dev devel::win10-sdk-2104-bundle'.
+    #                -  'bob dev devel::msvc-v142-layout-bundle'.
     #
     #  The result of this package is a zip archive which can be copied to the path configured
     #  in 'SCM_VS_OFFLINE_BUNDLE_DIRECTORY'. Please take care that the variable
