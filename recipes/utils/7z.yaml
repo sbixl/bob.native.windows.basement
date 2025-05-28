@@ -4,7 +4,7 @@ metaEnvironment:
     PKG_VERSION: "23.01"
 
 depends:
-    - name: devel::vs2019-toolchain-vc142-amd64
+    - name: devel::msvc-v142-x86_x64
       use: [environment, tools]
 
 checkoutSCM:
@@ -23,15 +23,6 @@ checkoutSCM:
         digestSHA256: 4c193deda63ef8e813746b78f73a337c983cc07170b533b29dfcca53d43b40ee
         if: !expr |
                 "${GITHUB_MIRROR}" != "https://github.com"
-
-checkoutVars: [PKG_VERSION]
-checkoutDeterministic: True
-checkoutScript: |
-    # It seems to be there is a bug in the Microsoft Windows 10 SDK
-    # version 10.0.20348.0, in the MAPI subsystem. Because we only
-    # use the command line tool, disabling the MAPI functionality
-    # does not effect use. The UI may not work as expected.
-    patchApplySeries $<<7z/*.patch>>
 
 buildVars: [CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION]
 buildScript: |
