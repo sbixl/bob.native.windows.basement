@@ -114,5 +114,3 @@ multiPackage:
         packageVars: [PKG_BUILD_NUMBER]
         packageScript: |
             Compress-Archive -Path "$($args[0])\*" -DestinationPath winsdksetup_${Env:PKG_BUILD_NUMBER}_layout.zip
-
-

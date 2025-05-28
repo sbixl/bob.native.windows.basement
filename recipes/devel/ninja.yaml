@@ -31,8 +31,8 @@ multiPackage:
         inherit: [cpackage, install]
 
         depends:
-          - name: python::pipython3
-            use: [tools]
+            - name: python::pipython3
+              use: [tools]
 
         buildVars: [CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION]
         buildTools: [python3]
