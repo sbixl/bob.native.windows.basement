@@ -2,14 +2,7 @@
 # variables so that the dependencies are found by the toolchains.
 
 buildTools: [target-toolchain]
-buildVars: [AUTOCONF_BUILD, AUTOCONF_HOST, CPPFLAGS, CFLAGS, CXXFLAGS, LDFLAGS,
-            BASEMENT_LIBS]
-
-# The following variables are only used by the Microsoft Visual Studio
-# toolchain. Their value depends on the install location but they do not change
-# the build result. The toolset version is handled by the toolchain directly
-# and is attached to 'target-toolchain'.
-buildVarsWeak: [INCLUDE, LIB, LIBPATH, VS_PATH, PLATFORM]
+buildVars: [AUTOCONF_BUILD, AUTOCONF_HOST, CPPFLAGS, CFLAGS, CXXFLAGS, LDFLAGS]
 buildScript: |
     # Check if we're officially cross-compiling
     function cpackageCrossCompiling
@@ -24,19 +17,13 @@ buildScript: |
         }
     }
 
-    # Get desired library type: "static", "shared" or "both".
+    # Get desired library type: "static" or "shared".
     #
     # By default shared libraries are built when cross-compiling and static
-    # libraries on host builds. This can be overridden by setting BASEMENT_LIBS
-    # to "static", "shared" or "both".
+    # libraries on host builds.
     function cpackageLibraryType
     {
-        if ( $null -ne ${Env:BASEMENT_LIBS} )
-        {
-            "${Env:BASEMENT_LIBS}"
-            return
-        }
-        elseif ( cpackageCrossCompiling )
+        if ( cpackageCrossCompiling )
         {
             "shared"
             return
@@ -48,26 +35,17 @@ buildScript: |
         }
     }
 
-    # Check $BASEMENT_LIBS values to catch misconfigurations early
-    switch ( ${Env:BASEMENT_LIBS} )
+    if ( ${Env:AUTOCONF_HOST}.Contains("-windows-msvc") )
     {
-        { ($PSItem -eq "static") -or ($PSItem -eq "shared") -or ($PSItem -eq "both") -or ($PSItem -eq $null) }
-        {
-            # continue
-        }
-        default
-        {
-            # break on error
-            Write-Error "Invalid BASEMENT_LIBS value: ${Env:BASEMENT_LIBS}"
-        }
-    }
+        # Setup the visual studio shell environment (similar to the Developer Command Prompt)
+        $PS_SCRIPT = "$($BOB_TOOL_PATHS["target-toolchain"])\setup_devenv.ps1"
 
-    # The global paths need to be added to $PATH.
-    $Env:PATH="$Env:VS_PATH;$Env:PATH"
+        & ${PS_SCRIPT} -RootDir $($BOB_TOOL_PATHS["target-toolchain"])
 
-    # Gather all include and library paths.
-    if ( ${Env:AUTOCONF_HOST}.Contains("-win32") )
-    {
+        # The global paths need to be added to $PATH.
+        $Env:PATH="$Env:VS_PATH;$Env:PATH"
+
+        # Gather all include and library paths.
         foreach ( $i in ($args | select -skip 1) )
         {
             if( Test-Path "$i/usr/include" )
