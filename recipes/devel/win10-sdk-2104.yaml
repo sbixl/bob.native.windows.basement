@@ -1,0 +1,118 @@
+inherit: [filesystem, lessmsi]
+
+environment:
+    PKG_BUILD_NUMBER:    "10.0.19041.0"
+
+checkoutSCM:
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" == ""
+        scm: url
+        # Taken from https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/index-legacy
+        #
+        # Open a power shell and locate the redirect URI of the "go.microsoft.com/fwlink" address:
+        #
+        # (Invoke-WebRequest -uri "https://go.microsoft.com/fwlink/p/?LinkID=698771" -MaximumRedirection 0 -ErrorAction SilentlyContinue).RawContent
+        url: https://download.microsoft.com/download/4/d/2/4d2b7011-606a-467e-99b4-99550bf24ffc/windowssdk/winsdksetup.exe
+        digestSHA256: "42d2774274d1135fc598c180c2acbf2321eb4192f59e511e6ac7772870bf6de1"
+        extract: no
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" != ""
+        scm: url
+        url: ${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}/winsdksetup_${PKG_BUILD_NUMBER}_layout.zip
+        digestSHA256: "5642cefb3cfb0673b8f8fc473d999e51746b4642637e474895444c2b6365fe3a"
+        extract: no
+
+# Available features:
+#
+#   - OptionId.WindowsPerformanceToolkit
+#   - OptionId.WindowsDesktopDebuggers
+#   - OptionId.AvrfExternal
+#   - OptionId.NetFxSoftwareDevelopmentKit
+#   - OptionId.WindowsSoftwareLogoToolkit
+#   - OptionId.IpOverUsb
+#   - OptionId.MSIInstallTools
+#   - OptionId.SigningTools
+#   - OptionId.UWPManaged
+#   - OptionId.UWPCPP
+#   - OptionId.UWPLocalized
+#   - OptionId.DesktopCPPx86
+#   - OptionId.DesktopCPPx64
+#   - OptionId.DesktopCPParm
+#   - OptionId.DesktopCPParm64
+#
+buildVars: [PKG_BUILD_NUMBER]
+buildVarsWeak: [SCM_VS_OFFLINE_BUNDLE_DIRECTORY]
+buildScript: |
+    if(!${Env:SCM_VS_OFFLINE_BUNDLE_DIRECTORY})
+    {
+        # always build the layout from scratch
+        DeleteDirectory layout
+
+        # Append the path to winsdksetup.exe
+        $Env:PATH="$($args[0]);$Env:PATH"
+
+        Write-Host "Downloading and building layout. Be patient, this may take some time..."
+
+        # Download all workloads and components to an offline layout
+        Start-Process winsdksetup.exe -Wait -ArgumentList "/layout layout",
+                                                        "/features OptionId.UWPManaged",
+                                                        "/features OptionId.UWPCPP",
+                                                        "/features OptionId.UWPLocalized",
+                                                        "/features OptionId.DesktopCPPx86",
+                                                        "/features OptionId.DesktopCPPx64",
+                                                        "/quiet"
+    }
+    else
+    {
+        # Extract the offline layout cache so that it is ready for the build step!
+        Expand-Archive -LiteralPath "$($args[0])\winsdksetup_${Env:PKG_BUILD_NUMBER}_layout.zip" -DestinationPath ${PWD}
+    }
+
+multiPackage:
+    "":
+        buildScript: |
+            Lessmsi_ExtractFromDirectory "${PWD}\layout\Installers" Win10SDK_${Env:PKG_BUILD_NUMBER}
+
+        packageVars: [PKG_BUILD_NUMBER]
+        packageScript: |
+            ##########################################################################################
+            # Always build the package from scratch
+            ##########################################################################################
+
+            DeleteDirectory ${PWD}\*
+
+            ##########################################################################################
+            # Copy Windows SDK
+            ##########################################################################################
+
+            $windows_sdk_dir = "$($args[0])\Win10SDK_${Env:PKG_BUILD_NUMBER}"
+            $directories = $(Get-ChildItem -Path $windows_sdk_dir -Directory | Select Name | foreach { $_.Name })
+            $white_list = @("Application Verifier", "Microsoft SDKs", "Windows Kits")
+            foreach ($directory in $directories)
+            {
+                if(Test-Path "$windows_sdk_dir\$directory\SourceDir")
+                {
+                    $files = $(Get-ChildItem "$windows_sdk_dir\$directory\SourceDir\*"  -Directory | Select Name | foreach { $_.Name })
+                    foreach($file in $files)
+                    {
+                        if ($file -in $white_list)
+                        {
+                            Write-Host "################## Copying SDK $directory"
+                            cp -r -Force  "$windows_sdk_dir\$directory\SourceDir\$file" .
+                        }
+                    }
+                }
+            }
+
+        provideVars:
+            WINDOWS_SDK_VERSION: "10.0.19041.0"
+
+    bundle:
+        root: True
+        packageVars: [PKG_BUILD_NUMBER]
+        packageScript: |
+            Compress-Archive -Path "$($args[0])\*" -DestinationPath winsdksetup_${Env:PKG_BUILD_NUMBER}_layout.zip
+
+

@@ -9,7 +9,9 @@ environment:
     # system (i.e. the system where the produced executables run on)
     # definition.
     ARCH:           "$(host-arch)"
+    # This is the platform on which the compilation tools are executed.
     AUTOCONF_BUILD: "$(host-autoconf)"
+    # This is the platform on which the compiled code will eventually run.
     AUTOCONF_HOST:  "$(host-autoconf)"
 
     GITHUB_MIRROR:        "https://github.com"
@@ -40,6 +42,31 @@ environment:
     # clang toolchain earns the role of the master host toolchain.
     # If set to "False" the MSVC compiler becomes the master host toolchain.
     ENABLE_NATIVE_CLANG_HOST_TOOLCHAIN: "False"
+
+    # This is for local (user) specific usage. Let this environment variable
+    # point to your local storage where the vs2019 BuildTools offline bundle is stored.
+    #
+    # If not set, the (online) layout(s) will be downloaded from the official microsoft mirror.
+    # If set, the (offline) zip bundle(s) will be downloaded from a specific secondary mirror.
+    #
+    # example:
+    #   # use secondary mirror from a internal network drive
+    #   SCM_VS_OFFLINE_BUNDLE_DIRECTORY:   \\\\MY-NETWORK-DRIVE\\windows
+    #
+    # example:
+    #   # use official cache from microsoft mirror (default setting)
+    #   SCM_VS_OFFLINE_BUNDLE_DIRECTORY:   ""
+    #
+    # note:
+    #  You can build an offline bundle by executing e.g:
+    #
+    #                -  'bob dev devel::win10-sdk-2104-bundle'.
+    #
+    #  The result of this package is a zip archive which can be copied to the path configured
+    #  in 'SCM_VS_OFFLINE_BUNDLE_DIRECTORY'. Please take care that the variable
+    #  'SCM_VS_OFFLINE_BUNDLE_DIRECTORY' is not set, so that the microsoft mirror is used
+    #  as source to create the offline cache.
+    SCM_VS_OFFLINE_BUNDLE_DIRECTORY: ""
 
 include:
     # optional include for user specific settings.

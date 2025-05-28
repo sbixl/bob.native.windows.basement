@@ -4,7 +4,7 @@ depends:
 
 buildToolsWeak: [lessmsi]
 buildSetup: |
-    function LessmsiExtractFromDirectory
+    function Lessmsi_ExtractFromDirectory
     {
         Param(
             # mandaotry
