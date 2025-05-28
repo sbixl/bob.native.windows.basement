@@ -1,4 +1,4 @@
-inherit: [msbuild]
+inherit: [cpackage]
 
 metaEnvironment:
     PYTHON_VERSION:     "3.11.6"
@@ -85,7 +85,6 @@ checkoutScript: |
     rm -Force -r Python-${Env:PYTHON_VERSION}
 
 buildTools: [python3]
-buildVars: [MSB_PATH]
 buildScript: |
     $SRC_PATH="$($args[0])"
 
