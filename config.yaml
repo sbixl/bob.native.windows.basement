@@ -3,6 +3,4 @@ scriptLanguage: PowerShell
 
 plugins:
     - multiarch
-    - vsenv
-    - msbuild
     - patch
