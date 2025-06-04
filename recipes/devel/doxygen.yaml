@@ -8,8 +8,6 @@ depends:
       use: [tools]
     - name: devel::bison
       use: [tools]
-    - name: devel::vs2019-toolchain-vc142-amd64
-      use: [environment, tools]
 
 checkoutSCM:
     scm: url
