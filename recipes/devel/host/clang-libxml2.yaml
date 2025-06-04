@@ -4,8 +4,6 @@ metaEnvironment:
     PKG_VERSION: "2.9.12"
 
 depends:
-    - name: devel::vs2019-toolchain-vc142-amd64
-      use: [environment, tools]
     - name: devel::ninja-bootstrap
       use: [tools]
     - name: devel::cmake-bootstrap

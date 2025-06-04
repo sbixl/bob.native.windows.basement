@@ -20,8 +20,6 @@ checkoutSCM:
 depends:
     # link libxml2 to make lld-link not require mt.exe on Windows
     - devel::host::clang-libxml2
-    - name: devel::vs2019-toolchain-vc142-amd64
-      use: [environment, tools]
 
 checkoutToolsWeak: [7z]
 checkoutVars: [PKG_VERSION]
