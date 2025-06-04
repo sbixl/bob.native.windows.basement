@@ -6,9 +6,6 @@ checkoutSCM:
     url: ${GITHUB_MIRROR}/Kitware/ninja/archive/refs/tags/v${PKG_VERSION}.g95dee.kitware.jobserver-1.zip
     digestSHA256: d605f36bce5cf50799ad3a56e7d388d7c0cf6731db40f46334e076c7e036bfaa
 
-depends:
-    - name: devel::vs2019-toolchain-vc142-amd64
-      use: [environment, tools]
 multiPackage:
     "":
         inherit: [cmake]
