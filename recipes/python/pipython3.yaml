@@ -8,9 +8,6 @@ metaEnvironment:
     WHEEL_VERSION:      "0.42.0"
 
 depends:
-    - name: devel::vs2019-toolchain-vc142-amd64
-      use: [environment, tools]
-      forward: true
     - name: python::pipython3-minimal
       use: [tools]
 
