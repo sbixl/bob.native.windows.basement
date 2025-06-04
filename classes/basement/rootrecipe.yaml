@@ -4,8 +4,12 @@ depends:
     - if: !expr |
         "${BOB_HOST_PLATFORM}" == "win32"
       depends:
-          - name: devel::msbuild
-            use: [tools]
+          # The general native host toolchain is the MSVC compiler.
+          # If required, the toolchain can be overwritten by the application
+          # in a upstream class or recipe. An example would be to use clang
+          # as host-toolchain for e.g. unit testing.
+          - name: devel::msvc-v142-x86_x64
+            use: [environment, tools]
             forward: True
           - name: utils::7z
             use: [tools]
@@ -18,11 +22,4 @@ depends:
             forward: True
           - name: python::pipython3
             use: [tools]
-            forward: True
-          # The general native host toolchain is the MSVC 2019 compiler.
-          # If required, the toolchain can be overwritten by the application
-          # in a upstream class or recipe. An example would be to use clang
-          # as host-toolchain for unit-testing.
-          - name: devel::vs2019-toolchain-vc142-amd64
-            use: [environment, tools]
             forward: True

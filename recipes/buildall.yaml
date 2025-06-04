@@ -24,7 +24,8 @@ buildScript: |
     $null
 
 packageTools:
-    # general tools
+    - msvc-toolchain
+   # general tools
     - 7z
     - ninja
     - cmake
