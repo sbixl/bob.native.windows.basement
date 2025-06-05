@@ -35,7 +35,7 @@ def hostAutoconf(args, **options):
     elif system.startswith("MINGW32_NT"):
         return "i686-w64-mingw32"
     elif system == "Windows":
-        return machine + "-pc-win32"
+        return machine + "-pc-windows-msvc"
     else:
         raise ParseError("Unsupported system: " + system)
 
