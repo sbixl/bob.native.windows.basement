@@ -10,8 +10,7 @@ recipes and classes were ported from bash to PowerShell as far as possible.
 
 These basement project is a collection of useful recipes and classes that can be used by other
 projects. Most importantly it provides standard classes to handle common build systems and other
-standard tasks. Optional a native host clang and common GCC as well as an embedded LLVM toolchain
-are ready-to-use.
+standard tasks. Optional a x86_64 clang and by default common GCC cross toolchains are available.
 
 # Prerequisites
 
@@ -209,7 +208,6 @@ as you like.
   * `devel::cross-toolchain-gcc-arm-none-eabi`: 32-bit Arm Cortex-A,-M,-R bare metal toolchain with
     newlib libc.
   * `devel::cross-toolchain-gcc-x86_64-linux-gnu`: x86_64 toolchain for Linux with glibc.
-  * `devel::cross-toolchain-llvm-embedded-toolchain-for-arm`: 32-bit Arm Cortex-M bare metal toolchain with newlib libc.
 
 To use a cross as well as the clang host-toolchain include it where needed via:
 

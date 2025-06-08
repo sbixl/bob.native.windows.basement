@@ -5,7 +5,6 @@ depends:
     - devel::cross-toolchain-gcc-arm-linux-gnueabihf
     - devel::cross-toolchain-gcc-aarch64-none-eabi
     - devel::cross-toolchain-gcc-aarch64-linux-gnu
-    - devel::cross-toolchain-llvm-embedded-toolchain-for-arm
     - name: devel::doxygen
       use: [tools]
       forward: True
