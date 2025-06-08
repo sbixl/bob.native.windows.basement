@@ -14,14 +14,7 @@ standard tasks. Optional a x86_64 clang and by default common GCC cross toolchai
 
 # Prerequisites
 
-* A x86_64 system with Windows 10 and some minimal tools installed
-  * Visual Studio Build Tools 2019 with minimal settings:
-    ![Alt text](doc/vs_build_tools_2019_setup.PNG "Visual Studio Build Tools 2019")
-  * [Windows 10 SDK version 10.0.20348.1](https://go.microsoft.com/fwlink/?linkid=2164145)
-    The Windows SDK is required to build the position independent Python 3.11.x
-    ![Alt text](doc/windows_sdk.PNG "Windows SDK Setup")
-  * powershell 5.x
-
+* A x86_64 system with Windows 10
 * Windows 10 system configuration
   * Make sure you can create symbolic links without admin rights. Usually you can enable
     this by switching to the developer mode. If this does not work, enable it in your
