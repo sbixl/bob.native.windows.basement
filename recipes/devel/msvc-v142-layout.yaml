@@ -23,9 +23,8 @@ checkoutSCM:
         extract: no
 
 buildVars: [PKG_BUILD_NUMBER]
-buildVarsWeak: [SCM_VS_OFFLINE_BUNDLE_DIRECTORY]
 buildScript: |
-    if(!${Env:SCM_VS_OFFLINE_BUNDLE_DIRECTORY})
+    if(Test-Path "$($args[0])\vs_BuildTools.exe" -PathType Leaf)
     {
         $SYMLINK_PATH = "C:\.bob_temp_vs_buildtools_layout"
 
