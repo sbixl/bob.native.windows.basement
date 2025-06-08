@@ -147,8 +147,8 @@ multiPackage:
             $clexe = (Get-Command -CommandType Application "cl.exe")[0]
             $msvcversion = "$($clexe.FileVersionInfo.FileMajorPart).$($clexe.FileVersionInfo.FileMinorPart)"
 
-            $AR = "$($BOB_TOOL_PATHS["clang-bootstrap"])\llvm-lib.exe".Replace("\","/")
-            $RANLIB = "$($BOB_TOOL_PATHS["clang-bootstrap"])\llvm-ranlib.exe".Replace("\","/")
+            $AR = "$($BOB_TOOL_PATHS["clang-host"])\llvm-lib.exe".Replace("\","/")
+            $RANLIB = "$($BOB_TOOL_PATHS["clang-host"])\llvm-ranlib.exe".Replace("\","/")
 
             buildClang -DCMAKE_C_FLAGS="-fms-compatibility-version=$msvcversion $curarch -DLIBXML_STATIC" `
                        -DCMAKE_CXX_FLAGS="-fms-compatibility-version=$msvcversion $curarch -DLIBXML_STATIC" `
