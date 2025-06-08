@@ -17,7 +17,7 @@ depends:
     - if: !expr |
         "${ENABLE_X86_64_CLANG_HOST_TOOLCHAIN}" == "True"
       depends:
-          - devel::host-toolchain
+          - devel::llvm-clang
 
 buildScript: |
     $null
