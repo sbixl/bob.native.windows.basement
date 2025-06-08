@@ -1,4 +1,4 @@
-inherit: [cmake, python3]
+inherit: [cmake, python3, filesystem]
 
 metaEnvironment:
     PKG_VERSION: "16.0.6"
