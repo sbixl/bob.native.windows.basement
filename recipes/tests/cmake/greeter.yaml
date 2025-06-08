@@ -20,7 +20,7 @@ multiPackage:
     host:
         depends:
             - if: !expr |
-                "${ENABLE_NATIVE_CLANG_HOST_TOOLCHAIN}" == "True"
+                "${ENABLE_X86_64_CLANG_HOST_TOOLCHAIN}" == "True"
               depends:
                   - name: devel::host-toolchain
                     use: [environment, tools]

@@ -6,10 +6,6 @@ depends:
     - devel::cross-toolchain-gcc-aarch64-none-eabi
     - devel::cross-toolchain-gcc-aarch64-linux-gnu
     - devel::cross-toolchain-llvm-embedded-toolchain-for-arm
-    - if: !expr |
-        "${ENABLE_NATIVE_CLANG_HOST_TOOLCHAIN}" == "True"
-      depends:
-          - devel::host-toolchain
     - name: devel::doxygen
       use: [tools]
       forward: True
@@ -19,6 +15,10 @@ depends:
     - name: devel::sphinx
       use: [tools]
       forward: True
+    - if: !expr |
+        "${ENABLE_X86_64_CLANG_HOST_TOOLCHAIN}" == "True"
+      depends:
+          - devel::host-toolchain
 
 buildScript: |
     $null

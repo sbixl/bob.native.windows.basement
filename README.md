@@ -38,7 +38,7 @@ There is the possibility to choose between two different host toolchains.
 
 By default, the MSVC 2019 compiler (vc142) is configured as host toolchain. If you want to use
 clang as host toolchain you can switch to it by modifying the environment variable
-`ENABLE_NATIVE_CLANG_HOST_TOOLCHAIN` which is defined in the `default.yaml` located in the root
+`ENABLE_X86_64_CLANG_HOST_TOOLCHAIN` which is defined in the `default.yaml` located in the root
 directory of this repository.
 
 ```yaml
@@ -47,7 +47,7 @@ directory of this repository.
     # they are required to build the clang toolchain. After building the clang toolchain, the
     # clang toolchain earns the role of the master host toolchain.
     # If set to "False" the MSVC compiler becomes the master host toolchain.
-    ENABLE_NATIVE_CLANG_HOST_TOOLCHAIN: "False"
+    ENABLE_X86_64_CLANG_HOST_TOOLCHAIN: "False"
 ```
 
 While building the clang host toolchain, take care using a flat folder structure. Regardless of
@@ -63,7 +63,7 @@ Since there are currently no examples that attract this project as a layer you c
     # building all packages (native host toolchain is MSVC 2019 compiler)
     bob dev buildall
     # OR building all packages including a self built clang host toolchain
-    bob dev buildall -DENABLE_NATIVE_CLANG_HOST_TOOLCHAIN=True
+    bob dev buildall -DENABLE_X86_64_CLANG_HOST_TOOLCHAIN=True
 ```
 
 ---
@@ -117,7 +117,7 @@ the argument `--upload`, bob will automatically upload the artifacts to `D:\arch
 # The binary archive is empty, start building all packages and upload it to the binary archive
 bob dev buildall --upload
 # or with additional self built clang host-toolchain
-bob dev buildall -DENABLE_NATIVE_CLANG_HOST_TOOLCHAIN=True --upload
+bob dev buildall -DENABLE_X86_64_CLANG_HOST_TOOLCHAIN=True --upload
 ...
 Duration: 0:54:24.442231, 16 checkouts (0 overrides active), 27 packages built, 0 downloaded.
 ```
@@ -149,7 +149,7 @@ the basement layer. They act as smoke tests for this project.
     # use the default MSVC host-toolchain
     bob dev tests::cmake::greeter-host -v
     # use the clang host-toolchain
-    bob dev tests::cmake::greeter-host -DENABLE_NATIVE_CLANG_HOST_TOOLCHAIN=True -v
+    bob dev tests::cmake::greeter-host -DENABLE_X86_64_CLANG_HOST_TOOLCHAIN=True -v
     # crosscompile the same sources with the gcc-aarch64-linux-gnu cross-toolchain
     bob dev tests::cmake::greeter-cross -v
     # build a simple code generator example

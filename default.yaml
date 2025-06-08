@@ -35,7 +35,7 @@ environment:
     # they are required to build the clang toolchain. After building the clang toolchain, the
     # clang toolchain earns the role of the master host toolchain.
     # If set to "False" the MSVC compiler becomes the master host toolchain.
-    ENABLE_NATIVE_CLANG_HOST_TOOLCHAIN: "False"
+    ENABLE_X86_64_CLANG_HOST_TOOLCHAIN: "False"
 
     # This is for local (user) specific usage. Let this environment variable
     # point to your local storage where the vs2019 BuildTools offline bundle is stored.
