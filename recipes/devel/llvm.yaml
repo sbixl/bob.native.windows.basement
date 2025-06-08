@@ -45,8 +45,8 @@ buildScript: |
 
     function buildClang
     {
-        $LIBXML2_INCLUDE_DIR = "$($BOB_DEP_PATHS["devel::host::clang-libxml2"])\usr\include\libxml2".Replace("\","/")
-        $LIBXML2_LIBRARIES   = "$($BOB_DEP_PATHS["devel::host::clang-libxml2"])\usr\lib\libxml2s.lib".Replace("\","/")
+        $LIBXML2_INCLUDE_DIR = "$($BOB_DEP_PATHS["libs::libxml2"])\usr\include\libxml2".Replace("\","/")
+        $LIBXML2_LIBRARIES   = "$($BOB_DEP_PATHS["libs::libxml2"])\usr\lib\libxml2s.lib".Replace("\","/")
 
         $_OPTIONS = $($args)
         Check-Command {
