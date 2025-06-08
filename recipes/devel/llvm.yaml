@@ -1,23 +1,188 @@
-# since we can't build gcc native or cross compiling toolchain on windows we must download pre build binaries
+inherit: [cmake, python3]
+
+metaEnvironment:
+    PKG_VERSION: "16.0.6"
+
 checkoutSCM:
-    scm: url
-    url: ${GITHUB_MIRROR}/ARM-software/LLVM-embedded-toolchain-for-Arm/releases/download/release-14.0.0/LLVMEmbeddedToolchainForArm-14.0.0-windows.zip
-    digestSHA256: "1d0ba47d93e09e34ee1e31cec43f221b9d689401a5eae568df6cdef0261c6abb"
-    dir: llvm
-    extract: no
+    -
+        scm: url
+        url: ${GITHUB_MIRROR}/llvm/llvm-project/releases/download/llvmorg-${PKG_VERSION}/llvm-project-${PKG_VERSION}.src.tar.xz
+        digestSHA256: ce5e71081d17ce9e86d7cbcfa28c4b04b9300f8fb7e78422b1feb6bc52c3028e
+        extract: no
+        dir: llvm
+    # Use rpmalloc, for faster ThinLTO linking.
+    -
+        scm: url
+        url: ${GITHUB_MIRROR}/mjansson/rpmalloc/archive/refs/tags/1.4.4.zip
+        digestSHA256: 4a585a4bc1aa5d77212691dcf4c8714b573808d99e62f9145152d91ce103af39
+        dir: rpmalloc
 
+depends:
+    # link libxml2 to make lld-link not require mt.exe on Windows
+    - libs::libxml2
+
+checkoutToolsWeak: [7z]
+checkoutVars: [PKG_VERSION]
+checkoutDeterministic: True
+checkoutScript: |
+     pushd llvm
+     Check-Command { 7z x -y llvm-project-${Env:PKG_VERSION}.src.tar.xz }
+     Check-Command { 7z x -y llvm-project-${Env:PKG_VERSION}.src.tar }
+
+     rm -r -Force llvm-project-${Env:PKG_VERSION}.src.tar
+     popd
+
+buildToolsWeak: [cmake]
+buildVars: [LLVM_TARGETS, LLVM_PROJECTS, CFLAGS, CXXFLAGS]
 buildScript: |
-    # create a symlink to avoid wasting memory
-    $ArchiveName = $(Get-ChildItem "$($args[0])/llvm" -File '*.zip')
-    New-Item -ItemType SymbolicLink -Path "llvm.zip"  -Target "$($args[0])/llvm/$ArchiveName" >$null
+    # Attention: While building Clang within a CI environment, the absolute paths used on Jenkins
+    # are longer than for a local build. For this reason, the entire source directory is copied to
+    # the build step because the relative path can be used!
 
+    CopyDirectory "$($args[0])\llvm\llvm-project-${Env:PKG_VERSION}.src" . $true
 
-packageTools: [7z]
+    $RPMALLOC_SRC_DIR = "$($args[0])\rpmalloc\rpmalloc-1.4.4"
+
+    function buildClang
+    {
+        $LIBXML2_INCLUDE_DIR = "$($BOB_DEP_PATHS["devel::host::clang-libxml2"])\usr\include\libxml2".Replace("\","/")
+        $LIBXML2_LIBRARIES   = "$($BOB_DEP_PATHS["devel::host::clang-libxml2"])\usr\lib\libxml2s.lib".Replace("\","/")
+
+        $_OPTIONS = $($args)
+        Check-Command {
+            cmake "llvm" `
+                  -GNinja `
+                  -DBUILD_SHARED_LIBS=OFF `
+                  -DCMAKE_BUILD_TYPE=Release `
+                  -DCMAKE_INSTALL_UCRT_LIBRARIES=ON `
+                  -DCMAKE_INSTALL_PREFIX=install\usr `
+                  -DCLANG_INCLUDE_TESTS=OFF `
+                  -DCLANG_INCLUDE_DOCS=OFF `
+                  -DCLANG_ENABLE_ARCMT=OFF `
+                  -DCLANG_ENABLE_STATIC_ANALYZER=OFF `
+                  -DLIBCLANG_BUILD_STATIC=ON `
+                  -DLLVM_TARGETS_TO_BUILD="${Env:LLVM_TARGETS}" `
+                  -DLLVM_ENABLE_PROJECTS="${Env:LLVM_PROJECTS}" `
+                  -DLLVM_USE_CRT_RELEASE=MT `
+                  -DLLVM_OPTIMIZED_TABLEGEN=ON `
+                  -DLLVM_BUILD_LLVM_C_DYLIB=OFF `
+                  -DLLVM_ENABLE_BACKTRACES=OFF `
+                  -DLLVM_ENABLE_UNWIND_TABLES=OFF `
+                  -DLLVM_ENABLE_CRASH_OVERRIDES=OFF `
+                  -DLLVM_ENABLE_TERMINFO=OFF `
+                  -DLLVM_ENABLE_LIBXML2=FORCE_ON `
+                  -DLIBXML2_INCLUDE_DIR="$LIBXML2_INCLUDE_DIR" `
+                  -DLIBXML2_LIBRARIES="$LIBXML2_LIBRARIES" `
+                  -DLLVM_ENABLE_LIBEDIT=OFF `
+                  -DLLVM_ENABLE_LIBPFM=OFF `
+                  -DLLVM_ENABLE_ZLIB=OFF `
+                  -DLLVM_ENABLE_Z3_SOLVER=OFF `
+                  -DLLVM_ENABLE_WARNINGS=OFF `
+                  -DLLVM_ENABLE_PEDANTIC=OFF `
+                  -DLLVM_ENABLE_WERROR=OFF `
+                  -DLLVM_ENABLE_ASSERTIONS=OFF `
+                  -DLLVM_ENABLE_BINDINGS=OFF `
+                  -DLLVM_ENABLE_PLUGINS=OFF `
+                  -DLLVM_ENABLE_IDE=OFF `
+                  -DLLVM_BUILD_EXAMPLES=OFF `
+                  -DLLVM_BUILD_TESTS=OFF `
+                  -DLLVM_BUILD_BENCHMARKS=OFF `
+                  -DLLVM_BUILD_DOCS=OFF `
+                  -DLLVM_INCLUDE_EXAMPLES=OFF `
+                  -DLLVM_INCLUDE_TESTS=OFF `
+                  -DLLVM_INCLUDE_BENCHMARKS=OFF `
+                  -DLLVM_INCLUDE_DOCS=OFF `
+                  -DLLVM_INTEGRATED_CRT_ALLOC="$RPMALLOC_SRC_DIR" `
+                  -DLLDB_EMBED_PYTHON_HOME=OFF `
+                  $_OPTIONS
+        }
+
+        ninjaParallel -t "install-distribution-stripped"
+        ninjaInstall
+    }
+
 packageScript: |
-    $ArchivPath = "$($args[0])"
-    mkdir usr > $null
-    Check-Command { 7z x -o"usr" -y $ArchivPath/llvm.zip }
-    # because 7z has not strip option we need to do it ourselves
-    $RootFolder = $(Get-ChildItem usr)
-    cp -r usr/$RootFolder/* usr -Force
-    rm -Recurse usr/$RootFolder
+    installPackageTgt "$($args[0])\install"
+
+multiPackage:
+    # Bootstrap LLVM using the MSVC compiler from the visual studio build tools.
+    # This minimal compiler (clang) is required later to build the entire clang toolchain
+    # for the accordant target (architecture). The MSVC compiler is not able to compile
+    # the entire toolchain due to some internal limitations (especially the libc++ could
+    # not build with it).
+    host-tools:
+        environment:
+            LLVM_TARGETS:  "X86"
+            LLVM_PROJECTS: "clang;lld"
+
+        buildScript: |
+
+            buildClang -DCMAKE_C_FLAGS="-DLIBXML_STATIC" `
+                       -DCMAKE_CXX_FLAGS="-DLIBXML_STATIC" `
+
+        provideTools:
+            clang-host: usr/bin
+
+    clang:
+        environment:
+            LLVM_TARGETS:  "X86"
+            # while building in a CI-Environment, it is not possible to build the project
+            # clang-tools-extra because the paths will get to long and the build fails!
+            LLVM_PROJECTS: "clang;compiler-rt;lld"
+
+        depends:
+            -
+                name: devel::llvm-host-tools
+                use: [tools]
+
+        buildTools: [clang-host, target-toolchain]
+        buildScript: |
+            $archtable = @{
+                "x64"   = "-m64";
+                "x86"   = "-m32";
+            }
+
+            $curarch = $archtable[${Env:PLATFORM}]
+
+            $clexe = (Get-Command -CommandType Application "cl.exe")[0]
+            $msvcversion = "$($clexe.FileVersionInfo.FileMajorPart).$($clexe.FileVersionInfo.FileMinorPart)"
+
+            $AR = "$($BOB_TOOL_PATHS["clang-bootstrap"])\llvm-lib.exe".Replace("\","/")
+            $RANLIB = "$($BOB_TOOL_PATHS["clang-bootstrap"])\llvm-ranlib.exe".Replace("\","/")
+
+            buildClang -DCMAKE_C_FLAGS="-fms-compatibility-version=$msvcversion $curarch -DLIBXML_STATIC" `
+                       -DCMAKE_CXX_FLAGS="-fms-compatibility-version=$msvcversion $curarch -DLIBXML_STATIC" `
+                       -DLLVM_FORCE_BUILD_RUNTIME=ON `
+                       -DLLVM_STATIC_LINK_CXX_STDLIB=TRUE `
+                       -DLLVM_ENABLE_RUNTIMES=libcxx `
+                       -DLLVM_ENABLE_LLD=ON `
+                       -DLIBCXX_ENABLE_SHARED=OFF `
+                       -DLIBCXX_ENABLE_STATIC=ON `
+                       -DLIBCXX_ENABLE_EXPERIMENTAL_LIBRARY=NO `
+                       -DLIBCXX_HAS_WIN32_THREAD_API=ON `
+                       -DCMAKE_C_COMPILER=clang-cl `
+                       -DCMAKE_CXX_COMPILER=clang-cl `
+                       -DCMAKE_LINKER=lld-link `
+                       -DLLVM_ENABLE_LTO=Thin `
+                       -DCMAKE_AR="$AR" `
+                       -DCMAKE_RANLIB="$RANLIB"
+
+        packageVars: [PKG_VERSION]
+        packageScript: |
+            mkdir -Force -p usr/etc/ide >$null
+            pushd usr/etc/ide
+            # Create setup file which can be used by an IDE Generator.
+            'defines: []
+
+            toolchain:
+                name: "clang"
+                arch: "x86_64"
+                cxx:  "usr/bin/clang++.exe"
+                cc:   "usr/bin/clang.exe"
+                dbg:  ""
+
+            publicHeader:
+                - usr\lib\clang\{0}\include
+                - usr\include\x86_64-pc-windows-msvc\c++\v1
+                - usr\include\c++\v1' -f ${Env:PKG_VERSION}.split(".")[0] | Out-File -encoding ASCII toolchain.cfg
+            popd
