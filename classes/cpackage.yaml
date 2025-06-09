@@ -35,15 +35,6 @@ buildScript: |
         }
     }
 
-    # Setup a custom 'Temp' directory. If we use the default temp directory the Microsoft-Defender
-    # may be to aggressive (e.g the deletion of temporary files is prevented, which can lead to a
-    # build error).
-
-    mkdir -Force -p "${PWD}\TEMP" >$null
-
-    $Env:TMP = "${PWD}\TEMP"
-    $Env:TEMP = "${PWD}\TEMP"
-
     if ( ${Env:AUTOCONF_HOST}.Contains("-windows-msvc") )
     {
         # Setup the visual studio shell environment (similar to the Developer Command Prompt)
