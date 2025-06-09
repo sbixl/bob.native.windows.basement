@@ -1,18 +1,20 @@
+shared: True
+
 metaEnvironment:
-    PKG_VERSION: "3.27.8"
+    PKG_VERSION: "3.31.7"
 
 checkoutSCM:
     -
         scm: url
         url: ${GITHUB_MIRROR}/Kitware/CMake/archive/v${PKG_VERSION}.zip
-        digestSHA256: "357d37103c35097a51db93920b8d4011d68bef2a5ec5587188c463b5738e0df2"
+        digestSHA256: "e7a3f6352c9061f7242243662cfc2514aa49d9eadc3cf7850e96b508703904cf"
         dir: cmake.src
-    # Since there is unfortunately no possibility to bootstrap cmake like under linux,
+    # Since there is unfortunately no possibility to bootstrap cmake like under Linux,
     # we must download a pre build binary for windows to build cmake from source.
     -
         scm: url
         url: ${GITHUB_MIRROR}/Kitware/CMake/releases/download/v${PKG_VERSION}/cmake-${PKG_VERSION}-windows-x86_64.zip
-        digestSHA256: "53c6f57bda4a20e2a0515246a298e3c0784da3b687ef2a00a55bdcfad450998c"
+        digestSHA256: "ab1c7f46a1b1314f9fcb766c2573148679af599d94c5566bc12b8b35bb563362"
         dir: cmake.bin
 
 depends:
