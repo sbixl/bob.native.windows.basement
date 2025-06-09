@@ -6,31 +6,39 @@ depends:
     - devel::plantuml
 
 buildScript: |
-    'breathe==4.35.0
-    mlx.traceability==10.1.0
-    sphinx_rtd_theme==1.3.0
-    sphinx_tabs==3.4.4
-    sphinx-prompt==1.8.0
-    sphinxcontrib-plantuml==0.27
+    'breathe==4.36.0
+    mlx.traceability==11.7.0
+    sphinx_rtd_theme==3.0.2
+    sphinx_tabs==3.4.7
+    sphinx-prompt==1.9.0
+    sphinxcontrib-plantuml==0.30
     sphinxcontrib-jsmath==1.0.1
     sphinx-togglebutton==0.3.2
     sphinx-copybutton==0.5.2
-    sphinx_design==0.5.0
-    jupyter-sphinx==0.4.0
-    ipython==8.18.1
-    ipykernel==6.27.1
-    pandas==2.1.3
-    scipy==1.11.4
-    schemdraw==0.17' | Out-File -encoding ASCII ${PWD}\addons.txt
+    sphinx_design==0.6.1
+    jupyter-sphinx==0.5.3
+    ipython==9.2.0
+    ipykernel==6.29.5
+    pandas==2.2.3
+    scipy==1.15.3
+    schemdraw==0.20' | Out-File -encoding ASCII ${PWD}\addons.txt
 
     # Search for any pip package in local storage (if available, otherwise use pypi.org as source)
     pipSetRelativeSearchPath sphinx
 
-    pipInstall sphinx==7.2.6
+    # Some dependencies needs a home directory we do not have on the CI build machine.
+    # We create a temporary one and let the HOMEPATH environment variable point to it
+    mkdir -Force -p home >$null
+    $Env:HOMEPATH="${PWD}\home"
+
+    pipInstall sphinx==8.2.3
     pipInstallFromFile addons.txt
 
     # unset local search path
     pipSetRelativeSearchPath ""
+
+    # remove temporary home directory again
+    cmd /c rmdir /s /q home
 
 packageScript: |
     installPythonModule
