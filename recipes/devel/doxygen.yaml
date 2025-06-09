@@ -1,7 +1,9 @@
+shared: True
+
 inherit: [cmake]
 
 metaEnvironment:
-    PKG_VERSION: "1_9_8"
+    PKG_VERSION: "1_13_2"
 
 depends:
     - name: devel::flex
@@ -12,12 +14,13 @@ depends:
 checkoutSCM:
     scm: url
     url: ${GITHUB_MIRROR}/doxygen/doxygen/archive/refs/tags/Release_${PKG_VERSION}.zip
-    digestSHA256: ddc0c697aaa961065b973a64a8e43a355b9fe78d66fc1638a24a3c81e5d06a8d
+    digestSHA256: 6ef2f89f6fad970f67cef9599df6cd8fe99f778e2187423cb11a5c8e1f95860a
 
 buildTools: [flex, bison]
 buildVars: [PKG_VERSION]
 buildScript: |
     cmakeBuild -GNinja `
+               -DCMAKE_BUILD_TYPE=RELEASE `
                -Dbuild_wizard=OFF `
                -Dbuild_app=OFF `
                -Dbuild_parse=OFF `
@@ -27,7 +30,6 @@ buildScript: |
                -Duse_sqlite3=OFF `
                -Duse_libclang=OFF `
                -Dwin_static=ON `
-               -DCMAKE_BUILD_TYPE=Release `
                "$($args[0])\doxygen-Release_${Env:PKG_VERSION}"
 
 packageScript: |
