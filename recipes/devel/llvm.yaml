@@ -1,20 +1,21 @@
+shared: True
 inherit: [cmake, python3, filesystem]
 
 metaEnvironment:
-    PKG_VERSION: "16.0.6"
+    PKG_VERSION: "19.1.7"
 
 checkoutSCM:
     -
         scm: url
         url: ${GITHUB_MIRROR}/llvm/llvm-project/releases/download/llvmorg-${PKG_VERSION}/llvm-project-${PKG_VERSION}.src.tar.xz
-        digestSHA256: ce5e71081d17ce9e86d7cbcfa28c4b04b9300f8fb7e78422b1feb6bc52c3028e
+        digestSHA256: 82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501
         extract: no
         dir: llvm
     # Use rpmalloc, for faster ThinLTO linking.
     -
         scm: url
-        url: ${GITHUB_MIRROR}/mjansson/rpmalloc/archive/refs/tags/1.4.4.zip
-        digestSHA256: 4a585a4bc1aa5d77212691dcf4c8714b573808d99e62f9145152d91ce103af39
+        url: ${GITHUB_MIRROR}/mjansson/rpmalloc/archive/refs/tags/1.4.5.zip
+        digestSHA256: f81694371c520ce0a5aca67c5012e6e907e847de37029d5791cf4888807dfae3
         dir: rpmalloc
 
 depends:
@@ -41,7 +42,7 @@ buildScript: |
 
     CopyDirectory "$($args[0])\llvm\llvm-project-${Env:PKG_VERSION}.src" . $true
 
-    $RPMALLOC_SRC_DIR = "$($args[0])\rpmalloc\rpmalloc-1.4.4"
+    $RPMALLOC_SRC_DIR = "$($args[0])\rpmalloc\rpmalloc-1.4.5"
 
     function buildClang
     {
@@ -55,6 +56,7 @@ buildScript: |
                   -DBUILD_SHARED_LIBS=OFF `
                   -DCMAKE_BUILD_TYPE=Release `
                   -DCMAKE_INSTALL_UCRT_LIBRARIES=ON `
+                  -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded `
                   -DCMAKE_INSTALL_PREFIX=install\usr `
                   -DCLANG_INCLUDE_TESTS=OFF `
                   -DCLANG_INCLUDE_DOCS=OFF `
@@ -183,6 +185,5 @@ multiPackage:
 
             publicHeader:
                 - usr\lib\clang\{0}\include
-                - usr\include\x86_64-pc-windows-msvc\c++\v1
                 - usr\include\c++\v1' -f ${Env:PKG_VERSION}.split(".")[0] | Out-File -encoding ASCII toolchain.cfg
             popd
