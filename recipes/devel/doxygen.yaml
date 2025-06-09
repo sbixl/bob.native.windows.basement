@@ -2,6 +2,10 @@ shared: True
 
 inherit: [cmake]
 
+# see: https://github.com/doxygen/doxygen/issues/10262
+environment:
+    PARALLEL_JOBS: "1"
+
 metaEnvironment:
     PKG_VERSION: "1_13_2"
 
