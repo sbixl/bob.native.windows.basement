@@ -1,13 +1,17 @@
+shared: True
+
 metaEnvironment:
-    PKG_VERSION: "1.11.1"
+    PKG_VERSION: "1.12.1"
 
 checkoutSCM:
     scm: url
-    url: ${GITHUB_MIRROR}/Kitware/ninja/archive/refs/tags/v${PKG_VERSION}.g95dee.kitware.jobserver-1.zip
-    digestSHA256: d605f36bce5cf50799ad3a56e7d388d7c0cf6731db40f46334e076c7e036bfaa
+    url: ${GITHUB_MIRROR}/ninja-build/ninja/archive/refs/tags/v${PKG_VERSION}.zip
+    digestSHA256: 40db6f6c77045efc817209fa72c3f92a399b7e39cf8e4cddfe7e65df2dd5dcbe
 
 multiPackage:
     "":
+        shared: True
+
         inherit: [cmake]
 
         depends:
@@ -18,7 +22,7 @@ multiPackage:
 
         buildVars: [PKG_VERSION]
         buildScript: |
-            cmakeBuild "$($args[0])\ninja-${Env:PKG_VERSION}.g95dee.kitware.jobserver-1" `
+            cmakeBuild "$($args[0])\ninja-${Env:PKG_VERSION}" `
                        -DCMAKE_BUILD_TYPE=Release
 
         packageScript: |
@@ -37,8 +41,8 @@ multiPackage:
             # copy sources to build directory while bootstrapping because this influence
             # the build-id and ninja is build twice (seems to be that the bootstrap command
             # modifies something in the source directory)
-            cp -r -Force "$($args[0])\ninja-${Env:PKG_VERSION}.g95dee.kitware.jobserver-1" .
-            $SRC_PATH = "ninja-${Env:PKG_VERSION}.g95dee.kitware.jobserver-1\configure.py"
+            cp -r -Force "$($args[0])\ninja-${Env:PKG_VERSION}" .
+            $SRC_PATH = "ninja-${Env:PKG_VERSION}\configure.py"
             Check-Command { python $SRC_PATH --bootstrap }
             ./ninja.exe
 
