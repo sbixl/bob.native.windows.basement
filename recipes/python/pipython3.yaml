@@ -1,11 +1,11 @@
 inherit: [cpackage]
 
 metaEnvironment:
-    PYTHON_VERSION:     "3.11.6"
-    GET_PIP_VERSION:    "23.3.1"
-    PIP_VERSION:        "23.3.1"
-    SETUPTOOLS_VERSION: "69.0.2"
-    WHEEL_VERSION:      "0.42.0"
+    PYTHON_VERSION:     "3.11.11"
+    GET_PIP_VERSION:    "24.3.1"
+    PIP_VERSION:        "24.3.1"
+    SETUPTOOLS_VERSION: "75.8.0"
+    WHEEL_VERSION:      "0.45.1"
 
 depends:
     - name: python::pipython3-minimal
@@ -15,13 +15,13 @@ checkoutSCM:
     -
         scm: url
         url: ${PYTHON_MIRROR}/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz
-        digestSHA256: 0fab78fa7f133f4f38210c6260d90d7c0d5c7198446419ce057ec7ac2e6f5f38
+        digestSHA256: 2a9920c7a0cd236de33644ed980a13cbbc21058bfdc528febb6081575ed73be3
         extract: no
         dir: python
     -
         scm: url
         url: ${GITHUB_MIRROR}/pypa/get-pip/archive/refs/tags/${GET_PIP_VERSION}.zip
-        digestSHA256: 369b52b1140e22ecf05ff699124d565c5754dd156e9ba0d98c2dce8af167b73b
+        digestSHA256: 352b0db8f4cbd348db1812ca693b8a38ad258aa1804c60c07bed87e15df27d67
         dir: get-pip
     # Fetching external libraries...
     -
@@ -32,8 +32,8 @@ checkoutSCM:
         dir: deps/bzip2
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/sqlite-3.42.0.0.zip
-        digestSHA256: 8b1c68e8f21be7016b0e67f91d7972281b118dcd591fd8580f001e92675a7108
+        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/sqlite-3.45.1.0.zip
+        digestSHA256: c8597e0744f5a2ca67242ce22e56462ea6968ce3a2db542fd3bee49f66315f9a
         extract: no
         dir: deps/sqlite
     -
@@ -44,8 +44,8 @@ checkoutSCM:
         dir: deps/xz
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/zlib-1.2.13.zip
-        digestSHA256: 93f286fefc44d971dbe865c59d6c61bb9cf429ca6607eb0604b0a5dae33d9486
+        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/zlib-1.3.1.zip
+        digestSHA256: a8f166f0f819ff084042554f39d763c41de5f19f8e9cdc68bc3e7f373cfba036
         extract: no
         dir: deps/zlib
     # Fetching external binaries...
@@ -57,8 +57,8 @@ checkoutSCM:
         dir: deps/libffi
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/openssl-bin-3.0.11.zip
-        digestSHA256: a7f00e8d7023ad8565087bd45520d736cd1211d77875f100c3cf232bea56db8f
+        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/openssl-bin-3.0.15.zip
+        digestSHA256: 32dbabcebb8da5d2ac2808a541a92c36c74ced762ba642f760cb0275d15047ea
         extract: no
         dir: deps/openssl-bin
     -
@@ -68,7 +68,7 @@ checkoutSCM:
         extract: no
         dir: deps/tcltk
 
-checkoutTools: [7z]
+checkoutToolsWeak: [7z]
 checkoutVars: [PYTHON_VERSION, PIP_VERSION, SETUPTOOLS_VERSION, WHEEL_VERSION, GET_PIP_VERSION]
 checkoutDeterministic: True
 checkoutScript: |
@@ -101,6 +101,8 @@ buildScript: |
 
         pushd src/externals
         Check-Command { 7z x -y $SRC_PATH/deps/$DEP/$DEP-$VER.zip }
+        # It is important to ensure that 7z has fully terminated to avoid any permission issues.
+        Start-Sleep -Seconds 1
         Rename-Item cpython-source-deps-$DEP-$VER $DEP-$VER
         popd
     }
@@ -117,6 +119,8 @@ buildScript: |
 
         pushd src/externals
         Check-Command { 7z x -y $SRC_PATH/deps/$DEP/$DEP-$VER.zip }
+        # It is important to ensure that 7z has fully terminated to avoid any permission issues.
+        Start-Sleep -Seconds 1
         Rename-Item cpython-bin-deps-$DEP-$VER $DEP-$VER
         popd
     }
@@ -133,11 +137,11 @@ buildScript: |
 
     # copy dependencies
     __addLib "bzip2"       "1.0.8"
-    __addLib "sqlite"      "3.42.0.0"
+    __addLib "sqlite"      "3.45.1.0"
     __addLib "xz"          "5.2.5"
-    __addLib "zlib"        "1.2.13"
+    __addLib "zlib"        "1.3.1"
     __addBin "libffi"      "3.4.4"
-    __addBin "openssl-bin" "3.0.11"
+    __addBin "openssl-bin" "3.0.15"
     __addBin "tcltk"       "8.6.12.1"
 
     Check-Command { src/PCbuild/build.bat -p x64 }
@@ -153,12 +157,14 @@ buildScript: |
     cp -Include @("*.h", "*/") -Force -r src/PC/* install/usr/include/
 
     # install pip, setuptools and wheel into the current environment
-    ./install/usr/bin/python.exe $SRC_PATH/get-pip/get-pip-${Env:GET_PIP_VERSION}/public/get-pip.py `
-            "pip == ${Env:PIP_VERSION}" `
-            "setuptools == ${Env:SETUPTOOLS_VERSION}" `
-            "wheel == ${Env:WHEEL_VERSION}" `
-            --root "$PWD/install" `
-            --prefix usr
+    Check-Command {
+        ./install/usr/bin/python.exe $SRC_PATH/get-pip/get-pip-${Env:GET_PIP_VERSION}/public/get-pip.py `
+                "pip == ${Env:PIP_VERSION}" `
+                "setuptools == ${Env:SETUPTOOLS_VERSION}" `
+                "wheel == ${Env:WHEEL_VERSION}" `
+                --root "$PWD/install" `
+                --prefix usr
+    }
 
 packageScript: |
     cp -Force -r "$($args[0])/install/*" .
