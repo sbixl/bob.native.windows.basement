@@ -1,7 +1,7 @@
 shared: True
 
 environment:
-    AUTOCONF_TARGET: "x86_64-pc-windows-msvc"
+    AUTOCONF_TARGET: "x86_64-pc-windows-gnu"
 
 depends:
     # build the native clang compiler
