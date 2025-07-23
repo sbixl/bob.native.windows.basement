@@ -37,9 +37,8 @@ checkoutScript: |
     #   ERROR: Dangerous symbolic link path was ignored : ...\multilib_64bit_linux_tree\usr\x86_64-unknown-linux\bin\as : ..\..\bin\x86_64-unknown-linux-gnu-as
     #   ERROR: Dangerous symbolic link path was ignored : ...\multilib_64bit_linux_tree\usr\x86_64-unknown-linux\bin\ld : ..\..\bin\x86_64-unknown-linux-gnu-ld
     #
-    # This issue happens only on a native windows machine. Ignoring the the path (which is only relevant for unix systems) will fix the error.
-    Check-Command { 7z x -y llvm-project-${Env:PKG_VERSION}.src.tar -xr!llvm-project-20.1.8.src\clang\test\Driver\Inputs\multilib_32bit_linux_tree }
-
+    # This issue happens only on a native windows machine. We ignore this error while not using the 'Check-Command' macro.
+    7z x -y llvm-project-${Env:PKG_VERSION}.src.tar
     rm -r -Force llvm-project-${Env:PKG_VERSION}.src.tar
     popd
 
