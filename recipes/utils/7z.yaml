@@ -3,7 +3,7 @@ shared: True
 inherit: [cpackage, install, patch]
 
 metaEnvironment:
-    PKG_VERSION: "24.09"
+    PKG_VERSION: "25.00"
 
 depends:
     - name: devel::msvc-v142-x86_x64
@@ -13,7 +13,7 @@ checkoutSCM:
     -
         scm: git
         url: ${GITHUB_MIRROR}/mcmilk/7-Zip.git
-        commit: c44df79f9a65142c460313f720dc22c8783c63b1
+        commit: b2ccdd1c669e88324b11d725c27c962b9e9e12b6
         if: !expr |
                 "${GITHUB_MIRROR}" == "https://github.com"
     -
@@ -22,7 +22,7 @@ checkoutSCM:
         # into our internal GitLab.
         scm: url
         url: ${GITHUB_MIRROR}/mcmilk/7z-${PKG_VERSION}.zip
-        digestSHA256: 0cf867252adf919ec8295740839f104bf979f42745ac740e180959bc7661aa13
+        digestSHA256: b60365a21ddba36af33e7cccd51c6d68cae45f57596cf61069588baabc39ae34
         if: !expr |
                 "${GITHUB_MIRROR}" != "https://github.com"
 
