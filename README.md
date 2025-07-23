@@ -22,7 +22,7 @@ standard tasks. Optional a x86_64 clang and by default common GCC cross toolchai
   * [Enable long path support](https://www.msftnext.com/how-to-enable-ntfs-long-paths-in-windows-10/).
 
 * git for windows (https://gitforwindows.org/)
-* Bob Build Tool (https://github.com/BobBuildTool/bob) with minimum version v0.23.1
+* Bob Build Tool (https://github.com/BobBuildTool/bob) with minimum version v1.1.0
 
 # How to build
 
