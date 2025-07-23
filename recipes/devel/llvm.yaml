@@ -2,13 +2,13 @@ shared: True
 inherit: [cmake, python3, filesystem]
 
 metaEnvironment:
-    PKG_VERSION: "19.1.7"
+    PKG_VERSION: "20.1.8"
 
 checkoutSCM:
     -
         scm: url
         url: ${GITHUB_MIRROR}/llvm/llvm-project/releases/download/llvmorg-${PKG_VERSION}/llvm-project-${PKG_VERSION}.src.tar.xz
-        digestSHA256: 82401fea7b79d0078043f7598b835284d6650a75b93e64b6f761ea7b63097501
+        digestSHA256: 6898f963c8e938981e6c4a302e83ec5beb4630147c7311183cf61069af16333d
         extract: no
         dir: llvm
     # Use rpmalloc, for faster ThinLTO linking.
@@ -26,12 +26,22 @@ checkoutToolsWeak: [7z]
 checkoutVars: [PKG_VERSION]
 checkoutDeterministic: True
 checkoutScript: |
-     pushd llvm
-     Check-Command { 7z x -y llvm-project-${Env:PKG_VERSION}.src.tar.xz }
-     Check-Command { 7z x -y llvm-project-${Env:PKG_VERSION}.src.tar }
+    pushd llvm
+    Check-Command { 7z x -y llvm-project-${Env:PKG_VERSION}.src.tar.xz }
 
-     rm -r -Force llvm-project-${Env:PKG_VERSION}.src.tar
-     popd
+    # There is an issue in the llvm source tree while extracting the tar archive from Github.
+    # After upgrading 7z to version 25.00 it complains with:
+    #
+    #   ERROR: Dangerous symbolic link path was ignored : ...\multilib_32bit_linux_tree\usr\i386-unknown-linux\bin\as   : ..\..\bin\i386-unknown-linux-gnu-as
+    #   ERROR: Dangerous symbolic link path was ignored : ...\multilib_32bit_linux_tree\usr\i386-unknown-linux\bin\ld   : ..\..\bin\i386-unknown-linux-gnu-ld
+    #   ERROR: Dangerous symbolic link path was ignored : ...\multilib_64bit_linux_tree\usr\x86_64-unknown-linux\bin\as : ..\..\bin\x86_64-unknown-linux-gnu-as
+    #   ERROR: Dangerous symbolic link path was ignored : ...\multilib_64bit_linux_tree\usr\x86_64-unknown-linux\bin\ld : ..\..\bin\x86_64-unknown-linux-gnu-ld
+    #
+    # This issue happens only on a native windows machine. Ignoring the the path (which is only relevant for unix systems) will fix the error.
+    Check-Command { 7z x -y llvm-project-${Env:PKG_VERSION}.src.tar -xr!llvm-project-20.1.8.src\clang\test\Driver\Inputs\multilib_32bit_linux_tree }
+
+    rm -r -Force llvm-project-${Env:PKG_VERSION}.src.tar
+    popd
 
 buildToolsWeak: [cmake]
 buildVars: [LLVM_TARGETS, LLVM_PROJECTS, CFLAGS, CXXFLAGS]
