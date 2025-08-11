@@ -11,8 +11,7 @@ buildScript: |
     }
 
     # Because DEST_DIR is not supported on windows, we must set the path from here
-    $global:CMAKE_INSTALL_PREFIX="..\install\usr"
-    $global:CMAKE_INSTALL_SYSCONFDIR="..\install\etc"
+    $global:CMAKE_INSTALL_PREFIX="install\usr"
 
     # CMake does not honor CPPFLAGS! Merge them with C(XX)FLAGS.
     if ( ${Env:CPPFLAGS} -ne $null )
@@ -98,8 +97,6 @@ buildScript: |
         }
         mkdir -Force build, install >$null
 
-        pushd build
-
         $SRC_PATH = "$($args[$processed])"
         $processed++
 
@@ -107,6 +104,7 @@ buildScript: |
 
         Check-Command {
             cmake $SRC_PATH `
+                  -B build `
                   -GNinja `
                   -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" `
                   -DCMAKE_FIND_ROOT_PATH="${CMAKE_FIND_ROOT_PATH}" `
@@ -118,14 +116,13 @@ buildScript: |
                   $_OPTIONS
         }
 
+        pushd build
         ninjaParallel -o "${MAKE_OPTIONS}" -t "${MAKE_TARGETS}"
 
         if ( $INSTALL -eq "yes" )
         {
-            $DESTDIR="${PWD}\..\install"
             cmakeInstall INSTALL_COMPONENT
         }
-
         popd
     }
 
@@ -134,8 +131,6 @@ buildScript: |
         # optional
         [Parameter(Position = 0)]
         [String]$INSTALL_COMPONENT=""
-
-        $DESTDIR="${PWD}\..\install"
 
         if ( "" -ne $INSTALL_COMPONENT )
         {
