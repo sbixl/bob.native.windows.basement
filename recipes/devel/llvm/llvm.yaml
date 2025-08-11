@@ -1,0 +1,133 @@
+shared: True
+inherit: [cmake, python3, filesystem]
+
+metaEnvironment:
+    PKG_VERSION: "20.1.8"
+    PKG_DESCRIPTION: "A collection of modular and reusable compiler and toolchain technologies"
+    PKG_LICENSE: "Apache-2.0 WITH LLVM-exception"
+
+checkoutSCM:
+    -
+        scm: url
+        url: ${GITHUB_MIRROR}/llvm/llvm-project/releases/download/llvmorg-${PKG_VERSION}/llvm-project-${PKG_VERSION}.src.tar.xz
+        digestSHA256: 6898f963c8e938981e6c4a302e83ec5beb4630147c7311183cf61069af16333d
+        extract: no
+        dir: llvm
+    # Use rpmalloc, for faster ThinLTO linking.
+    -
+        scm: url
+        url: ${GITHUB_MIRROR}/mjansson/rpmalloc/archive/refs/tags/1.4.5.zip
+        digestSHA256: f81694371c520ce0a5aca67c5012e6e907e847de37029d5791cf4888807dfae3
+        dir: rpmalloc
+
+depends:
+    # link libxml2 to make lld-link not require mt.exe on Windows
+    - devel::llvm::libxml2
+
+checkoutToolsWeak: [7z]
+checkoutVars: [PKG_VERSION]
+checkoutDeterministic: True
+checkoutScript: |
+    pushd llvm
+    Check-Command { 7z x -y llvm-project-${Env:PKG_VERSION}.src.tar.xz }
+
+    # There is an issue in the llvm source tree while extracting the tar archive from Github.
+    # After upgrading 7z to version 25.00 it complains with:
+    #
+    #   ERROR: Dangerous symbolic link path was ignored : ...\multilib_32bit_linux_tree\usr\i386-unknown-linux\bin\as   : ..\..\bin\i386-unknown-linux-gnu-as
+    #   ERROR: Dangerous symbolic link path was ignored : ...\multilib_32bit_linux_tree\usr\i386-unknown-linux\bin\ld   : ..\..\bin\i386-unknown-linux-gnu-ld
+    #   ERROR: Dangerous symbolic link path was ignored : ...\multilib_64bit_linux_tree\usr\x86_64-unknown-linux\bin\as : ..\..\bin\x86_64-unknown-linux-gnu-as
+    #   ERROR: Dangerous symbolic link path was ignored : ...\multilib_64bit_linux_tree\usr\x86_64-unknown-linux\bin\ld : ..\..\bin\x86_64-unknown-linux-gnu-ld
+    #
+    # This issue happens only on a native windows machine. We ignore this error while not using the 'Check-Command' macro.
+    7z x -y llvm-project-${Env:PKG_VERSION}.src.tar
+    Move-Item -Path "llvm-project-${Env:PKG_VERSION}.src\*" -Destination . -Force
+    rm -r -Force llvm-project-${Env:PKG_VERSION}.src
+    rm -r -Force llvm-project-${Env:PKG_VERSION}.src.tar
+    popd
+
+buildScript: |
+    # Attention: While building Clang within a CI environment, the absolute paths used on Jenkins
+    # are longer than for a local build. For this reason, the entire source directory is copied to
+    # the build step because the relative path can be used!
+
+    #mkdir -Force -p src > $null
+    #CopyDirectory "$($args[0])\llvm\" src $true
+
+    $global:LLVM_SRC_DIR = "$($args[0])\llvm\llvm"
+    #$global:LLVM_SRC_DIR = "src\llvm"
+
+    function buildClang
+    {
+        $PYTHON_DIR   = "$($BOB_TOOL_PATHS["python3"])".Replace("\","/")
+        $LIBXML2_INCLUDE_DIR = "$($BOB_DEP_PATHS["devel::llvm::libxml2"])\usr\include\libxml2".Replace("\","/")
+        $LIBXML2_LIBRARIES   = "$($BOB_DEP_PATHS["devel::llvm::libxml2"])\usr\lib\libxml2s.lib".Replace("\","/")
+
+        $_OPTIONS = $($args)
+
+        cmakeBuild "$LLVM_SRC_DIR" `
+                   -DCMAKE_BUILD_TYPE=Release `
+                   -DCMAKE_C_FLAGS="-DLIBXML_STATIC" `
+                   -DCMAKE_CXX_FLAGS="-DLIBXML_STATIC" `
+                   -DCMAKE_CL_SHOWINCLUDES_PREFIX="Note: including file: " `
+                   -DLIBXML2_INCLUDE_DIR="$LIBXML2_INCLUDE_DIR" `
+                   -DLIBXML2_LIBRARIES="$LIBXML2_LIBRARIES" `
+                   -DLIBCLANG_BUILD_STATIC=ON `
+                   -DLLVM_TARGETS_TO_BUILD="X86" `
+                   -DLLVM_ENABLE_LIBXML2=FORCE_ON `
+                   -DLLVM_ENABLE_ASSERTIONS=OFF `
+                   -DLLVM_OPTIMIZED_TABLEGEN=ON `
+                   -DLLVM_INCLUDE_BENCHMARKS=OFF `
+                   -DLLVM_INCLUDE_DOCS=OFF `
+                   -DLLVM_INCLUDE_EXAMPLES=OFF `
+                   -DLLVM_INCLUDE_TESTS=OFF `
+                   -DLLVM_ENABLE_OCAMLDOC=OFF `
+                   -DLLVM_ENABLE_ZSTD=OFF `
+                   -DLLVM_ENABLE_BINDINGS=OFF `
+                   -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON `
+                   -DLLVM_BUILD_LLVM_C_DYLIB=ON `
+                   -DLLVM_ENABLE_RPMALLOC=ON `
+                   -DLLDB_RELOCATABLE_PYTHON=1 `
+                   -DLLDB_EMBED_PYTHON_HOME=OFF `
+                   -DLLDB_ENABLE_LIBXML2=OFF `
+                   -DCLANG_ENABLE_LIBXML2=OFF `
+                   -DPython3_FIND_REGISTRY=NEVER `
+                   -DPYTHON_HOME="$PYTHON_DIR" `
+                   -DPython3_ROOT_DIR="$PYTHON_DIR" `
+                   $_OPTIONS
+    }
+
+multiPackage:
+
+    host-tools:
+        buildScript: |
+            buildClang -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld"
+
+        packageScript: |
+            cmakePackageBin
+            # Need to copy extra host tools that are not installed by default.
+            # Copy-Item -Path (@("clang-tidy-confusable-chars-gen.exe", "llvm-lit.py") | ForEach-Object { Join-Path "build/bin" $_ }) -Destination "install/usr/bin"
+
+        provideTools:
+            clang-host: usr/bin
+
+    "":
+        depends:
+            - name: devel::llvm::llvm-host-tools
+              use: [tools]
+
+        buildTools: [clang-host]
+        buildScript: |
+            Write-Host "TODO"
+
+        packageScript: |
+            Write-Host "TODO"
+
+        multiPackage:
+
+            clang:
+                buildScript: |
+                    Write-Host "TODO"
+
+                packageScript: |
+                    Write-Host "TODO"
