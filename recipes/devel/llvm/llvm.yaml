@@ -108,6 +108,10 @@ buildScript: |
                    -DPython3_ROOT_DIR="$PythonDirectory" `
                    $_OPTIONS
         popd
+
+        # Create a symlink from the external build and install directory back to Bobs (managed) build directory.
+        New-Item -ItemType SymbolicLink -Path "${PWD}\build"   -Target "${Drive}\.bob\llvm\build" > $null
+        New-Item -ItemType SymbolicLink -Path "${PWD}\install" -Target "${Drive}\.bob\llvm\install" > $null
     }
 
 multiPackage:
