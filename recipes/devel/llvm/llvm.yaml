@@ -60,19 +60,31 @@ checkoutScript: |
     # Create a symlink from the external source directory back to Bobs (managed) source directory.
     New-Item -ItemType SymbolicLink -Path ${SymlinkPath} -Target ${ExternalSourceDirectory} > $null
 
+buildVarsWeak: [BOB_PACKAGE_NAME]
 buildScript: |
-    # The same hack that applies to the source directory also applies to the build directory.
-    $Drive = Split-Path -Qualifier (Get-Location)
-    $global:ExternalBuildPath="${Drive}\.bob\llvm"
-    $global:SourceDirectory = "${Drive}\.bob\llvm\src\llvm"
-
     function buildClang
     {
+        # The same hack that applies to the source directory also applies to the build directory.
+        $Drive = Split-Path -Qualifier (Get-Location)
+
+        # Calculate a unique build path (use sha1 hash of the package to be build)
+        $sha1 = [System.Security.Cryptography.SHA1]::Create()
+        $bytes = [System.Text.Encoding]::UTF8.GetBytes(${Env:BOB_PACKAGE_NAME})
+        # shorten the sah1 checksum to eight numbers (to still have a 'short' path)
+        $hash = $sha1.ComputeHash($bytes)
+        $build_dir = [BitConverter]::ToUInt32($hash, 0) % 100000000
+
+        $ExternalBuildPath="${Drive}\.bob\llvm\${build_dir}"
+        $SourceDirectory = "${Drive}\.bob\llvm\src\llvm"
+
         $PythonDirectory    = "$($BOB_TOOL_PATHS["python3"])".Replace("\","/")
         $LibXml2_IncludeDir = "$($BOB_DEP_PATHS["devel::llvm::libxml2"])\usr\include\libxml2".Replace("\","/")
         $LibXml2_LibDir     = "$($BOB_DEP_PATHS["devel::llvm::libxml2"])\usr\lib\libxml2s.lib".Replace("\","/")
 
         $_OPTIONS = $($args)
+
+        DeleteDirectory ${ExternalBuildPath}
+        mkdir -p ${ExternalBuildPath} >$null
 
         pushd ${ExternalBuildPath}
 
@@ -110,8 +122,8 @@ buildScript: |
         popd
 
         # Create a symlink from the external build and install directory back to Bobs (managed) build directory.
-        New-Item -ItemType SymbolicLink -Path "${PWD}\build"   -Target "${Drive}\.bob\llvm\build" > $null
-        New-Item -ItemType SymbolicLink -Path "${PWD}\install" -Target "${Drive}\.bob\llvm\install" > $null
+        New-Item -ItemType SymbolicLink -Path "${PWD}\build"   -Target "${ExternalBuildPath}\build" > $null
+        New-Item -ItemType SymbolicLink -Path "${PWD}\install" -Target "${ExternalBuildPath}\install" > $null
     }
 
 multiPackage:
