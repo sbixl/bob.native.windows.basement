@@ -57,9 +57,6 @@ checkoutScript: |
     rm -r -Force "${ExternalSourceDirectory}\llvm-project-${Env:PKG_VERSION}.src"
     rm -r -Force llvm-project-${Env:PKG_VERSION}.src.tar
 
-    # Create a symlink from the external source directory back to Bobs (managed) source directory.
-    New-Item -ItemType SymbolicLink -Path ${SymlinkPath} -Target ${ExternalSourceDirectory} > $null
-
 buildVarsWeak: [BOB_PACKAGE_NAME]
 buildScript: |
     function buildClang
