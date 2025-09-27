@@ -96,7 +96,7 @@ buildScript: |
                    -DLIBXML2_INCLUDE_DIR="$LibXml2_IncludeDir" `
                    -DLIBXML2_LIBRARY="$LibXml2_LibDir" `
                    -DLIBCLANG_BUILD_STATIC=ON `
-                   -DLLVM_TARGETS_TO_BUILD=${Env:LLVM_TARGETS} `
+                   -DLLVM_TARGETS_TO_BUILD="${Env:LLVM_TARGETS}" `
                    -DLLVM_ENABLE_LIBXML2=FORCE_ON `
                    -DLLVM_ENABLE_ASSERTIONS=OFF `
                    -DLLVM_OPTIMIZED_TABLEGEN=ON `
@@ -155,10 +155,13 @@ multiPackage:
                        -DCMAKE_RC=llvm-windres
 
         multiPackage:
+            "":
+                packageScript: |
+                    cmakePackageBin
+
+                provideTools:
+                    llvm: "usr/bin"
 
             clang:
-                buildScript: |
-                    Write-Host "TODO"
-
                 packageScript: |
                     Write-Host "TODO"
