@@ -6,6 +6,9 @@ metaEnvironment:
     PKG_DESCRIPTION: "A collection of modular and reusable compiler and toolchain technologies"
     PKG_LICENSE: "Apache-2.0 WITH LLVM-exception"
 
+environment:
+    LLVM_TARGETS: "AArch64;ARM;RISCV;X86"
+
 checkoutSCM:
     -
         scm: url
@@ -58,6 +61,7 @@ checkoutScript: |
     rm -r -Force llvm-project-${Env:PKG_VERSION}.src.tar
 
 buildVarsWeak: [BOB_PACKAGE_NAME]
+buildVars: [LLVM_TARGETS]
 buildScript: |
     function buildClang
     {
@@ -78,8 +82,6 @@ buildScript: |
         $LibXml2_IncludeDir = "$($BOB_DEP_PATHS["devel::llvm::libxml2"])\usr\include\libxml2".Replace("\","/")
         $LibXml2_LibDir     = "$($BOB_DEP_PATHS["devel::llvm::libxml2"])\usr\lib\libxml2s.lib".Replace("\","/")
 
-        $_OPTIONS = $($args)
-
         DeleteDirectory ${ExternalBuildPath}
         mkdir -p ${ExternalBuildPath} >$null
 
@@ -94,7 +96,7 @@ buildScript: |
                    -DLIBXML2_INCLUDE_DIR="$LibXml2_IncludeDir" `
                    -DLIBXML2_LIBRARY="$LibXml2_LibDir" `
                    -DLIBCLANG_BUILD_STATIC=ON `
-                   -DLLVM_TARGETS_TO_BUILD="X86" `
+                   -DLLVM_TARGETS_TO_BUILD=${Env:LLVM_TARGETS} `
                    -DLLVM_ENABLE_LIBXML2=FORCE_ON `
                    -DLLVM_ENABLE_ASSERTIONS=OFF `
                    -DLLVM_OPTIMIZED_TABLEGEN=ON `
@@ -115,7 +117,7 @@ buildScript: |
                    -DPython3_FIND_REGISTRY=NEVER `
                    -DPYTHON_HOME="$PythonDirectory" `
                    -DPython3_ROOT_DIR="$PythonDirectory" `
-                   $_OPTIONS
+                   @args
         popd
 
         # Create a symlink from the external build and install directory back to Bobs (managed) build directory.
@@ -142,10 +144,15 @@ multiPackage:
 
         buildTools: [clang-host]
         buildScript: |
-            Write-Host "TODO"
-
-        packageScript: |
-            Write-Host "TODO"
+            buildClang -DLLVM_NATIVE_TOOL_DIR="$($BOB_TOOL_PATHS["clang-host"])" `
+                       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" `
+                       -DLLVM_TABLEGEN=llvm-tblgen `
+                       -DLLVM_ENABLE_LLD=ON `
+                       -DCMAKE_C_COMPILER=clang-cl `
+                       -DCMAKE_CXX_COMPILER=clang-cl `
+                       -DCMAKE_LINKER=lld-link `
+                       -DCMAKE_AR=llvm-lib `
+                       -DCMAKE_RC=llvm-windres
 
         multiPackage:
 
