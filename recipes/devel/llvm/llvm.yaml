@@ -144,15 +144,20 @@ multiPackage:
 
         buildTools: [clang-host]
         buildScript: |
-            buildClang -DLLVM_NATIVE_TOOL_DIR="$($BOB_TOOL_PATHS["clang-host"])" `
+            # CMake expects the paths that specifies the compiler and linker to be with forward slash.
+            $TOOLCHAIN_DIR="$($BOB_TOOL_PATHS["clang-host"])".Replace("\","/")
+            $AR="$TOOLCHAIN_DIR/llvm-lib.exe"
+            $RC="$TOOLCHAIN_DIR/llvm-rc.exe"
+
+            buildClang -DLLVM_NATIVE_TOOL_DIR="$TOOLCHAIN_DIR" `
                        -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" `
                        -DLLVM_TABLEGEN=llvm-tblgen `
                        -DLLVM_ENABLE_LLD=ON `
                        -DCMAKE_C_COMPILER=clang-cl `
                        -DCMAKE_CXX_COMPILER=clang-cl `
                        -DCMAKE_LINKER=lld-link `
-                       -DCMAKE_AR=llvm-lib `
-                       -DCMAKE_RC=llvm-windres
+                       -DCMAKE_AR="$AR" `
+                       -DCMAKE_RC="$RC"
 
         multiPackage:
             "":
