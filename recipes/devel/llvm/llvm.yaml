@@ -150,7 +150,7 @@ multiPackage:
             $RC="$TOOLCHAIN_DIR/llvm-rc.exe"
 
             buildClang -DLLVM_NATIVE_TOOL_DIR="$TOOLCHAIN_DIR" `
-                       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" `
+                       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld;compiler-rt;lldb;openmp" `
                        -DLLVM_TABLEGEN=llvm-tblgen `
                        -DLLVM_ENABLE_LLD=ON `
                        -DCMAKE_C_COMPILER=clang-cl `
@@ -160,13 +160,7 @@ multiPackage:
                        -DCMAKE_RC="$RC"
 
         multiPackage:
-            "":
-                packageScript: |
-                    cmakePackageBin
-
-                provideTools:
-                    llvm: "usr/bin"
 
             clang:
                 packageScript: |
-                    Write-Host "TODO"
+                    cmakePackageBin
