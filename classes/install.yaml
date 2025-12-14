@@ -10,6 +10,8 @@ packageScript: |
             [string[]]$PATTERNS=@()
         )
 
+        $ROOT_DIRECTORY = (Resolve-Path $ROOT_DIRECTORY).Path
+
         $defaultExcludes = @(
             # remove documentation
             "usr\info",
@@ -66,30 +68,25 @@ packageScript: |
         {
             foreach ($include in $includes)
             {
-                $file = Get-Item (Join-Path $ROOT_DIRECTORY $include)
+                $file = Get-Item (Resolve-Path(Join-Path $ROOT_DIRECTORY $include))
                 if (!$file.PSIsContainer)
                 {
                     # process files
                     $relative_install_dir = $($file.DirectoryName).Replace($ROOT_DIRECTORY, "")
-                    Check-Command {
-                        robocopy "$($file.DirectoryName)" "${PWD}${relative_install_dir}" "$($file.Name)" $exclude_args "/COPY:DAT" "/R:0" "/W:0" >$null
-                    }
+                    Write-Host "Files" $relative_install_dir
+                    robocopy "$($file.DirectoryName)" "${PWD}${relative_install_dir}" "$($file.Name)" $exclude_args "/COPY:DAT" "/R:0" "/W:0" >$null
                 }
                 else
                 {
                     # process directories
                     $relative_install_dir = $($file.FullName).Replace($ROOT_DIRECTORY, "")
-                    Check-Command {
-                        robocopy "$($file.FullName)" "${PWD}${relative_install_dir}" $exclude_args "/E" "/COPY:DAT" "/R:0" "/W:0" >$null
-                    }
+                    robocopy "$($file.FullName)" "${PWD}${relative_install_dir}" $exclude_args "/E" "/COPY:DAT" "/R:0" "/W:0" >$null
                 }
             }
         }
         else
         {
-            Check-Command {
-                robocopy ${ROOT_DIRECTORY} ${PWD} $exclude_args "/E" "/COPY:DAT" "/R:0" "/W:0" >$null
-            }
+            robocopy ${ROOT_DIRECTORY} ${PWD} $exclude_args "/E" "/COPY:DAT" "/R:0" "/W:0" >$null
         }
     }
 
