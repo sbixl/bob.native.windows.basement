@@ -73,7 +73,6 @@ packageScript: |
                 {
                     # process files
                     $relative_install_dir = $($file.DirectoryName).Replace($ROOT_DIRECTORY, "")
-                    Write-Host "Files" $relative_install_dir
                     robocopy "$($file.DirectoryName)" "${PWD}${relative_install_dir}" "$($file.Name)" $exclude_args "/COPY:DAT" "/R:0" "/W:0" >$null
                 }
                 else
