@@ -1,23 +1,23 @@
 packageScript: |
-    function __installCopy
+    function installCopy
     {
         Param(
-            # mandaotry
+            # mandatory
             [Parameter(Position = 0, mandatory=$true)]
-            [String]$BUILD_OUTPUT_PATH,
+            [String]$ROOT_DIRECTORY,
             # optional
             [Parameter(Position = 1, mandatory=$false)]
-            [string[]]$ADDITIONAL_EXCLUDES=@()
+            [string[]]$PATTERNS=@()
         )
 
-        $GENERAL_EXCLUDES = @(
+        $defaultExcludes = @(
             # remove documentation
-            "$BUILD_OUTPUT_PATH\usr\info",
-            "$BUILD_OUTPUT_PATH\usr\share\info",
-            "$BUILD_OUTPUT_PATH\usr\man",
-            "$BUILD_OUTPUT_PATH\usr\doc",
-            "$BUILD_OUTPUT_PATH\usr\share\man",
-            "$BUILD_OUTPUT_PATH\usr\share\doc",
+            "usr\info",
+            "usr\share\info",
+            "usr\man",
+            "usr\doc",
+            "usr\share\man",
+            "usr\share\doc",
             # remove not needed unix stuff
             "aclocal",
             "bash-completion",
@@ -25,8 +25,72 @@ packageScript: |
             "vim"
         )
 
-        # Unfortunately, there is no good rsync alternative available under windows so we use robocopy
-        robocopy $BUILD_OUTPUT_PATH ${PWD} /E /V /XD $GENERAL_EXCLUDES $ADDITIONAL_EXCLUDES >$null
+        $includes = @()
+        $excludes = @($defaultExcludes)
+
+        foreach ($p in $PATTERNS)
+        {
+            if ($p.StartsWith("!"))
+            {
+                $excludes += $p.Substring(1)
+            }
+            else
+            {
+                $includes += $p
+            }
+        }
+
+        $exclude_args = @()
+        foreach ($exclude in $excludes)
+        {
+            $path = Join-Path $ROOT_DIRECTORY $exclude
+            if (Test-Path $path)
+            {
+                $file = Get-Item($path)
+                if (!$file.PSIsContainer)
+                {
+                    # exclude files
+                    $exclude_args += "/XF"
+                    $exclude_args += $(Get-Item $path).FullName
+                }
+                else
+                {
+                    # exclude directories
+                    $exclude_args += "/XD"
+                    $exclude_args += $(Get-Item $path).FullName
+                }
+            }
+        }
+
+        if ($includes.Count -gt 0)
+        {
+            foreach ($include in $includes)
+            {
+                $file = Get-Item (Join-Path $ROOT_DIRECTORY $include)
+                if (!$file.PSIsContainer)
+                {
+                    # process files
+                    $relative_install_dir = $($file.DirectoryName).Replace($ROOT_DIRECTORY, "")
+                    Check-Command {
+                        robocopy "$($file.DirectoryName)" "${PWD}${relative_install_dir}" "$($file.Name)" $exclude_args "/COPY:DAT" "/R:0" "/W:0" >$null
+                    }
+                }
+                else
+                {
+                    # process directories
+                    $relative_install_dir = $($file.FullName).Replace($ROOT_DIRECTORY, "")
+                    Check-Command {
+                        robocopy "$($file.FullName)" "${PWD}${relative_install_dir}" $exclude_args "/E" "/COPY:DAT" "/R:0" "/W:0" >$null
+                    }
+                }
+            }
+        }
+        else
+        {
+            Check-Command {
+                robocopy ${ROOT_DIRECTORY} ${PWD} $exclude_args "/E" "/COPY:DAT" "/R:0" "/W:0" >$null
+            }
+        }
     }
 
     # Everything except shared or static libraries or header files.
@@ -35,10 +99,10 @@ packageScript: |
         Param(
             # mandatory
             [Parameter(Position = 0, mandatory=$true)]
-            [String]$BUILD_OUTPUT_PATH
+            [String]$ROOT_DIRECTORY
         )
 
-        __installCopy $BUILD_OUTPUT_PATH
+        installCopy $ROOT_DIRECTORY
     }
 
     function InstallPackageTgt
@@ -46,10 +110,10 @@ packageScript: |
         Param(
             # mandatory
             [Parameter(Position = 0, mandatory=$true)]
-            [String]$BUILD_OUTPUT_PATH
+            [String]$ROOT_DIRECTORY
         )
 
-        installPackageBin $BUILD_OUTPUT_PATH
+        installPackageBin $ROOT_DIRECTORY
     }
 
     # Only copy over headers, libs directly in library dir and cmake files.
@@ -58,11 +122,11 @@ packageScript: |
         Param(
             # mandatory
             [Parameter(Position = 0, mandatory=$true)]
-            [String]$BUILD_OUTPUT_PATH
+            [String]$ROOT_DIRECTORY
         )
 
         # TODO: add exclude filter
-        __installCopy $BUILD_OUTPUT_PATH
+        installCopy $ROOT_DIRECTORY
     }
 
     # Only copy shared libraries.
@@ -71,9 +135,9 @@ packageScript: |
         Param(
             # mandatory
             [Parameter(Position = 0, mandatory=$true)]
-            [String]$BUILD_OUTPUT_PATH
+            [String]$ROOT_DIRECTORY
         )
 
         # TODO: add exclude filter
-        __installCopy $BUILD_OUTPUT_PATH
+        installCopy $ROOT_DIRECTORY
     }
