@@ -15,9 +15,9 @@ buildScript: |
     # This is hardcoded in the CMakeLists.txt and can't modify from the outside.
 
     cp -r -Force "$($args[0])\winflexbison-${Env:PKG_VERSION}" src
-    $SRC_PATH="..\src"
 
-    cmakeBuild $SRC_PATH `
+    cmakeBuild src `
+               -DCMAKE_POLICY_VERSION_MINIMUM="3.5" `
                -DCMAKE_BUILD_TYPE=Release
 
 packageScript: |

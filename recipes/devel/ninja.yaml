@@ -1,12 +1,21 @@
 shared: True
 
+inherit: [patch]
+
 metaEnvironment:
-    PKG_VERSION: "1.12.1"
+    PKG_VERSION: "1.13.1"
 
 checkoutSCM:
-    scm: url
-    url: ${GITHUB_MIRROR}/ninja-build/ninja/archive/refs/tags/v${PKG_VERSION}.zip
-    digestSHA256: 40db6f6c77045efc817209fa72c3f92a399b7e39cf8e4cddfe7e65df2dd5dcbe
+    scm: git
+    url: https://github.com/ninja-build/ninja.git
+    tag: v1.13.0
+    dir: ninja-${PKG_VERSION}
+
+checkoutVars: [PKG_VERSION]
+checkoutDeterministic: True
+checkoutScript: |
+    pushd ninja-${Env:PKG_VERSION}
+    patchApplySeries $<<ninja/*.patch>>
 
 multiPackage:
     "":

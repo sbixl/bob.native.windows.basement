@@ -58,7 +58,7 @@ multiPackage:
                     }
 
                 packageDepends: True
-                packageVars: [WINDOWS_SDK_VERSION, MSVC_FULL_VERSION]
+                packageVars: [WINDOWS_SDK_VERSION, MSVC_TOOLSET_VERSION]
                 packageScript: |
                     ##########################################################################################
                     #         Always build the package from scratch
@@ -225,7 +225,7 @@ multiPackage:
                     Write-Host WindowsSdkDir         = $Env:WindowsSdkDir
                     Write-Host WindowsSDKLibVersion  = $Env:WindowsSDKLibVersion
                     Write-Host WindowsSdkVerBinPath  = $Env:WindowsSdkVerBinPath
-                    Write-Host WindowsSDKVersion     = $Env:WindowsSDKVersion' -f "${Env:MSVC_FULL_VERSION}", `
+                    Write-Host WindowsSDKVersion     = $Env:WindowsSDKVersion' -f "${Env:MSVC_TOOLSET_VERSION}", `
                                                                                   "${Env:WINDOWS_SDK_VERSION}" | Out-File -encoding utf8 ${PWD}\setup_devenv.ps1
 
                 provideTools:
@@ -241,7 +241,7 @@ multiPackage:
                 provideVars:
                     AUTOCONF_HOST: "x86_64-pc-windows-msvc"
 
-                    MSVC_FULL_VERSION:      $MSVC_FULL_VERSION
+                    MSVC_TOOLSET_VERSION:   $MSVC_TOOLSET_VERSION
                     WINDOWS_SDK_VERSION:    $WINDOWS_SDK_VERSION
                     PROCESSOR_ARCHITECTURE: "AMD64"
 
