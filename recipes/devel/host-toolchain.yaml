@@ -5,10 +5,10 @@ environment:
 
 depends:
     # build the native clang compiler
-    - devel::llvm::llvm-clang
+    - devel::llvm-clang
 
 buildScript: |
-    cp -r -Force "$($BOB_DEP_PATHS["devel::llvm::llvm-clang"])\*" .
+    cp -r -Force "$($BOB_DEP_PATHS["devel::llvm-clang"])\*" .
 
 packageScript: |
     cp -r "$($args[0])\*" .

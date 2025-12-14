@@ -139,7 +139,7 @@ multiPackage:
 
     "":
         depends:
-            - name: devel::llvm::llvm-host-tools
+            - name: devel::llvm-host-tools
               use: [tools]
 
         buildTools: [clang-host]
@@ -160,7 +160,63 @@ multiPackage:
                        -DCMAKE_RC="$RC"
 
         multiPackage:
+            "":
+                packageScript: |
+                    installCopy "$($args[0])\install" @(
+                                    "usr",
+                                    "!usr\bin\clang-cl.exe",
+                                    "!usr\bin\clang-cpp.exe",
+                                    "!usr\bin\ld.lld.exe",
+                                    "!usr\bin\lld.exe",
+                                    "!usr\bin\lld-link.exe",
+                                    "!usr\bin\wasm-ld.exe",
+                                    "!usr\lib\clang",
+                                    "!usr\bin\clangd.exe",
+                                    "!usr\bin\clang-format.exe",
+                                    "!usr\bin\git-clang-format",
+                                    "!usr\bin\git-clang-format.bat"
+                                    "!usr\bin\clang-tidy.exe",
+                                    "!usr\bin\run-clang-tidy"
+                                )
+                provideTools:
+                    llvm: "usr/bin"
 
             clang:
                 packageScript: |
-                    cmakePackageBin
+                    installCopy "$($args[0])\install" @(
+                                    "usr\bin\clang++.exe",
+                                    "usr\bin\clang-cl.exe",
+                                    "usr\bin\clang-cpp.exe",
+                                    "usr\bin\ld.lld.exe",
+                                    "usr\bin\lld.exe",
+                                    "usr\bin\lld-link.exe",
+                                    "usr\bin\wasm-ld.exe",
+                                    "usr\lib\clang"
+                                )
+                provideTools:
+                    clang: "usr/bin"
+
+            clangd:
+                packageScript: |
+                    installCopy "$($args[0])\install" "usr\bin\clangd.exe"
+                provideTools:
+                    clangd: "usr/bin"
+
+            clang-format:
+                packageScript: |
+                    installCopy "$($args[0])\install" @(
+                                    "usr\bin\clang-format.exe",
+                                    "usr\bin\git-clang-format",
+                                    "usr\bin\git-clang-format.bat"
+                                )
+                provideTools:
+                    clang-format: "usr/bin"
+
+            clang-tidy:
+                packageScript: |
+                    installCopy "$($args[0])\install" @(
+                                    "usr\bin\clang-tidy.exe",
+                                    "usr\bin\run-clang-tidy"
+                                )
+                provideTools:
+                    clang-tidy: "usr/bin"
