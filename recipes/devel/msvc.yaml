@@ -6,7 +6,7 @@ buildScript: |
     DeleteDirectory ${PWD}
     # Extract msi and vsix archives
     $buildToolsDepPath = "$($args[1])"
-    MSVC-ExtractBuildTools $buildToolsDepPath
+    msvcExtractBuildTools $buildToolsDepPath
 
 packageDepends: True
 packageVars: [WINDOWS_SDK_VERSION, MSVC_TOOLSET_VERSION, VC_VER, VS_YEAR]
@@ -15,12 +15,12 @@ packageScript: |
     DeleteDirectory ${PWD}\*
 
     # Create visual studio shell environment script
-    MSVC-CreateDevenvScript $Env:MSVC_TOOLSET_VERSION `
+    msvcCreateDevenvScript $Env:MSVC_TOOLSET_VERSION `
                             $Env:WINDOWS_SDK_VERSION `
                             $Env:VC_VER `
     	                    $Env:VS_YEAR
 
-    MSVC-PackageBuildTools "$($args[0])"
+    msvcPackageBuildTools "$($args[0])"
 
     Write-Host "################## Copying Windows SDK ${Env:WINDOWS_SDK_VERSION}"
     $windows_sdk_dir = "$($args[2])"

@@ -2,7 +2,7 @@ inherit: [filesystem,  lessmsi]
 
 buildNetAccess: True
 buildSetup: |
-    function MSVC-DownloadSDK
+    function msvcDownloadSDK
     {
         Param(
             [Parameter(Mandatory, Position = 0)]
@@ -36,7 +36,7 @@ buildSetup: |
         }
     }
 
-    function MSVC-ExtractSDK
+    function msvcExtractSDK
     {
         Param(
             [Parameter(Mandatory, Position = 0)]
@@ -49,7 +49,7 @@ buildSetup: |
     }
 
 packageSetup: |
-    function MSVC-PackageSdk
+    function msvcPackageSdk
     {
         Param(
             [Parameter(Mandatory, Position = 0)]
@@ -78,7 +78,7 @@ packageSetup: |
         }
     }
 
-    function MSVC-ArchiveSdk
+    function msvcArchiveSdk
     {
         Param(
             [Parameter(Mandatory, Position = 0)]

@@ -44,7 +44,7 @@ checkoutSCM:
 #   - OptionId.DesktopCPParm64
 buildVars: [SDK_BUNDLE_NAME]
 buildScript: |
-    MSVC-DownloadSDK $($args[0]) `
+    msvcDownloadSDK $($args[0]) `
                      ${Env:SDK_BUNDLE_NAME} `
                      @("/features OptionId.UWPManaged"
                        "/features OptionId.UWPCPP"
@@ -55,11 +55,11 @@ buildScript: |
 multiPackage:
     "":
         buildScript: |
-            MSVC-ExtractSDK "${PWD}\layout\Installers" `
+            msvcExtractSDK "${PWD}\layout\Installers" `
                             Win10SDK
 
         packageScript: |
-            MSVC-PackageSdk "$($args[0])\Win10SDK"
+            msvcPackageSdk "$($args[0])\Win10SDK"
 
         provideVars:
             WINDOWS_SDK_VERSION: "10.0.19041.0"
@@ -68,5 +68,5 @@ multiPackage:
         root: True
         packageVars: [PKG_BUILD_NUMBER]
         packageScript: |
-            MSVC-ArchiveSdk "$($args[0])" `
+            msvcArchiveSdk "$($args[0])" `
                             "${Env:VS_BUNDLE_NAME}"

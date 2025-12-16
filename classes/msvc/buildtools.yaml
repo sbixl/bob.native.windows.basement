@@ -1,5 +1,5 @@
 buildSetup: |
-    function MSVC-ExtractBuildTools
+    function msvcExtractBuildTools
     {
         Param(
             [Parameter(Mandatory, Position = 0)]
@@ -37,7 +37,7 @@ buildSetup: |
     }
 
 packageSetup: |
-    function MSVC-PackageBuildTools
+    function msvcPackageBuildTools
     {
         Param(
             [Parameter(Mandatory, Position = 0)]

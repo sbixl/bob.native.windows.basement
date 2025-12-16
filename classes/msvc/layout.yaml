@@ -2,7 +2,7 @@ inherit: [filesystem]
 
 buildNetAccess: True
 buildScript: |
-    function MSVC-DownloadLayout
+    function msvcDownloadLayout
     {
         Param(
             [Parameter(Mandatory, Position = 1)]
@@ -64,7 +64,7 @@ buildScript: |
     }
 
 packageSetup: |
-    function MSVC-ArchiveLayout
+    function msvcArchiveLayout
     {
         Param(
             [Parameter(Mandatory, Position = 0)]
@@ -76,7 +76,7 @@ packageSetup: |
         Compress-Archive -Path "${layoutDirectory}\*" -DestinationPath ${bundleName}.zip
     }
 
-    function MSVC-PackageLayout
+    function msvcPackageLayout
     {
         Param(
             [Parameter(Mandatory, Position = 0)]

@@ -26,7 +26,7 @@ checkoutSCM:
 
 buildVars: [VS_BUNDLE_NAME]
 buildScript: |
-    MSVC-DownloadLayout $args[0] `
+    msvcDownloadLayout $args[0] `
                         $Env:VS_BUNDLE_NAME `
                         @("--add Microsoft.VisualStudio.Workload.MSBuildTools"
                           "--add Microsoft.VisualStudio.Workload.VCTools"
@@ -36,13 +36,13 @@ buildScript: |
 multiPackage:
     layout:
         packageScript: |
-            MSVC-PackageLayout "$($args[0])/layout"
+            msvcPackageLayout "$($args[0])/layout"
 
     bundle:
         root: True
         packageVars: [VS_BUNDLE_NAME]
         packageScript: |
-            MSVC-ArchiveLayout "$($args[0])/layout" `
+            msvcArchiveLayout "$($args[0])/layout" `
                                "${Env:VS_BUNDLE_NAME}"
 
 provideVars:

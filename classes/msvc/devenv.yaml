@@ -1,5 +1,5 @@
 packageSetup: |
-    function MSVC-CreateDevenvScript
+    function msvcCreateDevenvScript
     {
         Param(
             [Parameter(Mandatory, Position = 1)]
