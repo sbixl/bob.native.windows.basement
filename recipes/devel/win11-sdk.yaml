@@ -1,0 +1,71 @@
+inherit: [msvc::sdk]
+
+environment:
+    PKG_BUILD_NUMBER: "10.0.26100.7175"
+    SDK_BUNDLE_NAME:  "winsdksetup_10_0_26100_7175_layout"
+
+checkoutSCM:
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" == ""
+        scm: url
+        # Taken from https://developer.microsoft.com/de-de/windows/downloads/windows-sdk/
+        #
+        # Open a power shell and locate the redirect URI of the "go.microsoft.com/fwlink" address:
+        #
+        # (Invoke-WebRequest -uri "https://go.microsoft.com/fwlink/p/?LinkID=698771" -MaximumRedirection 0 -ErrorAction SilentlyContinue).RawContent
+        url: https://download.microsoft.com/download/8c20ba92-ce77-4348-a6e8-5c0e021763f6/KIT_BUNDLE_WINDOWSSDK_MEDIACREATION/winsdksetup.exe
+        digestSHA256: "508f1844dc5b8021b0f521e523ea1b94a6689dec0dd71769b805c24aef464a30"
+        extract: no
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" != ""
+        scm: url
+        url: ${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}/${SDK_BUNDLE_NAME}.zip
+        digestSHA256: "5642cefb3cfb0673b8f8fc473d999e51746b4642637e474895444c2b6365fe3a"
+        extract: no
+
+# Available features:
+#
+#   - OptionId.WindowsPerformanceToolkit
+#   - OptionId.WindowsDesktopDebuggers
+#   - OptionId.AvrfExternal
+#   - OptionId.NetFxSoftwareDevelopmentKit
+#   - OptionId.WindowsSoftwareLogoToolkit
+#   - OptionId.IpOverUsb
+#   - OptionId.MSIInstallTools
+#   - OptionId.SigningTools
+#   - OptionId.UWPManaged
+#   - OptionId.UWPCPP
+#   - OptionId.UWPLocalized
+#   - OptionId.DesktopCPPx86
+#   - OptionId.DesktopCPPx64
+#   - OptionId.DesktopCPParm64
+buildVars: [PKG_BUILD_NUMBER]
+buildScript: |
+    MSVC-DownloadSDK $($args[0]) `
+                     ${Env:SDK_BUNDLE_NAME} `
+                     @("/features OptionId.UWPManaged",
+                       "/features OptionId.UWPCPP",
+                       "/features OptionId.UWPLocalized",
+                       "/features OptionId.DesktopCPPx86",
+                       "/features OptionId.DesktopCPPx64")
+
+multiPackage:
+    "":
+        buildScript: |
+            MSVC-ExtractSDK "${PWD}\layout\Installers" `
+                            Win11SDK
+
+        packageScript: |
+            MSVC-PackageSdk "$($args[0])\Win11SDK"
+
+        provideVars:
+            WINDOWS_SDK_VERSION: "10.0.26100.0"
+
+    bundle:
+        root: True
+        packageVars: [PKG_BUILD_NUMBER]
+        packageScript: |
+            MSVC-ArchiveSdk "$($args[0])" `
+                            "${Env:VS_BUNDLE_NAME}"
