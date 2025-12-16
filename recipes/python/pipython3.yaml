@@ -1,11 +1,11 @@
 inherit: [cpackage]
 
 metaEnvironment:
-    PYTHON_VERSION:     "3.11.11"
-    GET_PIP_VERSION:    "24.3.1"
-    PIP_VERSION:        "24.3.1"
-    SETUPTOOLS_VERSION: "75.8.0"
-    WHEEL_VERSION:      "0.45.1"
+    PYTHON_VERSION:     "3.13.11"
+    GET_PIP_VERSION:    "25.3"
+    PIP_VERSION:        "25.3"
+    SETUPTOOLS_VERSION: "80.9.0"
+    WHEEL_VERSION:      "0.46.1"
 
 depends:
     - name: python::pipython3-minimal
@@ -15,13 +15,13 @@ checkoutSCM:
     -
         scm: url
         url: ${PYTHON_MIRROR}/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz
-        digestSHA256: 2a9920c7a0cd236de33644ed980a13cbbc21058bfdc528febb6081575ed73be3
+        digestSHA256: 16ede7bb7cdbfa895d11b0642fa0e523f291e6487194d53cf6d3b338c3a17ea2
         extract: no
         dir: python
     -
         scm: url
         url: ${GITHUB_MIRROR}/pypa/get-pip/archive/refs/tags/${GET_PIP_VERSION}.zip
-        digestSHA256: 352b0db8f4cbd348db1812ca693b8a38ad258aa1804c60c07bed87e15df27d67
+        digestSHA256: b4dfff4205d86521b27613f17a8b6aebdb76f0a345da6a4f59bed59e118cb291
         dir: get-pip
     # Fetching external libraries...
     -
@@ -32,8 +32,14 @@ checkoutSCM:
         dir: deps/bzip2
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/sqlite-3.45.1.0.zip
-        digestSHA256: c8597e0744f5a2ca67242ce22e56462ea6968ce3a2db542fd3bee49f66315f9a
+        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/mpdecimal-4.0.0.zip
+        digestSHA256: 270f5fbee4cc02f6ebe28d5be9c4e1268696bff9ead14d1e7f674e2eef759a07
+        extract: no
+        dir: deps/mpdecimal
+    -
+        scm: url
+        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/sqlite-3.50.4.0.zip
+        digestSHA256: dc5e26c19a73160244fdba918df385ced399b309941da3d9365ba34afb421c2f
         extract: no
         dir: deps/sqlite
     -
@@ -57,14 +63,14 @@ checkoutSCM:
         dir: deps/libffi
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/openssl-bin-3.0.15.zip
-        digestSHA256: 32dbabcebb8da5d2ac2808a541a92c36c74ced762ba642f760cb0275d15047ea
+        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/openssl-bin-3.0.18.zip
+        digestSHA256: 382af4c449004fe3d334c061209c80e39f544e78fed8b2fcbc182f112e8158bf
         extract: no
         dir: deps/openssl-bin
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/tcltk-8.6.12.1.zip
-        digestSHA256: ddf39230b49b5751a2e899cf30623f2d618ac5b9cb863578f827132a53d3c001
+        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/tcltk-8.6.15.0.zip
+        digestSHA256: 60adc5fc31c02347666198ffc74e5b6d0948f6765bb9034ae423a5a16c22a4e5
         extract: no
         dir: deps/tcltk
 
@@ -137,14 +143,15 @@ buildScript: |
 
     # copy dependencies
     __addLib "bzip2"       "1.0.8"
-    __addLib "sqlite"      "3.45.1.0"
+    __addLib "sqlite"      "3.50.4.0"
+    __addLib "mpdecimal"   "4.0.0"
     __addLib "xz"          "5.2.5"
     __addLib "zlib"        "1.3.1"
     __addBin "libffi"      "3.4.4"
-    __addBin "openssl-bin" "3.0.15"
-    __addBin "tcltk"       "8.6.12.1"
+    __addBin "openssl-bin" "3.0.18"
+    __addBin "tcltk"       "8.6.15.0"
 
-    Check-Command { src/PCbuild/build.bat -p x64 }
+    Check-Command { src/PCbuild/build.bat -p x64 -v }
 
     $installdir="src/PCbuild/amd64"
 
