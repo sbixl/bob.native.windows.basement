@@ -7,8 +7,10 @@ packageSetup: |
             [Parameter(Mandatory, Position = 2)]
             [String]$windowsSdkVersion,
             [Parameter(Mandatory, Position = 3)]
-            [String]$VcVersion,
+            [String]$VcToolsetVersion,
             [Parameter(Mandatory, Position = 4)]
+            [String]$VcToolsetSuffix,
+            [Parameter(Mandatory, Position = 5)]
             [String]$BuildToolsYear
         )
 
@@ -81,9 +83,9 @@ packageSetup: |
     $Env:MSB_PATH             = "${{RootDir}}\BuildTools\MSBuild\Current\Bin\amd64"
 
     $Env:VCInstallDir          = "${{RootDir}}\BuildTools\VC"
-    $Env:VCInstallDir_160      = $Env:VCInstallDir
+    $Env:VCInstallDir_{3}      = $Env:VCInstallDir
     $Env:VCToolsInstallDir     = "${{RootDir}}\BuildTools\VC\Tools\MSVC\{0}"
-    $Env:VCToolsInstallDir_160 = $Env:VCToolsInstallDir
+    $Env:VCToolsInstallDir_{3} = $Env:VCToolsInstallDir
     $Env:VCToolsVersion        = "{0}"
 
     $Env:WindowsSdkBinPath    = "${{RootDir}}\Windows Kits\10\bin"
@@ -103,7 +105,7 @@ packageSetup: |
     $Env:DisableRegistryUse=$true
 
     Write-Host "**********************************************************************"
-    Write-Host "** Setup visual studio v{2} (VS {3}) development environment         "
+    Write-Host "** Setup visual studio v{2} (VS {4}) development environment         "
     Write-Host "**********************************************************************"
 
     Write-Host INCLUDE = $Env:INCLUDE
@@ -117,9 +119,9 @@ packageSetup: |
     Write-Host MSB_PATH = $Env:MSB_PATH
 
     Write-Host VCInstallDir          = $Env:VCInstallDir
-    Write-Host VCInstallDir_160      = $Env:VCInstallDir_160
+    Write-Host VCInstallDir_{3}      = $Env:VCInstallDir_{3}
     Write-Host VCToolsInstallDir     = $Env:VCToolsInstallDir
-    Write-Host VCToolsInstallDir_160 = $Env:VCToolsInstallDir_160
+    Write-Host VCToolsInstallDir_{3} = $Env:VCToolsInstallDir_{3}
     Write-Host VCToolsVersion        = $Env:VCToolsVersion
 
     Write-Host WindowsSdkBinPath     = $Env:WindowsSdkBinPath
@@ -127,7 +129,8 @@ packageSetup: |
     Write-Host WindowsSDKLibVersion  = $Env:WindowsSDKLibVersion
     Write-Host WindowsSdkVerBinPath  = $Env:WindowsSdkVerBinPath
     Write-Host WindowsSDKVersion     = $Env:WindowsSDKVersion' -f "${msvcToolsetVersion}", `
-                                                                    "${windowsSdkVersion}", `
-                                                                    "${VcVersion}", `
-                                                                    "${BuildToolsYear}" | Out-File -encoding utf8 ${PWD}\setup_devenv.ps1
+                                                                  "${windowsSdkVersion}", `
+                                                                  "${VcToolsetVersion}", `
+                                                                  "${VcToolsetSuffix}", `
+                                                                  "${BuildToolsYear}" | Out-File -encoding utf8 ${PWD}\setup_devenv.ps1
     }

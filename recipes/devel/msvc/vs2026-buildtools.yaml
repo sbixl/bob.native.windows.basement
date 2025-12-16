@@ -49,7 +49,7 @@ provideVars:
     VS_VERSION: "18.1.0"
     MSVC_BUILD_TOOLS_VERSION: "14.44"
     ### Microsoft Toolset  ###
-    MSVC_PLATFORM_TOOLSET: "v145"
+    MSVC_PLATFORM_TOOLSET: "145"
     MSVC_TOOLSET_VERSION: "14.50.35717"
     ### Microsoft C++ (MSVC) compiler version ###
     # Major.Minor
