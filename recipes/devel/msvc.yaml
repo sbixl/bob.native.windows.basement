@@ -66,7 +66,7 @@ multiPackage:
 
 provideTools:
     target-toolchain:
-        path: "just_a_placeholder"
+        path: ""
         environment:
             AUTOCONF_HOST: "x86_64-pc-windows-msvc"
             TOOLCHAIN_FLAVOUR: msvc
