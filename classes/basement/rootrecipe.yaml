@@ -4,14 +4,14 @@ depends:
     - if: !expr |
         "${BOB_HOST_PLATFORM}" == "win32"
       depends:
-        - if: !expr |
-            "${ENABLE_VS_BUILDTOOLS_2019}" == "True"
-          depends:
-              - devel::msvc-v142-x86_x64
-        - if: !expr |
-            "${ENABLE_VS_BUILDTOOLS_2026}" == "True"
-          depends:
-              - devel::msvc-v145-x86_x64
+          - if: !expr |
+              "${ENABLE_VS_BUILDTOOLS_2019}" == "True"
+            depends:
+                - devel::msvc-v142-x86_x64
+          - if: !expr |
+              "${ENABLE_VS_BUILDTOOLS_2026}" == "True"
+            depends:
+                - devel::msvc-v145-x86_x64
           # The general native host toolchain is the MSVC compiler.
           # By default the v143 (2022) MSVC toolchain is used
           - name: devel::msvc-v143-x86_x64
