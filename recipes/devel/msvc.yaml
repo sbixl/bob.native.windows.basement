@@ -1,254 +1,87 @@
 shared: True
+inherit: [lessmsi, filesystem, msvc::buildtools, msvc::devenv]
+
+buildScript: |
+    # Always build the package from scratch
+    DeleteDirectory ${PWD}
+    # Extract msi and vsix archives
+    $buildToolsDepPath = "$($args[1])"
+    MSVC-ExtractBuildTools $buildToolsDepPath
+
+packageDepends: True
+packageVars: [WINDOWS_SDK_VERSION, MSVC_TOOLSET_VERSION, VC_VER, VS_YEAR]
+packageScript: |
+    # Always package from scratch
+    DeleteDirectory ${PWD}\*
+
+    # Create visual studio shell environment script
+    MSVC-CreateDevenvScript $Env:MSVC_TOOLSET_VERSION `
+                            $Env:WINDOWS_SDK_VERSION `
+                            $Env:VC_VER `
+    	                    $Env:VS_YEAR
+
+    MSVC-PackageBuildTools "$($args[0])"
+
+    Write-Host "################## Copying Windows SDK ${Env:WINDOWS_SDK_VERSION}"
+    $windows_sdk_dir = "$($args[2])"
+    cp -r -Force  ${windows_sdk_dir}\* .
 
 multiPackage:
 
-    v142:
+    v142-x86_x64:
 
-        inherit: [lessmsi, filesystem]
+        metaEnvironment:
+            VC_VER: "142"
+            VS_YEAR: "2019"
 
         depends:
-            - name: devel::msvc-v142-layout
+            - name: devel::msvc::vs2019-buildtools-layout
               use: [result, environment]
-            - name: devel::win10-sdk-2104
+            - name: devel::win10-sdk
               use: [result, environment]
 
-        multiPackage:
+    v143-x86_x64:
 
-            x86_x64:
+        metaEnvironment:
+            VC_VER: "143"
+            VS_YEAR: "2022"
 
-                buildVars: [WINDOWS_SDK_VERSION]
-                buildScript: |
-                    ##########################################################################################
-                    #         Always build the package from scratch
-                    ##########################################################################################
+        depends:
+            - name: devel::msvc::vs2022-buildtools-layout
+              use: [result, environment]
+            - name: devel::win11-sdk
+              use: [result, environment]
 
-                    DeleteDirectory ${PWD}
+    v145-x86_x64:
 
-                    ##########################################################################################
-                    #         Extract visual studio build tools
-                    ##########################################################################################
+        metaEnvironment:
+            VC_VER: "145"
+            VS_YEAR: "2026"
 
-                    $directories = $(Get-ChildItem -Path "$($BOB_DEP_PATHS["devel::msvc-v142-layout"])\layout\Microsoft.*" -Directory | Select Name | foreach { $_.Name })
-                    foreach ($directory in $directories)
-                    {
-                        $vsix_path = "$($BOB_DEP_PATHS["devel::msvc-v142-layout"])\layout\$directory\payload.vsix"
-                        $msi_path = "$($BOB_DEP_PATHS["devel::msvc-v142-layout"])\layout\$directory\*.msi"
-                        if (Test-Path $vsix_path)
-                        {
-                            # copy payload.vsix and rename *.vsix to *.zip in order to use
-                            # the power shell 'Expand-Archive' command which only accept files
-                            # prefixed with *.zip
-                            cp $vsix_path .
-                            Rename-Item -Path "payload.vsix" -NewName "payload.zip"
+        depends:
+            - name: devel::msvc::vs2026-buildtools-layout
+              use: [result, environment]
+            - name: devel::win11-sdk
+              use: [result, environment]
 
-                            Write-Host Extract VSIX package $directory\payload.vsix ...
-                            Expand-Archive .\payload.zip -DestinationPath $directory
-                            rm .\payload.zip
-                        }
-                        elseif(Test-Path $msi_path)
-                        {
-                            mkdir -p $directory >$null
-                            Lessmsi_ExtractFromDirectory "$($BOB_DEP_PATHS["devel::msvc-v142-layout"])\layout\$directory" `
-                                                        $directory
-                        }
-                        else
-                        {
-                            Write-Host "WARNING: Could not extract content in package ${directory}, skipping it ..."
-                        }
-                    }
+provideTools:
+    host-toolchain:
+        path: ""
 
-                packageDepends: True
-                packageVars: [WINDOWS_SDK_VERSION, MSVC_TOOLSET_VERSION]
-                packageScript: |
-                    ##########################################################################################
-                    #         Always build the package from scratch
-                    ##########################################################################################
+    target-toolchain:
+        path: ""
 
-                    DeleteDirectory ${PWD}\*
+provideVars:
+    AUTOCONF_HOST: "x86_64-pc-windows-msvc"
 
-                    ##########################################################################################
-                    #         Copy MS BuildTools
-                    ##########################################################################################
+    MSVC_TOOLSET_VERSION:   $MSVC_TOOLSET_VERSION
+    WINDOWS_SDK_VERSION:    $WINDOWS_SDK_VERSION
+    PROCESSOR_ARCHITECTURE: "AMD64"
 
-                    $directories = $(Get-ChildItem -Path "$($args[0])\Microsoft.*" -Directory | Select Name | foreach { $_.Name })
+    CC: "cl"
+    CXX: "cl"
 
-                    mkdir -p BuildTools >$null
-                    pushd BuildTools
-
-                    foreach ($directory in $directories)
-                    {
-                        Write-Host "################## Copying ${directory}"
-                        $contents_src_path = "$($args[0])\$directory\Contents"
-                        if (Test-Path $contents_src_path)
-                        {
-                            $files = $(Get-ChildItem $contents_src_path -recurse)
-                            ForEach($file in $files)
-                            {
-                                $real_path = [uri]::UnescapeDataString($file.FullName.Replace("${contents_src_path}\",""))
-
-                                if((Get-Item $file.FullName) -is [System.IO.DirectoryInfo])
-                                {
-                                    mkdir -Force -p $real_path >$null
-                                }
-                                else
-                                {
-                                    cp $file.FullName $real_path
-                                }
-                            }
-                        }
-                    }
-                    popd
-
-                    ##########################################################################################
-                    #         Copy Windows SDK
-                    ##########################################################################################
-
-                    Write-Host "################## Copying Windows SDK ${Env:WINDOWS_SDK_VERSION}"
-                    $windows_sdk_dir = $BOB_DEP_PATHS["devel::win10-sdk-2104"]
-                    cp -r -Force  ${windows_sdk_dir}\* .
-
-                    ##########################################################################################
-                    #         Create visual studio shell environment script
-                    ##########################################################################################
-
-                    'param(
-                        [string]$RootDir
-                    )
-
-                    $Includes = @(
-                        "${{RootDir}}\BuildTools\VC\Tools\MSVC\{0}\ATLMFC\include",
-                        "${{RootDir}}\BuildTools\VC\Tools\MSVC\{0}\include",
-                        "${{RootDir}}\Windows Kits\10\include\{1}\ucrt",
-                        "${{RootDir}}\Windows Kits\10\include\{1}\shared",
-                        "${{RootDir}}\Windows Kits\10\include\{1}\um",
-                        "${{RootDir}}\Windows Kits\10\include\{1}\winrt",
-                        "${{RootDir}}\Windows Kits\10\include\{1}\cppwinrt"
-                    )
-
-                    $Libpaths = @(
-                        "${{RootDir}}\BuildTools\VC\Tools\MSVC\{0}\ATLMFC\lib\x64",
-                        "${{RootDir}}\BuildTools\VC\Tools\MSVC\{0}\lib\x64",
-                        "${{RootDir}}\BuildTools\VC\Tools\MSVC\{0}\lib\x86\store\references",
-                        "${{RootDir}}\Windows Kits\10\UnionMetadata\{1}",
-                        "${{RootDir}}\Windows Kits\10\References\{1}"
-                    )
-
-                    $Libs = @(
-                        "${{RootDir}}\BuildTools\VC\Tools\MSVC\{0}\ATLMFC\lib\x64",
-                        "${{RootDir}}\BuildTools\VC\Tools\MSVC\{0}\lib\x64",
-                        "${{RootDir}}\Windows Kits\10\lib\{1}\ucrt\x64",
-                        "${{RootDir}}\Windows Kits\10\lib\{1}\um\x64"
-                    )
-
-                    $VsPath = @(
-                        "${{RootDir}}\BuildTools\VC\Tools\MSVC\{0}\bin\HostX64\x64",
-                        "${{RootDir}}\BuildTools\Common7\Tools\devinit",
-                        "${{RootDir}}\Windows Kits\10\bin\{1}\x64",
-                        "${{RootDir}}\Windows Kits\10\bin\x64",
-                        "${{RootDir}}\BuildTools\MSBuild\Current\Bin",
-                        "${{RootDir}}\BuildTools\Common7\Tools\"
-                    )
-
-                    $Env:INCLUDE = ""
-                    $Env:LIBPATH = ""
-                    $Env:LIB = ""
-                    $Env:VS_PATH = ""
-
-                    foreach($path in $Includes)
-                    {{
-                        $Env:INCLUDE = $Env:INCLUDE + $path + ";"
-                    }}
-
-                    foreach($path in $Libpaths)
-                    {{
-                        $Env:LIBPATH = $Env:LIBPATH + $path + ";"
-                    }}
-
-                    foreach($lib in $Libs)
-                    {{
-                        $Env:LIB = $Env:LIB + $lib + ";"
-                    }}
-
-                    foreach($path in $VsPath)
-                    {{
-                        $Env:VS_PATH = $Env:VS_PATH + $path + ";"
-                    }}
-
-                    $Env:Platform               = "x64"
-                    $Env:PROCESSOR_ARCHITECTURE = "AMD64"
-
-                    $Env:MSB_PATH             = "${{RootDir}}\BuildTools\MSBuild\Current\Bin\amd64"
-
-                    $Env:VCInstallDir          = "${{RootDir}}\BuildTools\VC"
-                    $Env:VCInstallDir_160      = $Env:VCInstallDir
-                    $Env:VCToolsInstallDir     = "${{RootDir}}\BuildTools\VC\Tools\MSVC\{0}"
-                    $Env:VCToolsInstallDir_160 = $Env:VCToolsInstallDir
-                    $Env:VCToolsVersion        = "{0}"
-
-                    $Env:WindowsSdkBinPath    = "${{RootDir}}\Windows Kits\10\bin"
-                    $Env:WindowsSdkDir        = "${{RootDir}}\Windows Kits\10"
-                    $Env:WindowsSDKLibVersion = "{1}"
-                    $Env:WindowsSdkVerBinPath = "${{RootDir}}\Kits\10\bin\{1}"
-                    $Env:WindowsSDKVersion    = "{1}"
-
-
-                    # This environment variable is by default set to "true" we still set it here to be sure that
-                    # the environment set from within this file is always used by the visual studio toolchain
-                    $Env:UseEnv=$true
-
-                    # This environment variable defaults to "false" which means that the visual studio always scan
-                    # the windows registry to gather paths to several tools and versions. Setting this variable to
-                    # "true" ensures that the environment from this file is use in the first place.
-                    $Env:DisableRegistryUse=$true
-
-                    Write-Host "**********************************************************************"
-                    Write-Host "** Setup visual studio v142 (VS 2019) development environment         "
-                    Write-Host "**********************************************************************"
-
-                    Write-Host INCLUDE = $Env:INCLUDE
-                    Write-Host LIBPATH = $Env:LIBPATH
-                    Write-Host LIB     = $Env:LIB
-                    Write-Host VS_PATH = $Env:VS_PATH
-
-                    Write-Host Platform               = $Env:Platform
-                    Write-Host PROCESSOR_ARCHITECTURE = $Env:PROCESSOR_ARCHITECTURE
-
-                    Write-Host MSB_PATH = $Env:MSB_PATH
-
-                    Write-Host VCInstallDir          = $Env:VCInstallDir
-                    Write-Host VCInstallDir_160      = $Env:VCInstallDir_160
-                    Write-Host VCToolsInstallDir     = $Env:VCToolsInstallDir
-                    Write-Host VCToolsInstallDir_160 = $Env:VCToolsInstallDir_160
-                    Write-Host VCToolsVersion        = $Env:VCToolsVersion
-
-                    Write-Host WindowsSdkBinPath     = $Env:WindowsSdkBinPath
-                    Write-Host WindowsSdkDir         = $Env:WindowsSdkDir
-                    Write-Host WindowsSDKLibVersion  = $Env:WindowsSDKLibVersion
-                    Write-Host WindowsSdkVerBinPath  = $Env:WindowsSdkVerBinPath
-                    Write-Host WindowsSDKVersion     = $Env:WindowsSDKVersion' -f "${Env:MSVC_TOOLSET_VERSION}", `
-                                                                                  "${Env:WINDOWS_SDK_VERSION}" | Out-File -encoding utf8 ${PWD}\setup_devenv.ps1
-
-                provideTools:
-                    host-toolchain:
-                        path: ""
-
-                    target-toolchain:
-                        path: ""
-
-                    msvc-toolchain:
-                        path: ""
-
-                provideVars:
-                    AUTOCONF_HOST: "x86_64-pc-windows-msvc"
-
-                    MSVC_TOOLSET_VERSION:   $MSVC_TOOLSET_VERSION
-                    WINDOWS_SDK_VERSION:    $WINDOWS_SDK_VERSION
-                    PROCESSOR_ARCHITECTURE: "AMD64"
-
-                    CC: "cl"
-                    CXX: "cl"
-
-                    CPPFLAGS: ""
-                    CFLAGS: ""
-                    CXXFLAGS: ""
-                    LDFLAGS: ""
+    CPPFLAGS: ""
+    CFLAGS: ""
+    CXXFLAGS: ""
+    LDFLAGS: ""

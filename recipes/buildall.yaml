@@ -27,7 +27,6 @@ buildScript: |
     $null
 
 packageTools:
-    - msvc-toolchain
    # general tools
     - 7z
     - ninja
