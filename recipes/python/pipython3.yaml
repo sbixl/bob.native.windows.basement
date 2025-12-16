@@ -151,7 +151,10 @@ buildScript: |
     __addBin "openssl-bin" "3.0.18"
     __addBin "tcltk"       "8.6.15.0"
 
-    Check-Command { src/PCbuild/build.bat -p x64 -v }
+    # If we do not set PreferredToolArchitecture to "x64" the Python buildsystem
+    # will start a win32 build even we want to build the 64-bit variant!
+    $Env:PreferredToolArchitecture="x64"
+    Check-Command { src/PCbuild/build.bat -p x64 }
 
     $installdir="src/PCbuild/amd64"
 
