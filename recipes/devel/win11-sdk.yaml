@@ -41,7 +41,7 @@ checkoutSCM:
 #   - OptionId.DesktopCPPx86
 #   - OptionId.DesktopCPPx64
 #   - OptionId.DesktopCPParm64
-buildVars: [PKG_BUILD_NUMBER]
+buildVars: [SDK_BUNDLE_NAME]
 buildScript: |
     msvcDownloadSDK $($args[0]) `
                      ${Env:SDK_BUNDLE_NAME} `

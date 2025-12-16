@@ -65,21 +65,19 @@ multiPackage:
               use: [result, environment]
 
 provideTools:
-    host-toolchain:
-        path: ""
-
     target-toolchain:
-        path: ""
+        path: "just_a_placeholder"
+        environment:
+            AUTOCONF_HOST: "x86_64-pc-windows-msvc"
+            TOOLCHAIN_FLAVOUR: msvc
+
+            CC: "cl"
+            CXX: "cl"
 
 provideVars:
-    AUTOCONF_HOST: "x86_64-pc-windows-msvc"
-
     MSVC_TOOLSET_VERSION:   $MSVC_TOOLSET_VERSION
     WINDOWS_SDK_VERSION:    $WINDOWS_SDK_VERSION
     PROCESSOR_ARCHITECTURE: "AMD64"
-
-    CC: "cl"
-    CXX: "cl"
 
     CPPFLAGS: ""
     CFLAGS: ""

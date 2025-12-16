@@ -28,11 +28,11 @@ checkoutSCM:
 buildVars: [VS_BUNDLE_NAME]
 buildScript: |
     msvcDownloadLayout $args[0] `
-                        $Env:VS_BUNDLE_NAME `
-                        @("--add Microsoft.VisualStudio.Workload.MSBuildTools"
-                          "--add Microsoft.VisualStudio.Workload.VCTools"
-                          "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
-                          "--add Microsoft.VisualStudio.Component.VC.ATL")
+                       $Env:VS_BUNDLE_NAME `
+                       @("--add Microsoft.VisualStudio.Workload.MSBuildTools"
+                         "--add Microsoft.VisualStudio.Workload.VCTools"
+                         "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+                         "--add Microsoft.VisualStudio.Component.VC.ATL")
 
 multiPackage:
     layout:

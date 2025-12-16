@@ -3,8 +3,8 @@ inherit: [msvc::layout]
 # https://learn.microsoft.com/en-us/visualstudio/releases/2022/release-history
 metaEnvironment:
     # Visual Studio 2022 (Version: 17.14.22, Release Date: December 9, 2025, Build Number: 17.14.36804.6)
-    PKG_VERSION:        "17.14.22"
-    PKG_BUILD_NUMBER:   "17.14.36804.6"
+    PKG_VERSION:      "17.14.22"
+    PKG_BUILD_NUMBER: "17.14.36804.6"
     VS_BUNDLE_NAME:   "vs_2022_build_tools_17_14_36804_6_layout"
 
 checkoutSCM:
@@ -27,11 +27,11 @@ checkoutSCM:
 buildVars: [VS_BUNDLE_NAME]
 buildScript: |
     msvcDownloadLayout $args[0] `
-                        $Env:VS_BUNDLE_NAME `
-                        @("--add Microsoft.VisualStudio.Workload.MSBuildTools"
-                          "--add Microsoft.VisualStudio.Workload.VCTools"
-                          "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
-                          "--add Microsoft.VisualStudio.Component.VC.ATL")
+                       $Env:VS_BUNDLE_NAME `
+                       @("--add Microsoft.VisualStudio.Workload.MSBuildTools"
+                         "--add Microsoft.VisualStudio.Workload.VCTools"
+                         "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+                         "--add Microsoft.VisualStudio.Component.VC.ATL")
 
 multiPackage:
     layout:
