@@ -1,0 +1,58 @@
+inherit: [msvc::layout]
+
+# https://learn.microsoft.com/en-us/visualstudio/releases/2022/release-history
+metaEnvironment:
+    # Visual Studio 2022 (Version: 17.14.22, Release Date: December 9, 2025, Build Number: 17.14.36804.6)
+    PKG_VERSION:        "17.14.22"
+    PKG_BUILD_NUMBER:   "17.14.36804.6"
+    VS_BUNDLE_NAME:   "vs_2022_build_tools_17_14_36804_6_layout"
+
+checkoutSCM:
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" == ""
+        scm: url
+        # Visual Studio 2022 BuildTools
+        url: https://download.visualstudio.microsoft.com/download/pr/4f894be7-d4f2-4679-ace9-52a83030dab5/a7cf12bec0050e0f6153dcdc1bbe9c027f3fcdcd782e9676b50de879d7c50caf/vs_BuildTools.exe
+        digestSHA256: "a7cf12bec0050e0f6153dcdc1bbe9c027f3fcdcd782e9676b50de879d7c50caf"
+        extract: no
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" != ""
+        scm: url
+        url: ${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}/${VS_BUNDLE_NAME}.zip
+        digestSHA256: "1708beffe421c0429b7fe81a11f84bd229e697f15422a784a81daff3e0a95c2e"
+        extract: no
+
+buildVars: [VS_BUNDLE_NAME]
+buildScript: |
+    MSVC-DownloadLayout $args[0] `
+                        $Env:VS_BUNDLE_NAME `
+                        @("--add Microsoft.VisualStudio.Workload.MSBuildTools"
+                          "--add Microsoft.VisualStudio.Workload.VCTools"
+                          "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+                          "--add Microsoft.VisualStudio.Component.VC.ATL")
+
+multiPackage:
+    layout:
+        packageScript: |
+            MSVC-PackageLayout "$($args[0])/layout"
+
+    bundle:
+        root: True
+        packageVars: [VS_BUNDLE_NAME]
+        packageScript: |
+            MSVC-ArchiveLayout "$($args[0])/layout" `
+                               "${Env:VS_BUNDLE_NAME}"
+
+provideVars:
+    VS_VERSION: "17.14.22"
+    MSVC_BUILD_TOOLS_VERSION: "14.44"
+    ### Microsoft Toolset  ###
+    MSVC_PLATFORM_TOOLSET: "v143"
+    MSVC_TOOLSET_VERSION: "14.44.35207"
+    ### Microsoft C++ (MSVC) compiler version ###
+    # Major.Minor
+    MSVC_VERSION: "1944"
+    # Major.Minor.Build
+    MSVC_FULL_VERSION: "19.44.35222"
