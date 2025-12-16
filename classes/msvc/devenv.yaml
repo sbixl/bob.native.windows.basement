@@ -79,6 +79,8 @@ packageSetup: |
 
     $Env:Platform               = "x64"
     $Env:PROCESSOR_ARCHITECTURE = "AMD64"
+    $Env:VSCMD_ARG_HOST_ARCH    = $Env:Platform
+    $Env:VSCMD_ARG_TGT_ARCH     = $Env:Platform
 
     $Env:MSB_PATH             = "${{RootDir}}\BuildTools\MSBuild\Current\Bin\amd64"
 
@@ -91,7 +93,7 @@ packageSetup: |
     $Env:WindowsSdkBinPath    = "${{RootDir}}\Windows Kits\10\bin"
     $Env:WindowsSdkDir        = "${{RootDir}}\Windows Kits\10"
     $Env:WindowsSDKLibVersion = "{1}"
-    $Env:WindowsSdkVerBinPath = "${{RootDir}}\Kits\10\bin\{1}"
+    $Env:WindowsSdkVerBinPath = "${{RootDir}}\Windows Kits\10\bin\{1}"
     $Env:WindowsSDKVersion    = "{1}"
 
 
