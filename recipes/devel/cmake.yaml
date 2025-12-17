@@ -1,20 +1,20 @@
 shared: True
 
 metaEnvironment:
-    PKG_VERSION: "4.1.0"
+    PKG_VERSION: "4.2.1"
 
 checkoutSCM:
     -
         scm: url
         url: ${GITHUB_MIRROR}/Kitware/CMake/archive/v${PKG_VERSION}.zip
-        digestSHA256: "6e1b8217837a52c709b9f598d846402a395cad7f2eb8acb1f7709da1c9b71e80"
+        digestSHA256: "cc9a587763725ab7e414f670dd9d07ec6f56e23a5408094c65faa12cfb3d4f63"
         dir: cmake.src
     # Since there is unfortunately no possibility to bootstrap cmake like under Linux,
     # we must download a pre build binary for windows to build cmake from source.
     -
         scm: url
         url: ${GITHUB_MIRROR}/Kitware/CMake/releases/download/v${PKG_VERSION}/cmake-${PKG_VERSION}-windows-x86_64.zip
-        digestSHA256: "5c09d23786daa89ac433a1a8237f2bdee9f420fb0f2b8a9aded7894d532c0076"
+        digestSHA256: "dfc2b2afac257555e3b9ce375b12b2883964283a366c17fec96cf4d17e4f1677"
         dir: cmake.bin
 
 depends:
@@ -63,8 +63,8 @@ multiPackage:
                       -GNinja `
                       -DCMAKE_BUILD_TYPE=RELEASE `
                       -DBUILD_SHARED_LIBS=OFF `
-                      -DCMAKE_INSTALL_PREFIX="..\install\usr" `
-                }
+                      -DCMAKE_INSTALL_PREFIX="..\install\usr"
+            }
 
             ninjaParallel -t "all"
             ninjaInstall
