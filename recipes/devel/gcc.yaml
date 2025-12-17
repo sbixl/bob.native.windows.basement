@@ -4,8 +4,8 @@ checkoutSCM:
         if: !expr |
             "${AUTOCONF_TARGET}" == "arm-none-eabi"
         scm: url
-        url: ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/12.3.rel1/binrel/arm-gnu-toolchain-12.3.rel1-mingw-w64-i686-arm-none-eabi.zip
-        digestSHA256: "d52888bf59c5262ebf3e6b19b9f9e6270ecb60fd218cf81a4e793946e805a654"
+        url: ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-mingw-w64-i686-arm-none-eabi.zip
+        digestSHA256: "836ebe51fd71b6542dd7884c8fb2011192464b16c28e4b38fddc9350daba5ee8"
         sslVerify: False
         dir: ${AUTOCONF_TARGET}
         extract: no
