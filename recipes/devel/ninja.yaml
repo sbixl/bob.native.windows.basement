@@ -3,13 +3,13 @@ shared: True
 inherit: [patch]
 
 metaEnvironment:
-    PKG_VERSION: "1.13.1"
+    PKG_VERSION: "1.13.2"
 
 checkoutSCM:
     scm: git
     url: https://github.com/ninja-build/ninja.git
-    tag: v1.13.0
-    dir: ninja-${PKG_VERSION}
+    tag: v$PKG_VERSION
+    dir: ninja-$PKG_VERSION
 
 checkoutVars: [PKG_VERSION]
 checkoutDeterministic: True
