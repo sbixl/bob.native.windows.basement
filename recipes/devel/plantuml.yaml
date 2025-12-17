@@ -1,5 +1,5 @@
 metaEnvironment:
-    PKG_VERSION: "1.2025.3"
+    PKG_VERSION: "1.2025.10"
 
 depends:
     - devel::openjdk
@@ -7,7 +7,7 @@ depends:
 checkoutSCM:
     scm: url
     url: ${GITHUB_MIRROR}/plantuml/plantuml/releases/download/v${PKG_VERSION}/plantuml-mit-${PKG_VERSION}.jar
-    digestSHA256: "ac6a05db52549a3c1df0b0a258d9aa3dceaa02444bd9e11f3df72c498e963552"
+    digestSHA256: "a0e2f8f176e812fe1118246e4ffbf2d9c2bf2a0977024b3d533459f5e2df838c"
     dir: plantuml
     extract: no
 
