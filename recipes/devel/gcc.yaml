@@ -22,8 +22,8 @@ checkoutSCM:
         if: !expr |
             "${AUTOCONF_TARGET}" == "aarch64-none-elf"
         scm: url
-        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-mingw-w64-i686-aarch64-none-elf.zip
-        digestSHA256: "4ce6d3f1c063e40b6b70063156d7796f86c224149c241ede22c622958e763034"
+        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-mingw-w64-x86_64-aarch64-none-elf.zip
+        digestSHA256: "6b7d0680831feb5e69b3f8b9dc05f633c6a7b543b411f863e0f7bd263413c5a5"
         sslVerify: False
         dir: ${AUTOCONF_TARGET}
         extract: no
