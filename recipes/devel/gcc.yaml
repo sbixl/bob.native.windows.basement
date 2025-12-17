@@ -13,8 +13,8 @@ checkoutSCM:
         if: !expr |
             "${AUTOCONF_TARGET}" == "arm-none-linux-gnueabihf"
         scm: url
-        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/11.2-2022.02/binrel/gcc-arm-11.2-2022.02-mingw-w64-i686-arm-none-linux-gnueabihf.zip
-        digestSHA256: "2c2d3d9c91419f38867d69876570dd039fd3fd70a2c3ad22299dfc312ed82a6b"
+        url:  ${DEVELOPER_ARM_MIRROR}/-/media/Files/downloads/gnu/14.3.rel1/binrel/arm-gnu-toolchain-14.3.rel1-mingw-w64-x86_64-arm-none-linux-gnueabihf.zip
+        digestSHA256: "fd0801c9fcb0327978e5f7594f38225b7dec0fd515006c1608f74c0460111312"
         sslVerify: False
         dir: ${AUTOCONF_TARGET}
         extract: no
