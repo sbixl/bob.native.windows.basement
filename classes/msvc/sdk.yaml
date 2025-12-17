@@ -1,0 +1,90 @@
+inherit: [filesystem,  lessmsi]
+
+buildNetAccess: True
+buildSetup: |
+    function msvcDownloadSDK
+    {
+        Param(
+            [Parameter(Mandatory, Position = 0)]
+            [String]$winSdkSetupExecPath,
+            [Parameter(Mandatory, Position = 1)]
+            [String]$bundleName,
+            [Parameter(Mandatory, Position = 2)]
+            [string[]]$features
+        )
+
+        if(Test-Path "$($args[0])\winsdksetup.exe" -PathType Leaf)
+        {
+            # always build the layout from scratch
+            DeleteDirectory layout
+
+            # Append the path to winsdksetup.exe
+            $Env:PATH="$($args[0]);$Env:PATH"
+
+            Write-Host "Downloading and building layout. Be patient, this may take some time..."
+
+            # Download all workloads and components to an offline layout
+            $featureList = $features -join ' '
+            Start-Process winsdksetup.exe -Wait -ArgumentList "/layout layout",
+                                                              "/quiet",
+                                                              $featureList
+        }
+        else
+        {
+            # Extract the offline layout cache so that it is ready for the build step!
+            Expand-Archive -LiteralPath "${bundleName}\${Env:PKG_BUILD_NUMBER}.zip" -DestinationPath ${PWD}
+        }
+    }
+
+    function msvcExtractSDK
+    {
+        Param(
+            [Parameter(Mandatory, Position = 0)]
+            [String]$layoutDirectory,
+            [Parameter(Mandatory, Position = 1)]
+            [String]$destDir
+        )
+
+        Lessmsi_ExtractFromDirectory $layoutDirectory $destDir
+    }
+
+packageSetup: |
+    function msvcPackageSdk
+    {
+        Param(
+            [Parameter(Mandatory, Position = 0)]
+            [String]$winSdkDir
+        )
+
+        # Always build the package from scratch
+        DeleteDirectory ${PWD}\*
+
+        $directories = $(Get-ChildItem -Path $winSdkDir -Directory | Select Name | foreach { $_.Name })
+        $white_list = @("Application Verifier", "Microsoft SDKs", "Windows Kits")
+        foreach ($directory in $directories)
+        {
+            if(Test-Path "$winSdkDir\$directory\SourceDir")
+            {
+                $files = $(Get-ChildItem "$winSdkDir\$directory\SourceDir\*"  -Directory | Select Name | foreach { $_.Name })
+                foreach($file in $files)
+                {
+                    if ($file -in $white_list)
+                    {
+                        Write-Host "################## Copying SDK $directory"
+                        cp -r -Force  "$winSdkDir\$directory\SourceDir\$file" .
+                    }
+                }
+            }
+        }
+    }
+
+    function msvcArchiveSdk
+    {
+        Param(
+            [Parameter(Mandatory, Position = 0)]
+            [String]$sdkDirectory,
+            [Parameter(Mandatory, Position = 1)]
+            [String]$bundleName
+        )
+        Compress-Archive -Path "${sdkDirectory}\*" -DestinationPath ${bundleName}.zip
+    }

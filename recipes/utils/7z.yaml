@@ -6,7 +6,7 @@ metaEnvironment:
     PKG_VERSION: "25.00"
 
 depends:
-    - name: devel::msvc-v142-x86_x64
+    - name: devel::msvc-v143-x86_x64
       use: [environment, tools]
 
 checkoutSCM:

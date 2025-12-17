@@ -1,0 +1,87 @@
+inherit: [filesystem]
+
+buildNetAccess: True
+buildScript: |
+    function msvcDownloadLayout
+    {
+        Param(
+            [Parameter(Mandatory, Position = 1)]
+            [String]$buildToolExecPath,
+            [Parameter(Mandatory, Position = 2)]
+            [String]$bundleName,
+            [Parameter(Mandatory, Position = 3)]
+            [String[]]$features,
+            [Parameter(Position = 4)]
+            [String]$symlinkDir = "$(Split-Path -Qualifier (Get-Location))\.bob"
+        )
+
+        if(Test-Path "${buildToolExecPath}\vs_BuildTools.exe" -PathType Leaf)
+        {
+            mkdir -Force -p "${symlinkDir}" > $null
+            $symlinkPath = "${symlinkDir}\temp_${bundleName}"
+
+            if (Test-Path $symlinkPath)
+            {
+                # delete the symlink using 'rmdir' from cmd (this will delete the symlink but keep the contents in the target directory)
+                cmd /c "rmdir $symlinkPath"
+            }
+
+            # always build the layout from scratch
+            DeleteDirectory layout
+
+            # Append the path to vs_BuildTools.exe
+            $Env:PATH="${buildToolExecPath};$Env:PATH"
+
+            # Note: This is a hack because the path to the storage location shall be not longer than 80 Bytes.
+            #       By using a symlink we can workaround the issue. This problem mainly affects builds in a Jenkins
+            #       environment, as the paths are much longer here than in a local build.
+            #
+            #       Although it contradicts Bob's specifications, there is no other solution.
+            #
+            #       see: https://learn.microsoft.com/de-de/visualstudio/install/create-a-network-installation-of-visual-studio?view=vs-2019
+
+            mkdir -p layout > $null
+            New-Item -ItemType SymbolicLink -Path "$symlinkPath" -Target "${PWD}\layout" > $null
+
+            Write-Host "Downloading and building layout. Be patient, this may take some time..."
+
+            # Download all workloads and components to an offline layout
+            $featureList = $features -join ' '
+            Start-Process vs_BuildTools.exe -Wait -ArgumentList "--layout $symlinkPath",
+                                                                "--lang en-US",
+                                                                "--quiet",
+                                                                "--wait",
+                                                                $featureList
+
+            # delete the symlink using 'rmdir' from cmd (this will delete the symlink but keep the contents in the target directory)
+            cmd /c "rmdir $symlinkPath"
+        }
+        else
+        {
+            # Extract the offline layout cache so that it is ready for the build step!
+            Expand-Archive -LiteralPath "${buildToolExecPath}\${bundleName}.zip" -DestinationPath ${PWD}
+        }
+    }
+
+packageSetup: |
+    function msvcArchiveLayout
+    {
+        Param(
+            [Parameter(Mandatory, Position = 0)]
+            [String]$layoutDirectory,
+            [Parameter(Mandatory, Position = 1)]
+            [String]$bundleName
+        )
+
+        Compress-Archive -Path "${layoutDirectory}\*" -DestinationPath ${bundleName}.zip
+    }
+
+    function msvcPackageLayout
+    {
+        Param(
+            [Parameter(Mandatory, Position = 0)]
+            [String]$layoutDirectory
+        )
+
+        robocopy ${layoutDirectory} ${PWD} "/E" "/COPY:DAT" "/R:0" "/W:0" >$null
+    }

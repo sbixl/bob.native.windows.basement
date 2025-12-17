@@ -1,0 +1,75 @@
+buildSetup: |
+    function msvcExtractBuildTools
+    {
+        Param(
+            [Parameter(Mandatory, Position = 0)]
+            [String]$layoutDirectory
+        )
+
+        $directories = $(Get-ChildItem -Path "${layoutDirectory}\Microsoft.*" -Directory | Select Name | foreach { $_.Name })
+        foreach ($directory in $directories)
+        {
+            $vsix_path = "${layoutDirectory}\$directory\payload.vsix"
+            $msi_path = "${layoutDirectory}\$directory\*.msi"
+            if (Test-Path $vsix_path)
+            {
+                # copy payload.vsix and rename *.vsix to *.zip in order to use
+                # the power shell 'Expand-Archive' command which only accept files
+                # prefixed with *.zip
+                cp $vsix_path .
+                Rename-Item -Path "payload.vsix" -NewName "payload.zip"
+
+                Write-Host Extract VSIX package $directory\payload.vsix ...
+                Expand-Archive .\payload.zip -DestinationPath $directory
+                rm .\payload.zip
+            }
+            elseif(Test-Path $msi_path)
+            {
+                mkdir -p $directory >$null
+                Lessmsi_ExtractFromDirectory "${layoutDirectory}\$directory" `
+                                            $directory
+            }
+            else
+            {
+                Write-Host "WARNING: Could not extract content in package ${directory}, skipping it ..."
+            }
+        }
+    }
+
+packageSetup: |
+    function msvcPackageBuildTools
+    {
+        Param(
+            [Parameter(Mandatory, Position = 0)]
+            [String]$sourceDirectory
+        )
+
+        $directories = $(Get-ChildItem -Path "${sourceDirectory}\Microsoft.*" -Directory | Select Name | foreach { $_.Name })
+
+        mkdir -p BuildTools >$null
+        pushd BuildTools
+
+        foreach ($directory in $directories)
+        {
+            Write-Host "################## Copying ${directory}"
+            $contents_src_path = "${sourceDirectory}\$directory\Contents"
+            if (Test-Path $contents_src_path)
+            {
+                $files = $(Get-ChildItem $contents_src_path -recurse)
+                ForEach($file in $files)
+                {
+                    $real_path = [uri]::UnescapeDataString($file.FullName.Replace("${contents_src_path}\",""))
+
+                    if((Get-Item $file.FullName) -is [System.IO.DirectoryInfo])
+                    {
+                        mkdir -Force -p $real_path >$null
+                    }
+                    else
+                    {
+                        cp $file.FullName $real_path
+                    }
+                }
+            }
+        }
+        popd
+    }

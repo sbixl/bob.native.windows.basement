@@ -32,13 +32,18 @@ environment:
 
     # This will enable/disable the clang host toolchain if required by the user. If set to
     # "True" some initial tools will be bootstrapped using the native MSVC compiler because
-    # they are required to build the clang toolchain. After building the clang toolchain, the
-    # clang toolchain earns the role of the master host toolchain.
-    # If set to "False" the MSVC compiler becomes the master host toolchain.
+    # they are required to build the clang toolchain.
     ENABLE_X86_64_CLANG_HOST_TOOLCHAIN: "False"
 
+    # Enable/Disable the Microsoft Visual Studio 2019 toolchain (MSBuildTools)
+    # Note: The default VS toolchain is v143 (MSBuildTools 2022) independent of this setting
+    ENABLE_VS_BUILDTOOLS_2019: "True"
+    # Enable/Disable the Microsoft Visual Studio 2026 toolchain (MSBuildTools)
+    # Note: The default VS toolchain is v143 (MSBuildTools 2022) independent of this setting
+    ENABLE_VS_BUILDTOOLS_2026: "True"
+
     # This is for local (user) specific usage. Let this environment variable
-    # point to your local storage where the vs2019 BuildTools offline bundle is stored.
+    # point to your local storage where the vs20xx BuildTools offline bundle is stored.
     #
     # If not set, the (online) layout(s) will be downloaded from the official microsoft mirror.
     # If set, the (offline) zip bundle(s) will be downloaded from a specific secondary mirror.
@@ -48,19 +53,19 @@ environment:
     #   SCM_VS_OFFLINE_BUNDLE_DIRECTORY:   \\\\MY-NETWORK-DRIVE\\windows
     #
     # example:
-    #   # use official cache from microsoft mirror (default setting)
+    #   # use official files from microsoft mirror (default setting)
     #   SCM_VS_OFFLINE_BUNDLE_DIRECTORY:   ""
     #
     # note:
     #  You can build an offline bundle by executing e.g:
     #
-    #                -  'bob dev devel::win10-sdk-2104-bundle'.
+    #                -  'bob dev devel::win10-sdk-bundle'.
     #                -  'bob dev devel::msvc-v142-layout-bundle'.
     #
     #  The result of this package is a zip archive which can be copied to the path configured
-    #  in 'SCM_VS_OFFLINE_BUNDLE_DIRECTORY'. Please take care that the variable
-    #  'SCM_VS_OFFLINE_BUNDLE_DIRECTORY' is not set, so that the microsoft mirror is used
-    #  as source to create the offline cache.
+    #  in 'SCM_VS_OFFLINE_BUNDLE_DIRECTORY'.
+    #  Note: Please take care that the variable 'SCM_VS_OFFLINE_BUNDLE_DIRECTORY' is not set,
+    #        so that the microsoft mirror is used as source to create the offline cache.
     SCM_VS_OFFLINE_BUNDLE_DIRECTORY: ""
 
 include:

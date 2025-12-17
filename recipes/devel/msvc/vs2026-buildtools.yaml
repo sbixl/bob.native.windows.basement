@@ -1,0 +1,58 @@
+inherit: [msvc::layout]
+
+# https://learn.microsoft.com/en-us/visualstudio/releases/2026/release-history
+metaEnvironment:
+    # Visual Studio 2026 (Version: 18.1.0, Release Date: December 9, 2025, Build Number: 11304.174)
+    PKG_VERSION:      "18.1.0"
+    PKG_BUILD_NUMBER: "11304.174"
+    VS_BUNDLE_NAME:   "vs_2026_build_tools_11304_174_layout"
+
+checkoutSCM:
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" == ""
+        scm: url
+        # Visual Studio 2026 BuildTools
+        url: https://download.visualstudio.microsoft.com/download/pr/451b234a-4e25-491d-a007-bf3e55b2562f/442956195fde7b7a0be755d2dc1bc405c05b80115f26bac3b569cb0c358b303f/vs_BuildTools.exe
+        digestSHA256: "442956195fde7b7a0be755d2dc1bc405c05b80115f26bac3b569cb0c358b303f"
+        extract: no
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" != ""
+        scm: url
+        url: ${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}/${VS_BUNDLE_NAME}.zip
+        digestSHA256: "1708beffe421c0429b7fe81a11f84bd229e697f15422a784a81daff3e0a95c2e"
+        extract: no
+
+buildVars: [VS_BUNDLE_NAME]
+buildScript: |
+    msvcDownloadLayout $args[0] `
+                       $Env:VS_BUNDLE_NAME `
+                       @("--add Microsoft.VisualStudio.Workload.MSBuildTools"
+                         "--add Microsoft.VisualStudio.Workload.VCTools"
+                         "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+                         "--add Microsoft.VisualStudio.Component.VC.ATL")
+
+multiPackage:
+    layout:
+        packageScript: |
+            msvcPackageLayout "$($args[0])/layout"
+
+    bundle:
+        root: True
+        packageVars: [VS_BUNDLE_NAME]
+        packageScript: |
+            msvcArchiveLayout "$($args[0])/layout" `
+                               "${Env:VS_BUNDLE_NAME}"
+
+provideVars:
+    VS_VERSION: "18.1.0"
+    MSVC_BUILD_TOOLS_VERSION: "14.44"
+    ### Microsoft Toolset  ###
+    MSVC_PLATFORM_TOOLSET: "145"
+    MSVC_TOOLSET_VERSION: "14.50.35717"
+    ### Microsoft C++ (MSVC) compiler version ###
+    # Major.Minor
+    MSVC_VERSION: "1950"
+    # Major.Minor.Build
+    MSVC_FULL_VERSION: "19.50.35720"

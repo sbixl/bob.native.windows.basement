@@ -1,0 +1,72 @@
+inherit: [msvc::sdk]
+
+metaEnvironment:
+    PKG_BUILD_NUMBER: "10.0.19041.0"
+    SDK_BUNDLE_NAME:  "winsdksetup_10_0_19041_0_layout"
+
+checkoutSCM:
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" == ""
+        scm: url
+        # Taken from https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/index-legacy
+        #
+        # Open a power shell and locate the redirect URI of the "go.microsoft.com/fwlink" address:
+        #
+        # (Invoke-WebRequest -uri "https://go.microsoft.com/fwlink/p/?LinkID=698771" -MaximumRedirection 0 -ErrorAction SilentlyContinue).RawContent
+        url: https://download.microsoft.com/download/4/d/2/4d2b7011-606a-467e-99b4-99550bf24ffc/windowssdk/winsdksetup.exe
+        digestSHA256: "42d2774274d1135fc598c180c2acbf2321eb4192f59e511e6ac7772870bf6de1"
+        extract: no
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" != ""
+        scm: url
+        url: ${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}/${SDK_BUNDLE_NAME}.zip
+        digestSHA256: "5642cefb3cfb0673b8f8fc473d999e51746b4642637e474895444c2b6365fe3a"
+        extract: no
+
+# Available features:
+#
+#   - OptionId.WindowsPerformanceToolkit
+#   - OptionId.WindowsDesktopDebuggers
+#   - OptionId.AvrfExternal
+#   - OptionId.NetFxSoftwareDevelopmentKit
+#   - OptionId.WindowsSoftwareLogoToolkit
+#   - OptionId.IpOverUsb
+#   - OptionId.MSIInstallTools
+#   - OptionId.SigningTools
+#   - OptionId.UWPManaged
+#   - OptionId.UWPCPP
+#   - OptionId.UWPLocalized
+#   - OptionId.DesktopCPPx86
+#   - OptionId.DesktopCPPx64
+#   - OptionId.DesktopCPParm
+#   - OptionId.DesktopCPParm64
+buildVars: [SDK_BUNDLE_NAME]
+buildScript: |
+    msvcDownloadSDK $($args[0]) `
+                     ${Env:SDK_BUNDLE_NAME} `
+                     @("/features OptionId.UWPManaged"
+                       "/features OptionId.UWPCPP"
+                       "/features OptionId.UWPLocalized"
+                       "/features OptionId.DesktopCPPx86"
+                       "/features OptionId.DesktopCPPx64")
+
+multiPackage:
+    "":
+        buildScript: |
+            msvcExtractSDK "${PWD}\layout\Installers" `
+                            Win10SDK
+
+        packageScript: |
+            msvcPackageSdk "$($args[0])\Win10SDK"
+
+        provideVars:
+            WINDOWS_SDK_VERSION: "10.0.19041.0"
+
+    bundle:
+        root: True
+        packageVars: [PKG_BUILD_NUMBER]
+        packageScript: |
+            msvcArchiveSdk "$($args[0])" `
+                            "${Env:VS_BUNDLE_NAME}"

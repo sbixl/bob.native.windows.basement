@@ -1,0 +1,59 @@
+inherit: [msvc::layout]
+
+# https://learn.microsoft.com/en-us/visualstudio/releases/2019/history
+metaEnvironment:
+    # Visual Studio 2019 (Version: 16.11.53, Release Date: November 11, 2025, Build Number: 16.11.36631.11)
+    PKG_VERSION:      "16.11.53"
+    PKG_BUILD_NUMBER: "16.11.36631.11"
+    VS_BUNDLE_NAME:   "vs_2019_build_tools_16_11_36631_11_layout"
+
+checkoutSCM:
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" == ""
+        # https://learn.microsoft.com/en-us/visualstudio/releases/2019/history#installing-an-earlier-release
+        scm: url
+        # Visual Studio 2019 BuildTools
+        url: https://download.visualstudio.microsoft.com/download/pr/46bb5918-5ff1-4e1c-9090-bbc63baa33b6/19f18f068b7eb660d37c9cdc3e45d1a2cffcfe00329fa098124001c7ca792c52/vs_BuildTools.exe
+        digestSHA256: "19f18f068b7eb660d37c9cdc3e45d1a2cffcfe00329fa098124001c7ca792c52"
+        extract: no
+    -
+        if: !expr |
+            "${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}" != ""
+        scm: url
+        url: ${SCM_VS_OFFLINE_BUNDLE_DIRECTORY}/${VS_BUNDLE_NAME}.zip
+        digestSHA256: "1708beffe421c0429b7fe81a11f84bd229e697f15422a784a81daff3e0a95c2e"
+        extract: no
+
+buildVars: [VS_BUNDLE_NAME]
+buildScript: |
+    msvcDownloadLayout $args[0] `
+                       $Env:VS_BUNDLE_NAME `
+                       @("--add Microsoft.VisualStudio.Workload.MSBuildTools"
+                         "--add Microsoft.VisualStudio.Workload.VCTools"
+                         "--add Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+                         "--add Microsoft.VisualStudio.Component.VC.ATL")
+
+multiPackage:
+    layout:
+        packageScript: |
+            msvcPackageLayout "$($args[0])/layout"
+
+    bundle:
+        root: True
+        packageVars: [VS_BUNDLE_NAME]
+        packageScript: |
+            msvcArchiveLayout "$($args[0])/layout" `
+                               "${Env:VS_BUNDLE_NAME}"
+
+provideVars:
+    VS_VERSION: "16.11.53"
+    MSVC_BUILD_TOOLS_VERSION: "14.29"
+    ### Microsoft Toolset  ###
+    MSVC_PLATFORM_TOOLSET: "142"
+    MSVC_TOOLSET_VERSION: "14.29.30133"
+    ### Microsoft C++ (MSVC) compiler version ###
+    # Major.Minor
+    MSVC_VERSION: "1929"
+    # Major.Minor.Build
+    MSVC_FULL_VERSION: "19.29.30159"
