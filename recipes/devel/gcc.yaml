@@ -51,8 +51,3 @@ packageScript: |
     $ArchivPath = "$($args[0])"
     mkdir usr > $null
     Check-Command { 7z x -o"usr" -y $ArchivPath/${Env:AUTOCONF_TARGET}.zip }
-
-    # because 7z has not strip option we need to do it ourselves
-    $RootFolder = $(Get-ChildItem usr)
-    robocopy usr/$RootFolder/ usr /S /NFL /NDL /NJH /NJS /nc /ns
-    rm -Recurse usr/$RootFolder
