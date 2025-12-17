@@ -1,11 +1,11 @@
 metaEnvironment:
-    PKG_VERSION: "2.1.1"
+    PKG_VERSION: "2.11.2"
 
 checkoutSCM:
     -
         scm: url
         url: ${GITHUB_MIRROR}/activescott/lessmsi/releases/download/v${PKG_VERSION}/lessmsi-v${PKG_VERSION}.zip
-        digestSHA256: "e307396280ae7ae9fbf7f97dddd085fcdca60ebbcf020cedb534647ca33fa10e"
+        digestSHA256: "1e32aa068e93844f060ce4ea9132ba0f29dda82361a0fdd066fefe838f6847e6"
         extract: no
 
 buildVars: [PKG_VERSION]
