@@ -10,18 +10,18 @@ buildScript: |
     mlx.traceability==11.7.0
     sphinx_rtd_theme==3.0.2
     sphinx_tabs==3.4.7
-    sphinx-prompt==1.9.0
-    sphinxcontrib-plantuml==0.30
+    sphinx-prompt==1.10.2
+    sphinxcontrib-plantuml==0.31
     sphinxcontrib-jsmath==1.0.1
     sphinx-togglebutton==0.3.2
     sphinx-copybutton==0.5.2
     sphinx_design==0.6.1
     jupyter-sphinx==0.5.3
-    ipython==9.2.0
-    ipykernel==6.29.5
-    pandas==2.2.3
-    scipy==1.15.3
-    schemdraw==0.20' | Out-File -encoding ASCII ${PWD}\addons.txt
+    ipython==9.8.0
+    ipykernel==7.1.0
+    pandas==2.3.3
+    scipy==1.16.3
+    schemdraw==0.22' | Out-File -encoding ASCII ${PWD}\addons.txt
 
     # Search for any pip package in local storage (if available, otherwise use pypi.org as source)
     pipSetRelativeSearchPath sphinx
