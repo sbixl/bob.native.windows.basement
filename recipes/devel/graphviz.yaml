@@ -3,15 +3,16 @@ shared: True
 inherit: [filesystem]
 
 metaEnvironment:
-    PKG_VERSION: "9.0.0"
+    PKG_VERSION: "14.1.1"
 
 checkoutSCM:
     scm: url
-    url: ${GITLAB_MIRROR}/api/v4/projects/4207231/packages/generic/graphviz-releases/${PKG_VERSION}/windows_10_msbuild_Release_graphviz-${PKG_VERSION}-win32.zip
-    digestSHA256: d397f469bc8256ac8284a7aefde19a2205af3001b3de8354a190420d5272e524
+    url: ${GITLAB_MIRROR}/api/v4/projects/4207231/packages/generic/graphviz-releases/${PKG_VERSION}/windows_10_cmake_Release_Graphviz-${PKG_VERSION}-win64.zip
+    digestSHA256: 2a9b856a6b73591bdef5409e8b47ec6c90df40551d510709e1cb3e69016c1924
 
+buildVars: [PKG_VERSION]
 buildScript: |
-    CopyDirectory "$($args[0])\Graphviz" install
+    CopyDirectory "$($args[0])\Graphviz-${Env:PKG_VERSION}-win64" install
 
 packageScript: |
     CopyDirectory "$($args[0])\install" usr
