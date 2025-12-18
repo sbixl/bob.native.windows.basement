@@ -37,10 +37,10 @@ environment:
 
     # Enable/Disable the Microsoft Visual Studio 2019 toolchain (MSBuildTools)
     # Note: The default VS toolchain is v143 (MSBuildTools 2022) independent of this setting
-    ENABLE_VS_BUILDTOOLS_2019: "True"
+    ENABLE_VS_BUILDTOOLS_2019: "False"
     # Enable/Disable the Microsoft Visual Studio 2026 toolchain (MSBuildTools)
     # Note: The default VS toolchain is v143 (MSBuildTools 2022) independent of this setting
-    ENABLE_VS_BUILDTOOLS_2026: "True"
+    ENABLE_VS_BUILDTOOLS_2026: "False"
 
     # This is for local (user) specific usage. Let this environment variable
     # point to your local storage where the vs20xx BuildTools offline bundle is stored.
