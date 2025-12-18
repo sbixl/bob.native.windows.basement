@@ -13,14 +13,13 @@ checkoutSCM:
 
 buildScript: |
     # create a symlink to avoid wasting memory
-    $ArchiveName = $(Get-ChildItem "$($args[0])/plantuml" -File '*.zip')
-    New-Item -ItemType SymbolicLink -Force -Path "plantuml.zip"  -Target "$($args[0])/plantuml/$ArchiveName" >$null
+    $FileName = $(Get-ChildItem "$($args[0])/plantuml" -File '*.jar')
+    New-Item -ItemType SymbolicLink -Force -Path "plantuml.jar"  -Target "$($args[0])/plantuml/$FileName" >$null
 
 packageToolsWeak: [7z]
 packageScript: |
-    $ArchivPath = "$($args[0])"
     mkdir -p usr/bin > $null
-    Check-Command { 7z x -o"usr/bin" -y $ArchivPath/plantuml.zip }
+    cp -r "$($args[0])\plantuml.jar" usr/bin
 
 provideTools:
     plantuml:
