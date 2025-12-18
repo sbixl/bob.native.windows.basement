@@ -73,7 +73,7 @@ packageSetup: |
             [String]$bundleName
         )
 
-        Compress-Archive -Path "${layoutDirectory}\*" -DestinationPath ${bundleName}.zip
+        Compress-Archive -Path "${layoutDirectory}\*" -DestinationPath .\${bundleName}.zip
     }
 
     function msvcPackageLayout

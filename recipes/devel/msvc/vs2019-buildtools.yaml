@@ -45,7 +45,7 @@ multiPackage:
         packageVars: [VS_BUNDLE_NAME]
         packageScript: |
             msvcArchiveLayout "$($args[0])/layout" `
-                               "${Env:VS_BUNDLE_NAME}"
+                              "${Env:VS_BUNDLE_NAME}"
 
 provideVars:
     VS_VERSION: "16.11.53"
