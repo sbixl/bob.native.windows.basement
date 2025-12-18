@@ -79,11 +79,11 @@ buildSetup: |
 
         if([string]::IsNullOrWhiteSpace(${ARGS}))
         {
-            Write-Host "Downlowding pip package ${PIP_PACKAGE} from pypi.org ..."
+            Write-Host "Downloading pip package ${PIP_PACKAGE} from pypi.org ..."
         }
         else
         {
-            Write-Host "Downlowding pip package ${PIP_PACKAGE} from internal storage ${LOCAL_PIP_SEARCH_PATH} ..."
+            Write-Host "Downloading pip package ${PIP_PACKAGE} from internal storage ${LOCAL_PIP_SEARCH_PATH} ..."
         }
 
         $_OPTIONS = $($ARGS | select)
@@ -134,11 +134,11 @@ buildSetup: |
 
         if([string]::IsNullOrWhiteSpace(${ARGS}))
         {
-            Write-Host "Downlowding pip packages from pypi.org ..."
+            Write-Host "Downloading pip packages from pypi.org ..."
         }
         else
         {
-            Write-Host "Downlowding pip packages from internal storage ${LOCAL_PIP_SEARCH_PATH} ..."
+            Write-Host "Downloading pip packages from internal storage ${LOCAL_PIP_SEARCH_PATH} ..."
         }
 
         $_OPTIONS = $($ARGS | select)
@@ -189,11 +189,11 @@ buildSetup: |
 
         if([string]::IsNullOrWhiteSpace(${ARGS}))
         {
-            Write-Host "Downlowding pip packages from pypi.org ..."
+            Write-Host "Downloading pip packages from pypi.org ..."
         }
         else
         {
-            Write-Host "Downlowding pip packages from internal storage ${LOCAL_PIP_SEARCH_PATH} ..."
+            Write-Host "Downloading pip packages from internal storage ${LOCAL_PIP_SEARCH_PATH} ..."
         }
 
         $_OPTIONS = $($ARGS | select)
