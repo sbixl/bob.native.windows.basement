@@ -10,9 +10,6 @@ buildSetup: |
         $CMAKE_FIND_ROOT_PATH+="$i;"
     }
 
-    # Because DEST_DIR is not supported on windows, we must set the path from here
-    $global:CMAKE_INSTALL_PREFIX="install\usr"
-
     # CMake does not honor CPPFLAGS! Merge them with C(XX)FLAGS.
     if ( ${Env:CPPFLAGS} -ne $null )
     {
@@ -81,7 +78,7 @@ buildSetup: |
         }
         default
         {
-            Write-Error "undefined cpackageLibraryType"
+            Write-Error "undefined cpackageLibraryType: $(cpackageLibraryType)"
         }
     }
 
@@ -107,36 +104,45 @@ buildSetup: |
             }
         }
 
+        $SRC_PATH = "$($args[$processed])"
+        $processed++
+
+        $cmakeArgs = @(
+            $SRC_PATH
+            '-G', 'Ninja'
+            "-DCMAKE_FIND_ROOT_PATH=$CMAKE_FIND_ROOT_PATH"
+            "-DCMAKE_INSTALL_PREFIX=usr"
+            "-DCMAKE_INSTALL_SYSCONFDIR=etc"
+            "-DCMAKE_INSTALL_LIBDIR=lib"
+            "-DCMAKE_PREFIX_PATH=/usr/lib/cmake"
+            "-DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS"
+        )
+
+        if ($CMAKE_TOOLCHAIN_FILE) {
+            $cmakeArgs += "-DCMAKE_TOOLCHAIN_FILE=$CMAKE_TOOLCHAIN_FILE"
+        }
+
+        $_OPTIONS = $($args | select -skip $processed)
+        if ($_OPTIONS) {
+            $cmakeArgs += $_OPTIONS
+        }
+
         if (test-path install)
         {
             rm -r -Force install >$null
         }
         mkdir -Force build, install >$null
 
-        $SRC_PATH = "$($args[$processed])"
-        $processed++
-
-        $_OPTIONS = $($args | select -skip $processed)
-
+        pushd build
         Check-Command {
-            cmake $SRC_PATH `
-                  -B build `
-                  -GNinja `
-                  -DCMAKE_TOOLCHAIN_FILE="${CMAKE_TOOLCHAIN_FILE}" `
-                  -DCMAKE_FIND_ROOT_PATH="${CMAKE_FIND_ROOT_PATH}" `
-                  -DCMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}" `
-                  -DCMAKE_BUILD_WITH_INSTALL_RPATH="ON" `
-                  -DCMAKE_PREFIX_PATH="\usr\lib\cmake" `
-                  -DCMAKE_INSTALL_SYSCONFDIR="${CMAKE_INSTALL_SYSCONFDIR}" `
-                  -DBUILD_SHARED_LIBS="${BUILD_SHARED_LIBS}" `
-                  $_OPTIONS
+            cmake @cmakeArgs
         }
 
-        pushd build
         ninjaParallel -o "${MAKE_OPTIONS}" -t "${MAKE_TARGETS}"
 
         if ( $INSTALL -eq "yes" )
         {
+            $Env:DESTDIR = (Resolve-Path "$PWD/../install")
             cmakeInstall INSTALL_COMPONENT
         }
         popd
@@ -163,20 +169,36 @@ packageSetup: |
 
     function cmakePackageBin
     {
-        installPackageBin "${_CMAKE_BUILD_PATH}\install"
+        param (
+            [string[]]$ExtraArgs
+        )
+
+        installPackageBin "${_CMAKE_BUILD_PATH}\install" @ExtraArgs
     }
 
     function cmakePackageDev
     {
-        installPackageDev "${_CMAKE_BUILD_PATH}\install"
+        param (
+            [string[]]$ExtraArgs = @()
+        )
+
+        installPackageDev "${_CMAKE_BUILD_PATH}\install" @ExtraArgs
     }
 
     function cmakePackageLib
     {
-        installPackageLib "${_CMAKE_BUILD_PATH}\install"
+        param (
+            [string[]]$ExtraArgs = @()
+        )
+
+        installPackageLib "${_CMAKE_BUILD_PATH}\install" @ExtraArgs
     }
 
     function cmakePackageTgt
     {
-        installPackageTgt "${_CMAKE_BUILD_PATH}\install"
+        param (
+            [string[]]$ExtraArgs = @()
+        )
+
+        installPackageTgt "${_CMAKE_BUILD_PATH}\install" @ExtraArgs
     }
