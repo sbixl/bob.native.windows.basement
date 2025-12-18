@@ -95,7 +95,9 @@ packageSetup: |
         Param(
             # mandatory
             [Parameter(Position = 0, mandatory=$true)]
-            [String]$ROOT_DIRECTORY
+            [String]$ROOT_DIRECTORY,
+            [Parameter(Position = 1, mandatory=$false)]
+            [String[]]$ExtraArgs = @()
         )
 
         installCopy $ROOT_DIRECTORY
@@ -106,7 +108,9 @@ packageSetup: |
         Param(
             # mandatory
             [Parameter(Position = 0, mandatory=$true)]
-            [String]$ROOT_DIRECTORY
+            [String]$ROOT_DIRECTORY,
+            [Parameter(Position = 1, mandatory=$false)]
+            [String[]]$ExtraArgs = @()
         )
 
         installPackageBin $ROOT_DIRECTORY
@@ -118,7 +122,9 @@ packageSetup: |
         Param(
             # mandatory
             [Parameter(Position = 0, mandatory=$true)]
-            [String]$ROOT_DIRECTORY
+            [String]$ROOT_DIRECTORY,
+            [Parameter(Position = 1, mandatory=$false)]
+            [String[]]$ExtraArgs = @()
         )
 
         # TODO: add exclude filter
@@ -131,7 +137,9 @@ packageSetup: |
         Param(
             # mandatory
             [Parameter(Position = 0, mandatory=$true)]
-            [String]$ROOT_DIRECTORY
+            [String]$ROOT_DIRECTORY,
+            [Parameter(Position = 1, mandatory=$false)]
+            [String[]]$ExtraArgs = @()
         )
 
         # TODO: add exclude filter
