@@ -24,6 +24,7 @@ checkoutSCM:
         digestSHA256: "1708beffe421c0429b7fe81a11f84bd229e697f15422a784a81daff3e0a95c2e"
         extract: no
 
+# https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2019
 buildVars: [VS_BUNDLE_NAME]
 buildScript: |
     msvcDownloadLayout $args[0] `
