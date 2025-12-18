@@ -86,5 +86,5 @@ packageSetup: |
             [Parameter(Mandatory, Position = 1)]
             [String]$bundleName
         )
-        Compress-Archive -Path "${sdkDirectory}\*" -DestinationPath ${bundleName}.zip
+        Compress-Archive -Path "${sdkDirectory}\*" -DestinationPath .\${bundleName}.zip
     }
