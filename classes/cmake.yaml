@@ -65,11 +65,7 @@ buildSetup: |
 
         $CMAKE_TOOLCHAIN_FILE="${PWD}/toolchain.cmake"
     }
-    else
-    {
-        # create empty toolchain file
-        '# just a placeholder'  | Out-File -encoding utf8 ${PWD}\toolchain.cmake
-    }
+
     # The build of shared libraries can be controlled on cmake. Unfortunately
     # there is no standard switch to control static libraries.
 
