@@ -1,7 +1,7 @@
 inherit: [filesystem]
 
 buildNetAccess: True
-buildScript: |
+buildSetup: |
     function msvcDownloadLayout
     {
         Param(

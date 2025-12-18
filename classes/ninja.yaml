@@ -1,6 +1,6 @@
 buildToolsWeak: [ninja]
 buildVarsWeak: [PARALLEL_JOBS]
-buildScript: |
+buildSetup: |
     function ninjaParallel
     {
         Param(

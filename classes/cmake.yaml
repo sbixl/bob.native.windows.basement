@@ -2,7 +2,7 @@ inherit: [cpackage, ninja, install]
 
 buildToolsWeak: [cmake]
 buildVars: [AUTOCONF_HOST, CC, CXX, PLATFORM]
-buildScript: |
+buildSetup: |
     # Make sure CMake finds other stuff by its own logic too
     $global:CMAKE_FIND_ROOT_PATH=""
     foreach ( $i in ($args | select -skip 1) )
@@ -142,7 +142,7 @@ buildScript: |
         }
     }
 
-packageScript: |
+packageSetup: |
     $global:_CMAKE_BUILD_PATH="$($args[0])"
 
     function cmakePackageBin

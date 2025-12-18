@@ -4,7 +4,7 @@ depends:
 
 checkoutVarsWeak: [PATCH_PATH]
 checkoutDeterministic: True
-checkoutScript: |
+checkoutSetup: |
     function patchApplySeries
     {
         Param(

@@ -3,7 +3,7 @@
 
 buildTools: [target-toolchain]
 buildVars: [AUTOCONF_BUILD, AUTOCONF_HOST, CPPFLAGS, CFLAGS, CXXFLAGS, LDFLAGS]
-buildScript: |
+buildSetup: |
     # Check if we're officially cross-compiling
     function cpackageCrossCompiling
     {
