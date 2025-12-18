@@ -2,12 +2,12 @@
 # variables so that the dependencies are found by the toolchains.
 
 buildTools: [target-toolchain]
-buildVars: [AUTOCONF_BUILD, AUTOCONF_HOST, CPPFLAGS, CFLAGS, CXXFLAGS, LDFLAGS]
+buildVars: [AUTOCONF_BUILD, AUTOCONF_HOST, TOOLCHAIN_FLAVOUR, CPPFLAGS, CFLAGS, CXXFLAGS, LDFLAGS]
 buildSetup: |
     # Check if we're officially cross-compiling
     function cpackageCrossCompiling
     {
-        if ( "${Env:AUTOCONF_BUILD}" -ne "${Env:AUTOCONF_HOST}" )
+        if ("${Env:AUTOCONF_BUILD}" -ne "${Env:AUTOCONF_HOST}")
         {
             return 1 # cross compiling
         }
@@ -23,7 +23,7 @@ buildSetup: |
     # libraries on host builds.
     function cpackageLibraryType
     {
-        if ( cpackageCrossCompiling )
+        if(cpackageCrossCompiling)
         {
             "shared"
             return
@@ -35,7 +35,7 @@ buildSetup: |
         }
     }
 
-    if ( ${Env:AUTOCONF_HOST}.Contains("-windows-msvc") )
+    if(${Env:TOOLCHAIN_FLAVOUR} -eq "msvc")
     {
         # Setup the visual studio shell environment (similar to the Developer Command Prompt)
         $PS_SCRIPT = "$($BOB_TOOL_PATHS["target-toolchain"])\setup_devenv.ps1"
@@ -44,23 +44,22 @@ buildSetup: |
 
         # The global paths need to be added to $PATH.
         $Env:PATH="$Env:VS_PATH;$Env:PATH"
+    }
 
-        # Gather all include and library paths.
-        foreach ( $i in ($args | select -skip 1) )
+    # Gather all include and library paths.
+    foreach ($i in ($args | select -skip 1))
+    {
+        $includePath = Join-Path $i "usr/include"
+        if(Test-Path includePath)
         {
-            if( Test-Path "$i/usr/include" )
+            ${Env:CPPFLAGS} += " -I$includePath"
+        }
+        foreach($j in @("lib", "usr/lib"))
+        {
+            $libPath = Join-Path $i $j
+            if(Test-Path $libPath)
             {
-                ${Env:CPPFLAGS} += " -I$("$i/usr/include")"
+                ${Env:LDFLAGS} +=" -LIBPATH:$libPath"
             }
-            foreach ( $j in @("lib", "usr/lib") )
-            {
-                if( Test-Path "$i/$j" )
-                {
-                    # windows: TODO
-                    # cygwin: LDFLAGS+=" -LIBPATH:$(cygpath -w "$i/$j")"
-                    # linux: LDFLAGS+=" -L$i/$j"; LDFLAGS+=" -Wl,-rpath-link=$i/$j"
-                }
-            }
-
         }
     }

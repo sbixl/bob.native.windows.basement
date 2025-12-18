@@ -14,7 +14,7 @@ checkoutSetup: &ref |
 
         if($VERBOSITY -eq $false)
         {
-            robocopy $SRC $DST /MIR /NDL /NJH /NJS
+            robocopy $SRC $DST /MIR /NDL /NJH /NJS >$null
         }
         else
         {
