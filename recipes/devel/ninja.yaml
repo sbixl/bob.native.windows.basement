@@ -32,6 +32,7 @@ multiPackage:
         buildVars: [PKG_VERSION]
         buildScript: |
             cmakeBuild "$($args[0])\ninja-${Env:PKG_VERSION}" `
+                       -DBUILD_TESTING=OFF `
                        -DCMAKE_BUILD_TYPE=Release
 
         packageScript: |
