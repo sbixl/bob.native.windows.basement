@@ -61,7 +61,7 @@ checkoutScript: |
     rm -r -Force llvm-project-${Env:PKG_VERSION}.src.tar
 
 buildVarsWeak: [BOB_PACKAGE_NAME]
-buildVars: [LLVM_TARGETS]
+buildVars: [LLVM_TARGETS, LLVM_PROJECTS, LLVM_RUNTIMES]
 buildScript: |
     function buildClang
     {
@@ -83,12 +83,17 @@ buildScript: |
         $LibXml2_LibDir     = "$($BOB_DEP_PATHS["devel::llvm::libxml2"])\usr\lib\libxml2s.lib".Replace("\","/")
 
         DeleteDirectory ${ExternalBuildPath}
-        mkdir -p ${ExternalBuildPath} >$null
+        mkdir -p ${ExternalBuildPath} -ErrorAction SilentlyContinue
 
         pushd ${ExternalBuildPath}
 
+        # create a list of projects (required by ninja buildsystem)
+        $buildTargets = ${Env:LLVM_PROJECTS} -split '\s*;\s*'
+
         # note: setting CMAKE_CL_SHOWINCLUDES_PREFIX to work around PR27226.
-        cmakeBuild "$SourceDirectory" `
+        cmakeBuild -m $buildTargets `
+                   -n `
+                   "$SourceDirectory" `
                    -DCMAKE_BUILD_TYPE=Release `
                    -DCMAKE_C_FLAGS="-DLIBXML_STATIC" `
                    -DCMAKE_CXX_FLAGS="-DLIBXML_STATIC" `
@@ -97,6 +102,8 @@ buildScript: |
                    -DLIBXML2_LIBRARY="$LibXml2_LibDir" `
                    -DLIBCLANG_BUILD_STATIC=ON `
                    -DLLVM_TARGETS_TO_BUILD="${Env:LLVM_TARGETS}" `
+                   -DLLVM_ENABLE_PROJECTS="${Env:LLVM_PROJECTS}" `
+                   -DLLVM_ENABLE_RUNTIMES="${Env:LLVM_RUNTIMES}" `
                    -DLLVM_ENABLE_LIBXML2=FORCE_ON `
                    -DLLVM_ENABLE_ASSERTIONS=OFF `
                    -DLLVM_OPTIMIZED_TABLEGEN=ON `
@@ -128,8 +135,12 @@ buildScript: |
 multiPackage:
 
     bootstrap-clang:
+        environment:
+            LLVM_PROJECTS: "clang;lld"
+            LLVM_RUNTIMES: ""
+
         buildScript: |
-            buildClang -DLLVM_ENABLE_PROJECTS="clang;lld"
+            buildClang
 
         packageScript: |
             cmakePackageBin
@@ -138,6 +149,10 @@ multiPackage:
             bootstrap-clang: usr/bin
 
     "":
+        environment:
+            LLVM_PROJECTS: "clang;clang-tools-extra;lld;lldb"
+            LLVM_RUNTIMES: "compiler-rt;openmp"
+
         depends:
             - name: devel::llvm-bootstrap-clang
               use: [tools]
@@ -150,8 +165,6 @@ multiPackage:
             $RC="$TOOLCHAIN_DIR/llvm-rc.exe"
 
             buildClang -DLLVM_NATIVE_TOOL_DIR="$TOOLCHAIN_DIR" `
-                       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld;lldb" `
-                       -DLLVM_ENABLE_RUNTIMES="compiler-rt;openmp" `
                        -DLLVM_TABLEGEN=llvm-tblgen `
                        -DLLVM_ENABLE_LLD=ON `
                        -DCMAKE_C_COMPILER=clang-cl `
