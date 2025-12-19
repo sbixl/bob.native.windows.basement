@@ -39,7 +39,8 @@ multiPackage:
         buildVars: [PKG_VERSION]
         buildScript: |
             cmakeBuild "$($args[0])\cmake.src\CMake-${Env:PKG_VERSION}" `
-                       -DCMAKE_BUILD_TYPE=RELEASE
+                       -DCMAKE_BUILD_TYPE=RELEASE `
+                       -DBUILD_TESTING=OFF
 
         packageScript: |
             cmakePackageTgt
@@ -63,10 +64,11 @@ multiPackage:
                       -GNinja `
                       -DCMAKE_BUILD_TYPE=RELEASE `
                       -DBUILD_SHARED_LIBS=OFF `
+                      -DBUILD_TESTING=OFF `
                       -DCMAKE_INSTALL_PREFIX="..\install\usr"
             }
 
-            ninjaParallel -t "all"
+            ninjaParallel
             ninjaInstall
 
             popd
