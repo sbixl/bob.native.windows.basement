@@ -143,8 +143,8 @@ buildSetup: |
             '-B', 'build'
             "-DCMAKE_FIND_ROOT_PATH=$CMAKE_FIND_ROOT_PATH"
             "-DCMAKE_INSTALL_PREFIX=/usr"
+            "-DCMAKE_INSTALL_LIBDIR=/usr/lib"
             "-DCMAKE_INSTALL_SYSCONFDIR=/etc"
-            "-DCMAKE_INSTALL_LIBDIR=/lib"
             "-DCMAKE_PREFIX_PATH=/usr/lib/cmake"
             "-DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS"
         )
@@ -194,17 +194,17 @@ buildSetup: |
 
         if($SubInstallDir)
         {
-            $Env:DESTDIR="$PWD\install"
+            $Env:DESTDIR="$PWD\install\$SubInstallDir"
         }
         else
         {
-            $Env:DESTDIR="$PWD\install\$SubInstallDir"
+            $Env:DESTDIR="$PWD\install"
         }
 
         Check-Command {
             cmake @cmakeArgs
         }
-        Remove-Item $Env:DESTDIR
+        rm Env:DESTDIR
     }
 
 packageSetup: |
