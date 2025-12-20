@@ -6,9 +6,6 @@ metaEnvironment:
     PKG_DESCRIPTION: "A collection of modular and reusable compiler and toolchain technologies"
     PKG_LICENSE: "Apache-2.0 WITH LLVM-exception"
 
-environment:
-    LLVM_TARGETS: "AArch64;ARM;RISCV;X86"
-
 checkoutSCM:
     -
         scm: url
@@ -87,16 +84,9 @@ buildScript: |
 
         pushd ${ExternalBuildPath}
 
-        # create a list of projects (required by ninja buildsystem)
-        $buildTargets = ${Env:LLVM_PROJECTS} -split '\s*;\s*'
-
         # note: setting CMAKE_CL_SHOWINCLUDES_PREFIX to work around PR27226.
-        cmakeBuild -m $buildTargets `
-                   -n `
-                   "$SourceDirectory" `
+        cmakeBuild "$SourceDirectory" `
                    -DCMAKE_BUILD_TYPE=Release `
-                   -DCMAKE_C_FLAGS="-DLIBXML_STATIC" `
-                   -DCMAKE_CXX_FLAGS="-DLIBXML_STATIC" `
                    -DCMAKE_CL_SHOWINCLUDES_PREFIX="Note: including file: " `
                    -DLIBXML2_INCLUDE_DIR="$LibXml2_IncludeDir" `
                    -DLIBXML2_LIBRARY="$LibXml2_LibDir" `
@@ -114,7 +104,6 @@ buildScript: |
                    -DLLVM_ENABLE_OCAMLDOC=OFF `
                    -DLLVM_ENABLE_ZSTD=OFF `
                    -DLLVM_ENABLE_BINDINGS=OFF `
-                   -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON `
                    -DLLVM_BUILD_LLVM_C_DYLIB=ON `
                    -DLLVM_ENABLE_RPMALLOC=ON `
                    -DLLDB_RELOCATABLE_PYTHON=1 `
@@ -136,11 +125,14 @@ multiPackage:
 
     bootstrap-clang:
         environment:
+            LLVM_TARGETS:  "Native"
             LLVM_PROJECTS: "clang;lld"
             LLVM_RUNTIMES: ""
 
         buildScript: |
-            buildClang
+            buildClang -DCMAKE_C_FLAGS="-DLIBXML_STATIC" `
+                       -DCMAKE_CXX_FLAGS="-DLIBXML_STATIC" `
+                       -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON
 
         packageScript: |
             cmakePackageBin
@@ -150,6 +142,7 @@ multiPackage:
 
     "":
         environment:
+            LLVM_TARGETS: "AArch64;ARM;RISCV;X86"
             LLVM_PROJECTS: "clang;clang-tools-extra;lld;lldb"
             LLVM_RUNTIMES: "compiler-rt;openmp"
 
@@ -162,38 +155,29 @@ multiPackage:
             # CMake expects the paths that specifies the compiler and linker to be with forward slash.
             $TOOLCHAIN_DIR="$($BOB_TOOL_PATHS["bootstrap-clang"])".Replace("\","/")
             $AR="$TOOLCHAIN_DIR/llvm-lib.exe"
-            $RC="$TOOLCHAIN_DIR/llvm-rc.exe"
+            $RC="$TOOLCHAIN_DIR/llvm-windres.exe"
 
-            buildClang -DLLVM_NATIVE_TOOL_DIR="$TOOLCHAIN_DIR" `
-                       -DLLVM_TABLEGEN=llvm-tblgen `
+            buildClang -DCMAKE_C_FLAGS="-DLIBXML_STATIC -fuse-ld=lld -Wno-backend-plugin" `
+                       -DCMAKE_CXX_FLAGS="-DLIBXML_STATIC -fuse-ld=lld -Wno-backend-plugin" `
+                       -DLLVM_NATIVE_TOOL_DIR="$TOOLCHAIN_DIR" `
+                       -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON `
+                       -DLLVM_TABLEGEN=llvm-tblgen.exe `
                        -DLLVM_ENABLE_LLD=ON `
-                       -DCMAKE_C_COMPILER=clang-cl `
-                       -DCMAKE_CXX_COMPILER=clang-cl `
-                       -DCMAKE_LINKER=lld-link `
+                       -DCMAKE_C_COMPILER=clang-cl.exe `
+                       -DCMAKE_CXX_COMPILER=clang-cl.exe `
+                       -DCMAKE_LINKER=lld-link.exe `
                        -DCMAKE_AR="$AR" `
                        -DCMAKE_RC="$RC"
 
+            # create a list of projects (required by ninja buildsystem)
+            $buildTargets = ${Env:LLVM_PROJECTS} -split '\s*;\s*'
+
         multiPackage:
-            "":
+            clang-windows-msvc:
                 packageScript: |
-                    installCopy "$($args[0])\install" @(
-                                    "usr",
-                                    "!usr\bin\clang-cl.exe",
-                                    "!usr\bin\clang-cpp.exe",
-                                    "!usr\bin\ld.lld.exe",
-                                    "!usr\bin\lld.exe",
-                                    "!usr\bin\lld-link.exe",
-                                    "!usr\bin\wasm-ld.exe",
-                                    "!usr\lib\clang",
-                                    "!usr\bin\clangd.exe",
-                                    "!usr\bin\clang-format.exe",
-                                    "!usr\bin\git-clang-format",
-                                    "!usr\bin\git-clang-format.bat"
-                                    "!usr\bin\clang-tidy.exe",
-                                    "!usr\bin\run-clang-tidy"
-                                )
+                    cmakePackageBin
                 provideTools:
-                    llvm: "usr/bin"
+                    clang-windows-msvc: "usr/bin"
 
             clang:
                 packageScript: |

@@ -25,7 +25,7 @@ depends:
     - if: !expr |
         "${ENABLE_X86_64_CLANG_HOST_TOOLCHAIN}" == "True"
       depends:
-          - devel::llvm
+          - devel::llvm-clang-windows-msvc
           - devel::llvm-clang
           - devel::llvm-clangd
           - devel::llvm-clang-format
