@@ -144,7 +144,7 @@ multiPackage:
         environment:
             LLVM_TARGETS: "AArch64;ARM;RISCV;X86"
             LLVM_PROJECTS: "clang;clang-tools-extra;lld;lldb"
-            LLVM_RUNTIMES: "compiler-rt;openmp;libcxx;libunwind"
+            LLVM_RUNTIMES: "compiler-rt;openmp;libcxx"
 
         depends:
             - name: devel::llvm-bootstrap-clang
