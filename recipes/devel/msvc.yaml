@@ -66,7 +66,10 @@ multiPackage:
               use: [result, environment]
 
 provideTools:
-    target-toolchain:
+    # The MSVC compiler is the official host toolchain on windows
+    # In contrast to the linux basement, the compiler must be not installed
+    # in the local file system. For this reason no fingerprinting is required!
+    host-toolchain: &host-toolchain
         path: ""
         environment:
             AUTOCONF_HOST: "x86_64-pc-windows-msvc"
@@ -76,12 +79,13 @@ provideTools:
             CXX: "cl"
             AR:  "lib"
 
+            CPPFLAGS: ""
+            CFLAGS: ""
+            CXXFLAGS: ""
+            LDFLAGS: ""
+    target-toolchain: *host-toolchain
+
 provideVars:
     MSVC_TOOLSET_VERSION:   $MSVC_TOOLSET_VERSION
     WINDOWS_SDK_VERSION:    $WINDOWS_SDK_VERSION
     PROCESSOR_ARCHITECTURE: "AMD64"
-
-    CPPFLAGS: ""
-    CFLAGS: ""
-    CXXFLAGS: ""
-    LDFLAGS: ""

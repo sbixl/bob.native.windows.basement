@@ -144,7 +144,7 @@ multiPackage:
         environment:
             LLVM_TARGETS: "AArch64;ARM;RISCV;X86"
             LLVM_PROJECTS: "clang;clang-tools-extra;lld;lldb"
-            LLVM_RUNTIMES: "compiler-rt;openmp"
+            LLVM_RUNTIMES: "compiler-rt;openmp,libcxx,libunwind"
 
         depends:
             - name: devel::llvm-bootstrap-clang
@@ -173,26 +173,62 @@ multiPackage:
             $buildTargets = ${Env:LLVM_PROJECTS} -split '\s*;\s*'
 
         multiPackage:
-            clang-windows-msvc:
-                packageScript: |
-                    cmakePackageBin
-                provideTools:
-                    clang-windows-msvc: "usr/bin"
-
             clang:
-                packageScript: |
-                    installCopy "$($args[0])\install" @(
-                                    "usr\bin\clang++.exe",
-                                    "usr\bin\clang-cl.exe",
-                                    "usr\bin\clang-cpp.exe",
-                                    "usr\bin\ld.lld.exe",
-                                    "usr\bin\lld.exe",
-                                    "usr\bin\lld-link.exe",
-                                    "usr\bin\wasm-ld.exe",
-                                    "usr\lib\clang"
-                                )
-                provideTools:
-                    clang: "usr/bin"
+                multiPackage:
+                    "":
+                        packageScript: |
+                            installCopy "$($args[0])\install" @(
+                                            "usr\bin\clang++.exe",
+                                            "usr\bin\clang-cl.exe",
+                                            "usr\bin\clang-cpp.exe",
+                                            "usr\bin\ld.lld.exe",
+                                            "usr\bin\lld.exe",
+                                            "usr\bin\lld-link.exe",
+                                            "usr\bin\wasm-ld.exe",
+                                            "usr\lib\clang"
+                                        )
+                        provideTools:
+                            clang: "usr/bin"
+
+                    # clang for windows with GNU CLI (no msvc)
+                    x86_64-pc-windows-gnu:
+                        environment:
+                            AUTOCONF_TARGET: "x86_64-pc-windows-gnu"
+                            ARCH: "amd64"
+
+                        packageScript: |
+                            cmakePackageBin
+
+                        provideTools:
+                            target-toolchain:
+                                path: "usr/bin"
+                                environment:
+                                    # usual compiler variables
+                                    AR:      "llvm-ar"
+                                    AS:      "llvm-as"
+                                    CC:      "clang"
+                                    CPP:     "clang-cpp"
+                                    CXX:     "clang++"
+                                    GDB:     "lldb"
+                                    LD:      "llvm-ld"
+                                    NM:      "llvm-nm"
+                                    OBJCOPY: "llvm-objcopy"
+                                    OBJDUMP: "llvm-objdump"
+                                    RANLIB:  "llvm-ranlib"
+                                    READELF: "llvm-readelf"
+                                    STRIP:   "llvm-strip"
+
+                                    ARCH: "$ARCH"
+                                    # Define our build and host systems because we define the host- and
+                                    # target-toolchain. ARCH is unchanged, though.
+                                    AUTOCONF_BUILD: "$AUTOCONF_TARGET"
+                                    AUTOCONF_HOST:  "$AUTOCONF_TARGET"
+                                    TOOLCHAIN_FLAVOUR: clang
+
+                                    CPPFLAGS: ""
+                                    CFLAGS: "-Oz -pipe"
+                                    CXXFLAGS: "-Oz -pipe"
+                                    LDFLAGS: "-Xclang -std=c++1z -Xclang -stdlib=libc++"
 
             clangd:
                 packageScript: |

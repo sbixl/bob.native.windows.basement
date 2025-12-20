@@ -22,7 +22,7 @@ multiPackage:
             - if: !expr |
                 "${ENABLE_X86_64_CLANG_HOST_TOOLCHAIN}" == "True"
               depends:
-                  - name: devel::host-toolchain
+                  - name: devel::llvm-clang-x86_64-pc-windows-gnu
                     use: [environment, tools]
                     forward: True
             - tests::cmake::libgreet-dev
