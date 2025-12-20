@@ -33,6 +33,7 @@ multiPackage:
                     OBJCOPY: "${AUTOCONF_TARGET}-objcopy"
                     OBJDUMP: "${AUTOCONF_TARGET}-objdump"
                     RANLIB: "${AUTOCONF_TARGET}-ranlib"
+                    READELF: "${AUTOCONF_TARGET}-readelf"
                     STRIP: "${AUTOCONF_TARGET}-strip"
 
                     ARCH: "${ARCH}"
@@ -40,9 +41,6 @@ multiPackage:
                     CROSS_COMPILE: "${AUTOCONF_TARGET}-"
                     TOOLCHAIN_SYSROOT: "../${AUTOCONF_TARGET}"
                     TOOLCHAIN_FLAVOUR: gcc
-
-                    # CMake dependent
-                    CMAKE_TOOLCHAIN_FILE: ..\\..\\${AUTOCONF_TARGET}.toolchain
 
                     ### common compiler flags
 
