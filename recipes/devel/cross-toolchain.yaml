@@ -110,7 +110,7 @@ multiPackage:
                     GCC_TARGET_FPU: "vfpv4"
 
             # ARMv8-A AArch64 bare metal toolchain
-            aarch64-none-eabi:
+            aarch64-none-elf:
                 environment:
                     AUTOCONF_TARGET: "aarch64-none-elf"
                     ARCH: "arm64"
