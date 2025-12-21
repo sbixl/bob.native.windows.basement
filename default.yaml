@@ -68,6 +68,12 @@ environment:
     #        so that the microsoft mirror is used as source to create the offline cache.
     SCM_VS_OFFLINE_BUNDLE_DIRECTORY: ""
 
+whitelist:
+    - "PROCESSOR_ARCHITECTURE"
+    #- "PROCESSOR_IDENTIFIER"
+    #- "PROCESSOR_LEVEL"
+    #- "PROCESSOR_REVISION"
+
 include:
     # optional include for user specific settings.
     # note: This file (user.yaml) is not under version control and shall be placed

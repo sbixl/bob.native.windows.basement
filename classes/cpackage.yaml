@@ -1,3 +1,4 @@
+inherit: [msvc::vcvars]
 # Common class C/C++ based packages. It updates the various compiler flags
 # variables so that the dependencies are found by the toolchains.
 
@@ -37,13 +38,7 @@ buildSetup: |
 
     if(${Env:TOOLCHAIN_FLAVOUR} -eq "msvc")
     {
-        # Setup the visual studio shell environment (similar to the Developer Command Prompt)
-        $PS_SCRIPT = "$($BOB_TOOL_PATHS["target-toolchain"])\setup_devenv.ps1"
-
-        & ${PS_SCRIPT} -RootDir $($BOB_TOOL_PATHS["target-toolchain"])
-
-        # The global paths need to be added to $PATH.
-        $Env:PATH="$Env:VS_PATH;$Env:PATH"
+        msvcLoadVcvars -VsInstallDir "$($BOB_TOOL_PATHS["target-toolchain"])"
     }
 
     # Gather all include and library paths.
