@@ -68,6 +68,23 @@ environment:
     #        so that the microsoft mirror is used as source to create the offline cache.
     SCM_VS_OFFLINE_BUNDLE_DIRECTORY: ""
 
+    # This variable can be used to clear and rebuild the local cache of the
+    # Visual Studio Developer Command Prompt. Normally, this variable does not
+    # need to be modified. The cache is automatically initialized during the
+    # first build of a package.
+    #
+    # The purpose of the cache is to avoid repeatedly loading environment variables
+    # from the vcvarsall.bat file, which can take several seconds. When frequently
+    # rebuilding packages that use the MSVC toolchain, this delay can quickly become
+    # annoying.
+    MSVC_REBUILD_VCVARS_CACHE: "False"
+
+whitelist:
+    - "PROCESSOR_ARCHITECTURE"
+    #- "PROCESSOR_IDENTIFIER"
+    #- "PROCESSOR_LEVEL"
+    #- "PROCESSOR_REVISION"
+
 include:
     # optional include for user specific settings.
     # note: This file (user.yaml) is not under version control and shall be placed

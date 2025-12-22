@@ -11,7 +11,7 @@ depends:
           - devel::msvc-v145-x86_x64
     - devel::cross-toolchain-gcc-arm-none-eabi
     - devel::cross-toolchain-gcc-arm-linux-gnueabihf
-    - devel::cross-toolchain-gcc-aarch64-none-eabi
+    - devel::cross-toolchain-gcc-aarch64-none-elf
     - devel::cross-toolchain-gcc-aarch64-linux-gnu
     - name: devel::doxygen
       use: [tools]
@@ -25,7 +25,7 @@ depends:
     - if: !expr |
         "${ENABLE_X86_64_CLANG_HOST_TOOLCHAIN}" == "True"
       depends:
-          - devel::llvm
+          - devel::llvm-clang-x86_64-pc-windows-gnu
           - devel::llvm-clang
           - devel::llvm-clangd
           - devel::llvm-clang-format

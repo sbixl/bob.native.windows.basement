@@ -2,18 +2,15 @@ shared: True
 inherit: [cmake, python3, filesystem]
 
 metaEnvironment:
-    PKG_VERSION: "21.1.7"
+    PKG_VERSION: "21.1.8"
     PKG_DESCRIPTION: "A collection of modular and reusable compiler and toolchain technologies"
     PKG_LICENSE: "Apache-2.0 WITH LLVM-exception"
-
-environment:
-    LLVM_TARGETS: "AArch64;ARM;RISCV;X86"
 
 checkoutSCM:
     -
         scm: url
         url: ${GITHUB_MIRROR}/llvm/llvm-project/releases/download/llvmorg-${PKG_VERSION}/llvm-project-${PKG_VERSION}.src.tar.xz
-        digestSHA256: e5b65fd79c95c343bb584127114cb2d252306c1ada1e057899b6aacdd445899e
+        digestSHA256: 4633a23617fa31a3ea51242586ea7fb1da7140e426bd62fc164261fe036aa142
         extract: no
 
 depends:
@@ -61,7 +58,7 @@ checkoutScript: |
     rm -r -Force llvm-project-${Env:PKG_VERSION}.src.tar
 
 buildVarsWeak: [BOB_PACKAGE_NAME]
-buildVars: [LLVM_TARGETS]
+buildVars: [LLVM_TARGETS, LLVM_PROJECTS, LLVM_RUNTIMES]
 buildScript: |
     function buildClang
     {
@@ -83,20 +80,20 @@ buildScript: |
         $LibXml2_LibDir     = "$($BOB_DEP_PATHS["devel::llvm::libxml2"])\usr\lib\libxml2s.lib".Replace("\","/")
 
         DeleteDirectory ${ExternalBuildPath}
-        mkdir -p ${ExternalBuildPath} >$null
+        mkdir -p ${ExternalBuildPath} -ErrorAction SilentlyContinue
 
         pushd ${ExternalBuildPath}
 
         # note: setting CMAKE_CL_SHOWINCLUDES_PREFIX to work around PR27226.
         cmakeBuild "$SourceDirectory" `
                    -DCMAKE_BUILD_TYPE=Release `
-                   -DCMAKE_C_FLAGS="-DLIBXML_STATIC" `
-                   -DCMAKE_CXX_FLAGS="-DLIBXML_STATIC" `
                    -DCMAKE_CL_SHOWINCLUDES_PREFIX="Note: including file: " `
                    -DLIBXML2_INCLUDE_DIR="$LibXml2_IncludeDir" `
                    -DLIBXML2_LIBRARY="$LibXml2_LibDir" `
                    -DLIBCLANG_BUILD_STATIC=ON `
                    -DLLVM_TARGETS_TO_BUILD="${Env:LLVM_TARGETS}" `
+                   -DLLVM_ENABLE_PROJECTS="${Env:LLVM_PROJECTS}" `
+                   -DLLVM_ENABLE_RUNTIMES="${Env:LLVM_RUNTIMES}" `
                    -DLLVM_ENABLE_LIBXML2=FORCE_ON `
                    -DLLVM_ENABLE_ASSERTIONS=OFF `
                    -DLLVM_OPTIMIZED_TABLEGEN=ON `
@@ -107,7 +104,6 @@ buildScript: |
                    -DLLVM_ENABLE_OCAMLDOC=OFF `
                    -DLLVM_ENABLE_ZSTD=OFF `
                    -DLLVM_ENABLE_BINDINGS=OFF `
-                   -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON `
                    -DLLVM_BUILD_LLVM_C_DYLIB=ON `
                    -DLLVM_ENABLE_RPMALLOC=ON `
                    -DLLDB_RELOCATABLE_PYTHON=1 `
@@ -128,8 +124,15 @@ buildScript: |
 multiPackage:
 
     bootstrap-clang:
+        environment:
+            LLVM_TARGETS:  "Native"
+            LLVM_PROJECTS: "clang;lld"
+            LLVM_RUNTIMES: ""
+
         buildScript: |
-            buildClang -DLLVM_ENABLE_PROJECTS="clang;lld"
+            buildClang -DCMAKE_C_FLAGS="-DLIBXML_STATIC" `
+                       -DCMAKE_CXX_FLAGS="-DLIBXML_STATIC" `
+                       -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON
 
         packageScript: |
             cmakePackageBin
@@ -138,6 +141,11 @@ multiPackage:
             bootstrap-clang: usr/bin
 
     "":
+        environment:
+            LLVM_TARGETS: "AArch64;ARM;RISCV;X86"
+            LLVM_PROJECTS: "clang;clang-tools-extra;lld;lldb"
+            LLVM_RUNTIMES: "compiler-rt;openmp;libcxx"
+
         depends:
             - name: devel::llvm-bootstrap-clang
               use: [tools]
@@ -147,55 +155,80 @@ multiPackage:
             # CMake expects the paths that specifies the compiler and linker to be with forward slash.
             $TOOLCHAIN_DIR="$($BOB_TOOL_PATHS["bootstrap-clang"])".Replace("\","/")
             $AR="$TOOLCHAIN_DIR/llvm-lib.exe"
-            $RC="$TOOLCHAIN_DIR/llvm-rc.exe"
+            $RC="$TOOLCHAIN_DIR/llvm-windres.exe"
 
-            buildClang -DLLVM_NATIVE_TOOL_DIR="$TOOLCHAIN_DIR" `
-                       -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld;lldb" `
-                       -DLLVM_ENABLE_RUNTIMES="compiler-rt;openmp" `
-                       -DLLVM_TABLEGEN=llvm-tblgen `
+            buildClang -DCMAKE_C_FLAGS="-DLIBXML_STATIC -fuse-ld=lld -Wno-backend-plugin" `
+                       -DCMAKE_CXX_FLAGS="-DLIBXML_STATIC -fuse-ld=lld -Wno-backend-plugin" `
+                       -DLLVM_NATIVE_TOOL_DIR="$TOOLCHAIN_DIR" `
+                       -DLLVM_INSTALL_TOOLCHAIN_ONLY=ON `
+                       -DLLVM_TABLEGEN=llvm-tblgen.exe `
                        -DLLVM_ENABLE_LLD=ON `
-                       -DCMAKE_C_COMPILER=clang-cl `
-                       -DCMAKE_CXX_COMPILER=clang-cl `
-                       -DCMAKE_LINKER=lld-link `
+                       -DCMAKE_C_COMPILER=clang-cl.exe `
+                       -DCMAKE_CXX_COMPILER=clang-cl.exe `
+                       -DCMAKE_LINKER=lld-link.exe `
                        -DCMAKE_AR="$AR" `
                        -DCMAKE_RC="$RC"
 
-        multiPackage:
-            "":
-                packageScript: |
-                    installCopy "$($args[0])\install" @(
-                                    "usr",
-                                    "!usr\bin\clang-cl.exe",
-                                    "!usr\bin\clang-cpp.exe",
-                                    "!usr\bin\ld.lld.exe",
-                                    "!usr\bin\lld.exe",
-                                    "!usr\bin\lld-link.exe",
-                                    "!usr\bin\wasm-ld.exe",
-                                    "!usr\lib\clang",
-                                    "!usr\bin\clangd.exe",
-                                    "!usr\bin\clang-format.exe",
-                                    "!usr\bin\git-clang-format",
-                                    "!usr\bin\git-clang-format.bat"
-                                    "!usr\bin\clang-tidy.exe",
-                                    "!usr\bin\run-clang-tidy"
-                                )
-                provideTools:
-                    llvm: "usr/bin"
+            # create a list of projects (required by ninja buildsystem)
+            $buildTargets = ${Env:LLVM_PROJECTS} -split '\s*;\s*'
 
+        multiPackage:
             clang:
-                packageScript: |
-                    installCopy "$($args[0])\install" @(
-                                    "usr\bin\clang++.exe",
-                                    "usr\bin\clang-cl.exe",
-                                    "usr\bin\clang-cpp.exe",
-                                    "usr\bin\ld.lld.exe",
-                                    "usr\bin\lld.exe",
-                                    "usr\bin\lld-link.exe",
-                                    "usr\bin\wasm-ld.exe",
-                                    "usr\lib\clang"
-                                )
-                provideTools:
-                    clang: "usr/bin"
+                multiPackage:
+                    "":
+                        packageScript: |
+                            installCopy "$($args[0])\install" @(
+                                            "usr\bin\clang++.exe",
+                                            "usr\bin\clang-cl.exe",
+                                            "usr\bin\clang-cpp.exe",
+                                            "usr\bin\ld.lld.exe",
+                                            "usr\bin\lld.exe",
+                                            "usr\bin\lld-link.exe",
+                                            "usr\bin\wasm-ld.exe",
+                                            "usr\lib\clang"
+                                        )
+                        provideTools:
+                            clang: "usr/bin"
+
+                    # clang for windows with GNU CLI (no msvc)
+                    x86_64-pc-windows-gnu:
+                        environment:
+                            AUTOCONF_TARGET: "x86_64-pc-windows-gnu"
+                            ARCH: "amd64"
+
+                        packageScript: |
+                            cmakePackageBin
+
+                        provideTools:
+                            target-toolchain:
+                                path: "usr/bin"
+                                environment:
+                                    # usual compiler variables
+                                    AR:      "llvm-ar"
+                                    AS:      "llvm-as"
+                                    CC:      "clang"
+                                    CPP:     "clang-cpp"
+                                    CXX:     "clang++"
+                                    GDB:     "lldb"
+                                    LD:      "llvm-ld"
+                                    NM:      "llvm-nm"
+                                    OBJCOPY: "llvm-objcopy"
+                                    OBJDUMP: "llvm-objdump"
+                                    RANLIB:  "llvm-ranlib"
+                                    READELF: "llvm-readelf"
+                                    STRIP:   "llvm-strip"
+
+                                    ARCH: "$ARCH"
+                                    # Define our build and host systems because we define the host- and
+                                    # target-toolchain. ARCH is unchanged, though.
+                                    AUTOCONF_BUILD: "$AUTOCONF_TARGET"
+                                    AUTOCONF_HOST:  "$AUTOCONF_TARGET"
+                                    TOOLCHAIN_FLAVOUR: clang
+
+                                    CPPFLAGS: ""
+                                    CFLAGS: "-Oz -pipe"
+                                    CXXFLAGS: "-Oz -pipe"
+                                    LDFLAGS: "-Xclang -std=c++1z -Xclang -stdlib=libc++"
 
             clangd:
                 packageScript: |

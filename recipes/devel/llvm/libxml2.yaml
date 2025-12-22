@@ -3,12 +3,6 @@ inherit: [cmake]
 metaEnvironment:
     PKG_VERSION: "2.9.12"
 
-depends:
-    - name: devel::ninja-bootstrap
-      use: [tools]
-    - name: devel::cmake-bootstrap
-      use: [tools]
-
 checkoutSCM:
     scm: url
     url: ${GITHUB_MIRROR}/GNOME/libxml2/archive/refs/tags/v${PKG_VERSION}.zip

@@ -4,40 +4,70 @@ buildSetup: |
     function ninjaParallel
     {
         Param(
+            [Alias("C")]
+            [string] $Dir = $null,
             # optional
-            [Parameter(Position = 0, mandatory=$false)]
-            [Alias("-o")]
-            [string[]] $OPTIONS=@(),
+            [Alias("o")]
+            [string[]] $Options=@(),
             # optional
-            [Parameter(Position = 1, mandatory=$false)]
-            [Alias("-t")]
-            [string[]] $TARGETS=@()
+            [Alias("t")]
+            [string[]] $Targets=@()
         )
 
         # set the number of logical cores which can be used for parallel builds
-        if( ${Env:PARALLEL_JOBS} )
-        {
-            $NOLP = ${Env:PARALLEL_JOBS}
+        if($Env:PARALLEL_JOBS) {
+            $NOLP = [int]$Env:PARALLEL_JOBS
         }
-        else
-        {
-            $NOLP = $((Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors)
+        else {
+            $NOLP = (Get-CimInstance Win32_ComputerSystem).NumberOfLogicalProcessors
         }
 
-        Check-Command { ninja -j $NOLP $TARGETS "$OPTIONS" }
+        $ninjaArgs = @()
+        if ($Dir) {
+            $ninjaArgs += '-C'
+            $ninjaArgs += $Dir
+        }
+
+        $ninjaArgs += '-j'
+        $ninjaArgs += $NOLP
+
+        if ($Options) {
+            $ninjaArgs += $Options
+        }
+
+        if ($Targets) {
+            $ninjaArgs += $Targets
+        }
+
+        Check-Command {
+            ninja @ninjaArgs
+        }
     }
 
     function ninjaSequential
     {
         Param(
             # optional
-            [Parameter(Position = 0)]
-            [string[]]$OPTIONS=@()
+            [Alias("o")]
+            [string[]] $Options=@()
         )
-        Check-Command { ninja -j 1 "$OPTIONS" }
+
+        $ninjaArgs = @(
+            '-j', '1'
+        )
+
+        if ($Options) {
+            $ninjaArgs += $Options
+        }
+
+        Check-Command {
+            ninja @ninjaArgs
+        }
     }
 
     function ninjaInstall
     {
-        Check-Command { ninja install }
+        Check-Command {
+            ninja install
+        }
     }

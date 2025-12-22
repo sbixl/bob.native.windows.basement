@@ -1,0 +1,263 @@
+buildVars: [MSVC_BUILD_TOOLS_VERSION, WINDOWS_SDK_VERSION, MSVC_REBUILD_VCVARS_CACHE]
+buildSetup: |
+    function __overrideEnvVar
+    {
+        Param(
+            [Parameter(Position = 0, mandatory=$true)]
+            [String]$EnvVarName,
+            [Parameter(Position = 1, mandatory=$true)]
+            [String]$EnvVarValue,
+            [Parameter(Position = 2, mandatory=$false)]
+            [bool]$CheckPath = $false
+        )
+
+        if (Test-Path "Env:$EnvVarName") {
+            $oldValue = [Environment]::GetEnvironmentVariable($EnvVarName)
+            [Environment]::SetEnvironmentVariable($EnvVarName, $EnvVarValue)
+            $newValue = [Environment]::GetEnvironmentVariable($EnvVarName)
+            Write-Verbose "Override 'Env:$EnvVarName' with new value '$newValue' (old value was '$oldValue')"
+        }
+        else
+        {
+            [Environment]::SetEnvironmentVariable($EnvVarName, $EnvVarValue)
+            $newValue = [Environment]::GetEnvironmentVariable($EnvVarName)
+            Write-Verbose "Set 'Env:$EnvVarName' because it does not exist (value = $newValue)!"
+        }
+
+        if($CheckPath) {
+            __checkPath $([Environment]::GetEnvironmentVariable($EnvVarName))
+        }
+    }
+
+    function __checkPath
+    {
+        Param(
+            [Parameter(Position = 0, mandatory=$true)]
+            [String]$PathToCheck
+        )
+
+        if(-not (Test-Path $PathToCheck))
+        {
+            Write-Error "The path $PathToCheck doest not exist... aborting!"
+        }
+    }
+
+    function __ignorePath {
+        Param(
+            [Parameter(Position = 0, Mandatory=$true)]
+            [string]$pathToCheck
+        )
+
+        $pathBlackList = @(
+            "C:\Windows\Microsoft",
+            "C:\Program Files (x86)\Windows Kits",
+            "C:\Program Files (x86)\Microsoft SDKs\"
+        )
+
+        foreach ($prefix in $pathBlackList) {
+            if ($pathToCheck.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase)) {
+                return $true
+            }
+        }
+
+        return $false
+    }
+
+    function __mergePathVariable
+    {
+        Param(
+            [Parameter(Position = 0, mandatory=$true)]
+            [String]$otherPaths
+        )
+
+        $current = $env:PATH -split ';'
+
+        $otherPaths -split ';' |
+            Where-Object { $_ -and ($_ -notin $current) } |
+            ForEach-Object {
+                $newPath = $_.replace('\\', '\')
+                if(-not(__ignorePath $newPath)) {
+                    __checkPath $newPath
+                    # append in front of the PATH variable
+                    $Env:PATH="$newPath;$Env:PATH"
+                }
+                else
+                {
+                    Write-Verbose "Ignore path $newPath"
+                }
+            }
+    }
+
+    function __cleanupEnv
+    {
+        Param(
+            [Parameter(Position = 0, mandatory=$true)]
+            [String]$EnvVarName
+        )
+
+        if (Test-Path "Env:$EnvVarName") {
+            $newValue = ""
+            [Environment]::GetEnvironmentVariable($EnvVarName) -split ';' |
+                ForEach-Object {
+                    $extractedPath = $_.replace('\\', '\')
+                    if(-not(__ignorePath $extractedPath)) {
+                       $newValue="$extractedPath;$newValue"
+                    }
+                    else
+                    {
+                        Write-Verbose "removed $extractedPath from [Env:$EnvVarName]"
+                    }
+                }
+            [Environment]::SetEnvironmentVariable($EnvVarName, $newValue)
+        }
+        else
+        {
+            Write-Error "Environment variable $EnvVarName does not exist!"
+        }
+    }
+
+    function msvcLoadVcvars
+    {
+        Param(
+            [Parameter(Position = 0, mandatory=$true)]
+            [String]$VsInstallDir
+        )
+
+        # This environment variable is by default set to "true" we still set it here to be sure that
+        # the environment set from within this file is always used by the visual studio toolchain
+        $Env:UseEnv=$true
+
+        # This environment variable defaults to "false" which means that the visual studio always scan
+        # the windows registry to gather paths to several tools and versions. Setting this variable to
+        # "true" ensures that the environment from this file is use in the first place.
+        $Env:DisableRegistryUse=$true
+
+        $vcvarsCacheFile=".vcvars_cache.json"
+
+        if((Test-Path $vcvarsCacheFile) -and ($Env:MSVC_REBUILD_VCVARS_CACHE -eq "True")) {
+            rm -Force $vcvarsCacheFile
+        }
+
+        if(-not (Test-Path $vcvarsCacheFile))
+        {
+            Write-Host "Loading Visual Studio environment variables (vcvars)..."
+            $vcvars = "$VsInstallDir\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
+
+            # Uncomment the following line to enable additional debugging output
+            #cmd /c "`"$vcvars`" amd64 -vcvars_ver=$Env:MSVC_BUILD_TOOLS_VERSION && set"
+
+            # Collect all environment variables initialized by the Visual Studio Developer Command Prompt.
+            cmd /c `
+                "`"$vcvars`" amd64 -vcvars_ver=$Env:MSVC_BUILD_TOOLS_VERSION >NUL ^ & powershell -Command `"Get-ChildItem env: | Select-Object -Property Key,Value | ConvertTo-Json -Depth 2`"" `
+                |  Out-File -Encoding UTF8 $vcvarsCacheFile
+            Write-Host "Finished loading Visual Studio environment variables (vcvars)."
+        }
+        else
+        {
+            Write-Host "Using cached Visual Studio environment variables (vcvars)."
+        }
+
+        $all_env = Get-Content $vcvarsCacheFile -Raw | ConvertFrom-Json
+
+        # The following variables can be safely ignored
+        $envBlackList = @(
+            "WindowsSDK_ExecutablePath_x64",
+            "WindowsSDK_ExecutablePath_x86"
+        )
+
+        foreach ($envvar in $all_env) {
+            if (-not (Test-Path "Env:$($envvar.Key)")) {
+                # Ensure that no path entries reference directories on the local filesystem
+                if(__ignorePath $envvar.Value)
+                {
+                    Write-Verbose "Ignore[Value]: $($envvar.Key) = $($envvar.Value)"
+                }
+                else
+                {
+                    $matches =  $envBlackList | Where-Object {
+                        $envvar.Key.StartsWith($_, [StringComparison]::OrdinalIgnoreCase)
+                    }
+
+                    if($matches)
+                    {
+                        Write-Verbose "Ignore[Var]: $($envvar.Key) = $($envvar.Value)"
+                    }
+                    else
+                    {
+                        [Environment]::SetEnvironmentVariable($envvar.Key, $envvar.Value)
+                    }
+                }
+            }
+
+            # Merge the PATH variable with the entries appended by the vcvarsall batch file
+            if ($envvar.Key -eq "PATH")
+            {
+                $vsPath = $envvar.Value
+                __mergePathVariable $vsPath
+            }
+        }
+
+        $vsVersion = $Env:VisualStudioVersion.Replace(".", "")
+        [Environment]::SetEnvironmentVariable("VCInstallDir_$vsVersion", $Env:VCInstallDir)
+        [Environment]::SetEnvironmentVariable("VCToolsInstallDir_$vsVersion", $Env:VCToolsInstallDir)
+
+        # We must adapt the Windows SDK environment variables because vcvarsall.bat
+        # resolves the Windows SDK through the Windows registry. By default, this
+        # selects an SDK installed on the local machine, which is not suitable
+        # for our toolchain layout.
+
+        __cleanupEnv "INCLUDE"
+        __cleanupEnv "LIBPATH"
+        __cleanupEnv "LIB"
+
+        # Append Windows SDK Paths to VS LIBPATH environment variable
+        $LibPaths = @(
+            "$VsInstallDir\Windows Kits\10\bin\x64",
+            "$VsInstallDir\Windows Kits\10\bin\${Env:WINDOWS_SDK_VERSION}\x64"
+        )
+
+        foreach ($LibPath in $LibPaths) {
+            __checkPath $LibPath
+            # Add mandatory Windows SDK paths to PATH
+            $Env:PATH="$LibPath;$Env:PATH"
+            # Append Windows SDK Paths to LIBPATH
+            $Env:LIBPATH="$Env:LIBPATH;$LibPath"
+        }
+
+        # Append Windows SDK Paths to VS INCLUDE environment variable
+        $IncludePaths = @(
+            "$VsInstallDir\Windows Kits\10\include\${Env:WINDOWS_SDK_VERSION}\ucrt",
+            "$VsInstallDir\Windows Kits\10\include\${Env:WINDOWS_SDK_VERSION}\um",
+            "$VsInstallDir\Windows Kits\10\include\${Env:WINDOWS_SDK_VERSION}\shared",
+            "$VsInstallDir\Windows Kits\10\include\${Env:WINDOWS_SDK_VERSION}\winrt",
+            "$VsInstallDir\Windows Kits\10\include\${Env:WINDOWS_SDK_VERSION}\cppwinrt"
+        )
+
+        foreach ($IncludePath in $IncludePaths) {
+            __checkPath $IncludePath
+            $Env:INCLUDE="$Env:INCLUDE;$IncludePath"
+        }
+
+        # Append Windows SDK Paths to VS LIB environment variable
+        $Libs = @(
+            "$VsInstallDir\Windows Kits\10\lib\${Env:WINDOWS_SDK_VERSION}\ucrt\x64",
+            "$VsInstallDir\Windows Kits\10\lib\${Env:WINDOWS_SDK_VERSION}\um\x64"
+        )
+
+        foreach ($Lib in $Libs) {
+            __checkPath $Lib
+            $Env:LIB="$Env:LIB;$Lib"
+        }
+
+        __overrideEnvVar "WindowsLibPath" "$LibPaths[0];$LibPaths[1]"
+        __overrideEnvVar "WindowsSdkBinPath" "$VsInstallDir\Windows Kits\10\bin" $true
+        __overrideEnvVar "WindowsSdkDir" "$VsInstallDir\Windows Kits\10" $true
+        __overrideEnvVar "WindowsSDKLibVersion" "${Env:WINDOWS_SDK_VERSION}"
+        __overrideEnvVar "WindowsSdkVerBinPath" "$VsInstallDir\Windows Kits\10\bin\${Env:WINDOWS_SDK_VERSION}" $true
+        __overrideEnvVar "WindowsSDKVersion" "${Env:WINDOWS_SDK_VERSION}"
+
+        if(-not ($Env:VCToolsVersion.StartsWith($Env:MSVC_BUILD_TOOLS_VERSION)))
+        {
+            Write-Error "Wrong MSVC tool version loaded! (expected: $Env:MSVC_BUILD_TOOLS_VERSION.xxxxx observed: $Env:VCToolsVersion)"
+        }
+    }
