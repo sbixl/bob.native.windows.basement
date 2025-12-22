@@ -143,8 +143,8 @@ buildSetup: |
             '-B', 'build'
             "-DCMAKE_FIND_ROOT_PATH=$CMAKE_FIND_ROOT_PATH"
             "-DCMAKE_INSTALL_PREFIX=/usr"
-            "-DCMAKE_INSTALL_LIBDIR=/usr/lib"
-            "-DCMAKE_INSTALL_SYSCONFDIR=/etc"
+            "-DCMAKE_INSTALL_LIBDIR=lib"
+            "-DCMAKE_INSTALL_SYSCONFDIR=etc"
             "-DCMAKE_PREFIX_PATH=/usr/lib/cmake"
             "-DBUILD_SHARED_LIBS=$BUILD_SHARED_LIBS"
         )
