@@ -1,4 +1,4 @@
-buildVars: [MSVC_BUILD_TOOLS_VERSION, WINDOWS_SDK_VERSION]
+buildVars: [MSVC_BUILD_TOOLS_VERSION, WINDOWS_SDK_VERSION, MSVC_REBUILD_VCVARS_CACHE]
 buildSetup: |
     function __overrideEnvVar
     {
@@ -123,8 +123,6 @@ buildSetup: |
             [String]$VsInstallDir
         )
 
-        $vcvars = "$VsInstallDir\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
-
         # This environment variable is by default set to "true" we still set it here to be sure that
         # the environment set from within this file is always used by the visual studio toolchain
         $Env:UseEnv=$true
@@ -134,13 +132,32 @@ buildSetup: |
         # "true" ensures that the environment from this file is use in the first place.
         $Env:DisableRegistryUse=$true
 
-        # Uncomment the following line to enable additional debugging output
-        #cmd /c "`"$vcvars`" amd64 -vcvars_ver=$Env:MSVC_BUILD_TOOLS_VERSION && set"
+        $vcvarsCacheFile=".vcvars_cache.json"
 
-        # Collect all environment variables initialized by the Visual Studio Developer Command Prompt.
-        $all_env = cmd /c `
-            "`"$vcvars`" amd64 -vcvars_ver=$Env:MSVC_BUILD_TOOLS_VERSION >NUL ^ & powershell -Command `"Get-ChildItem env: | Select-Object -Property Key,Value | ConvertTo-Json`"" `
-            | ConvertFrom-Json
+        if((Test-Path $vcvarsCacheFile) -and ($Env:MSVC_REBUILD_VCVARS_CACHE -eq "True")) {
+            rm -Force $vcvarsCacheFile
+        }
+
+        if(-not (Test-Path $vcvarsCacheFile))
+        {
+            Write-Host "Loading Visual Studio environment variables (vcvars)..."
+            $vcvars = "$VsInstallDir\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
+
+            # Uncomment the following line to enable additional debugging output
+            #cmd /c "`"$vcvars`" amd64 -vcvars_ver=$Env:MSVC_BUILD_TOOLS_VERSION && set"
+
+            # Collect all environment variables initialized by the Visual Studio Developer Command Prompt.
+            cmd /c `
+                "`"$vcvars`" amd64 -vcvars_ver=$Env:MSVC_BUILD_TOOLS_VERSION >NUL ^ & powershell -Command `"Get-ChildItem env: | Select-Object -Property Key,Value | ConvertTo-Json -Depth 2`"" `
+                |  Out-File -Encoding UTF8 $vcvarsCacheFile
+            Write-Host "Finished loading Visual Studio environment variables (vcvars)."
+        }
+        else
+        {
+            Write-Host "Using cached Visual Studio environment variables (vcvars)."
+        }
+
+        $all_env = Get-Content $vcvarsCacheFile -Raw | ConvertFrom-Json
 
         # The following variables can be safely ignored
         $envBlackList = @(
