@@ -128,10 +128,10 @@ buildSetup: |
             }
         }
 
-        Write-Host "Targets: $MAKE_TARGETS"
-        Write-Host "Options: $MAKE_OPTIONS"
-        Write-Host "Install: $INSTALL"
-        Write-Host "Component: $INSTALL_COMPONENT"
+        Write-Verbose "Targets: $MAKE_TARGETS"
+        Write-Verbose "Options: $MAKE_OPTIONS"
+        Write-Verbose "Install: $INSTALL"
+        Write-Verbose "Component: $INSTALL_COMPONENT"
 
         $processed=0
         $SRC_PATH = "$($REMAINING_ARGS[$processed])"
