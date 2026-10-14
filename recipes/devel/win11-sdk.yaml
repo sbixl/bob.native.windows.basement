@@ -1,8 +1,8 @@
 inherit: [msvc::sdk]
 
 environment:
-    PKG_BUILD_NUMBER: "10.0.26100.7175"
-    SDK_BUNDLE_NAME:  "winsdksetup_10_0_26100_7175_layout"
+    PKG_BUILD_NUMBER: "10.0.28000.2957"
+    SDK_BUNDLE_NAME:  "winsdksetup_10_0_28000_2957_layout"
 
 checkoutSCM:
     -
@@ -11,11 +11,11 @@ checkoutSCM:
         scm: url
         # Taken from https://developer.microsoft.com/de-de/windows/downloads/windows-sdk/
         #
-        # Open a power shell and locate the redirect URI of the "go.microsoft.com/fwlink" address:
+        # Open a power shell (5x!!!) and locate the redirect URI of the "go.microsoft.com/fwlink" address:
         #
         # (Invoke-WebRequest -uri "https://go.microsoft.com/fwlink/p/?LinkID=698771" -MaximumRedirection 0 -ErrorAction SilentlyContinue).RawContent
-        url: https://download.microsoft.com/download/8c20ba92-ce77-4348-a6e8-5c0e021763f6/KIT_BUNDLE_WINDOWSSDK_MEDIACREATION/winsdksetup.exe
-        digestSHA256: "508f1844dc5b8021b0f521e523ea1b94a6689dec0dd71769b805c24aef464a30"
+        url: https://download.microsoft.com/download/e6cfffdc-0d3e-4c6c-96d7-d491da459a07/KIT_BUNDLE_WINDOWSSDK_MEDIACREATION/winsdksetup.exe
+        digestSHA256: "e8e264aca8bc34abdf592352bf09f986a85cdb96db0efba405ca9e149181fe61"
         extract: no
     -
         if: !expr |
@@ -61,7 +61,7 @@ multiPackage:
             msvcPackageSdk "$($args[0])\Win11SDK"
 
         provideVars:
-            WINDOWS_SDK_VERSION: "10.0.26100.0"
+            WINDOWS_SDK_VERSION: "10.0.28000.0"
 
     bundle:
         root: True
