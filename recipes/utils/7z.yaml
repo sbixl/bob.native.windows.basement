@@ -3,33 +3,18 @@ shared: True
 inherit: [cpackage, install, patch]
 
 metaEnvironment:
-    PKG_VERSION: "25.01"
-
-depends:
-    - name: devel::msvc-v143-x86_x64
-      use: [environment, tools]
+    PKG_VERSION: "26.04"
 
 checkoutSCM:
     -
-        scm: git
-        url: ${GITHUB_MIRROR}/mcmilk/7-Zip.git
-        commit: 083561031433474eba5bd0e1f8782db3bb152f3b
-        if: !expr |
-                "${GITHUB_MIRROR}" == "https://github.com"
-    -
-        # there are no archives available on GitHub so we must prepare one
-        # and download this archive instep of mirroring the GitHub repository
-        # into our internal GitLab.
         scm: url
-        url: ${GITHUB_MIRROR}/mcmilk/7z-${PKG_VERSION}.zip
-        digestSHA256: a339ad5e823b7776b1ff31fca7f721fd8ddaee8726b2879643c291088015003c
-        if: !expr |
-                "${GITHUB_MIRROR}" != "https://github.com"
+        url: ${GITHUB_MIRROR}/ip7z/7zip/archive/refs/tags/$PKG_VERSION.zip
+        digestSHA256: 44539a0d4083bd57f7ea81ed7c7922ab9d2a1e52bdc81e6dac3dd2255e8af7c1
 
 buildVars: [CC, CXX, CFLAGS, CXXFLAGS, PKG_VERSION]
 buildScript: |
     mkdir -Force build >$null
-    cp -Force -r "$($args[0])\*" build
+    cp -Force -r "$($args[0])\7zip-${Env:PKG_VERSION}\*" build
 
     pushd "build\CPP\7zip\Bundles\Format7zF"
     Check-Command { nmake }
