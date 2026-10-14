@@ -52,21 +52,27 @@ packageSetup: |
         foreach ($directory in $directories)
         {
             Write-Host "################## Copying ${directory}"
-            $contents_src_path = "${sourceDirectory}\$directory\Contents"
-            if (Test-Path $contents_src_path)
-            {
-                $files = $(Get-ChildItem $contents_src_path -recurse)
-                ForEach($file in $files)
-                {
-                    $real_path = [uri]::UnescapeDataString($file.FullName.Replace("${contents_src_path}\",""))
+            $contentsSrcPath = Join-Path $sourceDirectory "$directory\Contents"
 
-                    if((Get-Item $file.FullName) -is [System.IO.DirectoryInfo])
+            if (Test-Path $contentsSrcPath)
+            {
+                $files = Get-ChildItem -LiteralPath $contentsSrcPath -Recurse
+
+                foreach ($file in $files)
+                {
+                    $relative_path = [System.IO.Path]::GetRelativePath($contentsSrcPath, $file.FullName)
+                    $relative_path = [uri]::UnescapeDataString($relative_path)
+                    $real_path = Join-Path $PWD $relative_path
+
+                    if ($file -is [System.IO.DirectoryInfo])
                     {
-                        mkdir -Force -p $real_path >$null
+                        New-Item -ItemType Directory -Path $real_path -Force |Out-Null
                     }
                     else
                     {
-                        cp $file.FullName $real_path
+                        $destinationDirectory = Split-Path -Parent $real_path
+                        New-Item -ItemType Directory -Path $destinationDirectory -Force | Out-Null
+                        Copy-Item -LiteralPath $file.FullName -Destination $real_path -Force
                     }
                 }
             }

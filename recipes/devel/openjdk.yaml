@@ -11,20 +11,37 @@ checkoutSCM:
     extract: no
 
 buildScript: |
-    # create a symlink to avoid wasting memory
-    $ArchiveName = $(Get-ChildItem "$($args[0])/openjdk" -File '*.zip')
-    New-Item -ItemType SymbolicLink -Force -Path "openjdk.zip"  -Target "$($args[0])/openjdk/$ArchiveName" >$null
+    # Create a symlink to avoid wasting memory
+    $Archive = Get-ChildItem "$($args[0])/openjdk" -File -Filter '*.zip' | Select-Object -First 1
 
+    if (-not $Archive) {
+        throw "No ZIP archive found in '$($args[0])/openjdk'"
+    }
+
+    New-Item -ItemType SymbolicLink -Force `
+                                    -Path "openjdk.zip" `
+                                    -Target $Archive.FullName > $null
 
 packageToolsWeak: [7z]
 packageScript: |
-    $ArchivPath = "$($args[0])"
-    mkdir usr > $null
-    Check-Command { 7z x -o"usr" -y $ArchivPath/openjdk.zip }
-    # because 7z has not strip option we need to do it ourselves
-    $RootFolder = $(Get-ChildItem usr)
-    cp -r usr/$RootFolder/* usr -Force
-    rm -Recurse usr/$RootFolder
+    $ArchivePath = "$($args[0])"
+
+    New-Item -ItemType Directory -Path usr -Force > $null
+    Check-Command { 7z x "-ousr" -y "${ArchivePath}/openjdk.zip" }
+
+    # Because 7z has no strip option, remove the top-level directory manually
+    $RootFolder = Get-ChildItem usr -Directory | Select-Object -First 1
+
+    if ($RootFolder)
+    {
+        Get-ChildItem $RootFolder.FullName -Force | Copy-Item -Destination usr -Recurse -Force
+
+        Remove-Item -LiteralPath $RootFolder.FullName -Recurse -Force
+    }
+    else
+    {
+        throw "No root directory found after extracting OpenJDK into usr."
+    }
 
 provideTools:
     java:

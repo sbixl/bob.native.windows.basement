@@ -39,12 +39,16 @@ checkoutSCM:
 
 buildVars: [AUTOCONF_TARGET]
 buildScript: |
-    # create a symlink to avoid wasting memory
-    $ArchiveName = $(Get-ChildItem "$($args[0])/${Env:AUTOCONF_TARGET}" -File '*.zip')
-    New-Item -ItemType SymbolicLink `
-             -Force `
-             -Path "${Env:AUTOCONF_TARGET}.zip" `
-             -Target "$($args[0])/${Env:AUTOCONF_TARGET}/$ArchiveName" >$null
+    # Create a symlink to avoid wasting memory
+    $Archive = Get-ChildItem "$($args[0])/${Env:AUTOCONF_TARGET}" -File -Filter '*.zip' | Select-Object -First 1
+
+    if (-not $Archive) {
+        throw "No ZIP archive found in '$($args[0])/${Env:AUTOCONF_TARGET}'"
+    }
+
+    New-Item -ItemType SymbolicLink -Force `
+                                    -Path "${Env:AUTOCONF_TARGET}.zip" `
+                                    -Target $Archive.FullName > $null
 
 packageToolsWeak: [7z]
 packageScript: |

@@ -26,7 +26,7 @@ buildSetup: |
         return $ARGS
     }
 
-    function __append2PythpnPath
+    function __append2PythonPath
     {
         # append previous installed pip module to python path
         foreach ($i in @("", "lib-dynload", "site-packages"))
@@ -98,10 +98,10 @@ buildSetup: |
                 --no-warn-script-location `
                 --no-cache-dir `
                 --ignore-installed `
-                $_OPTIONS
+                $(if ($null -ne $_OPTIONS -and $_OPTIONS -ne '') { $_OPTIONS })
         }
 
-        __append2PythpnPath
+        __append2PythonPath
 
     }
 
@@ -153,10 +153,10 @@ buildSetup: |
                 --no-warn-script-location `
                 --no-cache-dir `
                 --ignore-installed `
-                $_OPTIONS
+                $(if ($null -ne $_OPTIONS -and $_OPTIONS -ne '') { $_OPTIONS })
         }
 
-        __append2PythpnPath
+        __append2PythonPath
     }
 
     ########################################################################################
@@ -218,10 +218,10 @@ buildSetup: |
                 --no-warn-script-location `
                 --no-cache-dir `
                 --ignore-installed `
-                $_OPTIONS
+                $(if ($null -ne $_OPTIONS -and $_OPTIONS -ne '') { $_OPTIONS })
         }
 
-        __append2PythpnPath
+        __append2PythonPath
     }
 
     function pipDownloadFromFile

@@ -12,9 +12,16 @@ checkoutSCM:
     extract: no
 
 buildScript: |
-    # create a symlink to avoid wasting memory
-    $FileName = $(Get-ChildItem "$($args[0])/plantuml" -File '*.jar')
-    New-Item -ItemType SymbolicLink -Force -Path "plantuml.jar"  -Target "$($args[0])/plantuml/$FileName" >$null
+    # Create a symlink to avoid wasting memory
+    $Archive = Get-ChildItem "$($args[0])/plantuml" -File -Filter '*.jar' | Select-Object -First 1
+
+    if (-not $Archive) {
+        throw "No ZIP archive found in ${Archive}/plantuml"
+    }
+
+    New-Item -ItemType SymbolicLink -Force `
+                                    -Path "plantuml.jar" `
+                                    -Target $Archive.FullName > $null
 
 packageToolsWeak: [7z]
 packageScript: |
