@@ -6,9 +6,9 @@ depends:
       depends:
           - devel::msvc-v142-x86_x64
     - if: !expr |
-        "${ENABLE_VS_BUILDTOOLS_2026}" == "True"
+        "${ENABLE_VS_BUILDTOOLS_2022}" == "True"
       depends:
-          - devel::msvc-v145-x86_x64
+          - devel::msvc-v143-x86_x64
     - devel::cross-toolchain-gcc-arm-none-eabi
     - devel::cross-toolchain-gcc-arm-linux-gnueabihf
     - devel::cross-toolchain-gcc-aarch64-none-elf

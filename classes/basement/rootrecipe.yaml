@@ -5,8 +5,8 @@ depends:
         "${BOB_HOST_PLATFORM}" == "win32"
       depends:
           # The general native host toolchain is the MSVC compiler.
-          # By default the v143 (2022) MSVC toolchain is used
-          - name: devel::msvc-v143-x86_x64
+          # By default the v145 (2026) MSVC toolchain is used
+          - name: devel::msvc-v145-x86_x64
             use: [environment, tools]
             forward: True
           - name: utils::7z

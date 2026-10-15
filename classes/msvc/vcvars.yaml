@@ -1,4 +1,4 @@
-buildVars: [MSVC_BUILD_TOOLS_VERSION, WINDOWS_SDK_VERSION, MSVC_REBUILD_VCVARS_CACHE]
+buildVars: [MSVC_BUILD_TOOLS_VERSION, WINDOWS_SDK_VERSION, MSVC_REBUILD_VCVARS_CACHE, VS_VERSION, MSVC_PLATFORM_TOOLSET]
 buildSetup: |
     function __overrideEnvVar
     {
@@ -150,7 +150,8 @@ buildSetup: |
             cmd /c `
                 "`"$vcvars`" amd64 -vcvars_ver=$Env:MSVC_BUILD_TOOLS_VERSION >NUL ^ & powershell -Command `"Get-ChildItem env: | Select-Object -Property Key,Value | ConvertTo-Json -Depth 2`"" `
                 |  Out-File -Encoding UTF8 $vcvarsCacheFile
-            Write-Host "Finished loading Visual Studio environment variables (vcvars)."
+            Write-Host "Finished loading Visual Studio (toolset ${Env:MSVC_PLATFORM_TOOLSET}, version ${Env:VS_VERSION}) environment variables (vcvars)."
+            Write-Host "Using MSVC Build Tools (${Env:MSVC_BUILD_TOOLS_VERSION}) and Windows Sdk (${Env:WINDOWS_SDK_VERSION})"
         }
         else
         {

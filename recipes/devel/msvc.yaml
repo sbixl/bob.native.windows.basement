@@ -53,6 +53,8 @@ provideTools:
         path: ""
         environment:
             AUTOCONF_HOST: "x86_64-pc-windows-msvc"
+            VS_VERSION: "$VS_VERSION"
+            MSVC_PLATFORM_TOOLSET: "$MSVC_PLATFORM_TOOLSET"
             MSVC_BUILD_TOOLS_VERSION: $MSVC_BUILD_TOOLS_VERSION
             WINDOWS_SDK_VERSION: $WINDOWS_SDK_VERSION
             TOOLCHAIN_FLAVOUR: msvc
