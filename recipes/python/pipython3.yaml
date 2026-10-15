@@ -1,27 +1,29 @@
 inherit: [cpackage]
 
 metaEnvironment:
-    PYTHON_VERSION:     "3.13.11"
-    GET_PIP_VERSION:    "25.3"
-    PIP_VERSION:        "25.3"
-    SETUPTOOLS_VERSION: "80.9.0"
-    WHEEL_VERSION:      "0.46.1"
+    PYTHON_VERSION:     "3.14.8"
+    GET_PIP_VERSION:    "26.2.1"
+    PIP_VERSION:        "26.2"
+    SETUPTOOLS_VERSION: "84.0.0"
+    WHEEL_VERSION:      "0.48.0"
 
 depends:
     - name: python::pipython3-minimal
       use: [tools]
+    - name: devel::msvc-v143-x86_x64
+      use: [environment, tools]
 
 checkoutSCM:
     -
         scm: url
         url: ${PYTHON_MIRROR}/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz
-        digestSHA256: 16ede7bb7cdbfa895d11b0642fa0e523f291e6487194d53cf6d3b338c3a17ea2
+        digestSHA256: c2215904f02b175596dc49351585104f4bc20341e1c47378b26a2c274360ce73
         extract: no
         dir: python
     -
         scm: url
         url: ${GITHUB_MIRROR}/pypa/get-pip/archive/refs/tags/${GET_PIP_VERSION}.zip
-        digestSHA256: b4dfff4205d86521b27613f17a8b6aebdb76f0a345da6a4f59bed59e118cb291
+        digestSHA256: e6edceb28106a4c0c6c814499c8d0712f5c79096a50474ab6e9f7dac04a77e3b
         dir: get-pip
     # Fetching external libraries...
     -
@@ -50,10 +52,16 @@ checkoutSCM:
         dir: deps/xz
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/zlib-1.3.1.zip
-        digestSHA256: a8f166f0f819ff084042554f39d763c41de5f19f8e9cdc68bc3e7f373cfba036
+        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/refs/tags/zlib-ng-2.2.4.zip
+        digestSHA256: 9f3bde7d774704f0cf3c2c31ca2e7dbd7e448912e9ac9bd70a603b4987d0f00d
         extract: no
-        dir: deps/zlib
+        dir: deps/zlib-ng
+    -
+        scm: url
+        url: ${GITHUB_MIRROR}/python/cpython-source-deps/archive/refs/tags/zstd-1.5.7.zip
+        digestSHA256: ce97f58811d46c6111eafbd2258e5f63256b8e667a6597c18634939cdb630dc5
+        extract: no
+        dir: deps/zstd
     # Fetching external binaries...
     -
         scm: url
@@ -63,14 +71,14 @@ checkoutSCM:
         dir: deps/libffi
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/openssl-bin-3.0.18.zip
-        digestSHA256: 382af4c449004fe3d334c061209c80e39f544e78fed8b2fcbc182f112e8158bf
+        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/refs/tags/openssl-bin-3.5.9.zip
+        digestSHA256: f4bcdb2494d81c9863c585bf51a833b611ecb7ba2170f9f8bba6de4e43476de8
         extract: no
         dir: deps/openssl-bin
     -
         scm: url
-        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/tcltk-8.6.15.0.zip
-        digestSHA256: 60adc5fc31c02347666198ffc74e5b6d0948f6765bb9034ae423a5a16c22a4e5
+        url: ${GITHUB_MIRROR}/python/cpython-bin-deps/archive/refs/tags/tcltk-9.0.4.0.zip
+        digestSHA256: ff04215b99a16cd7c78951d02d8d1ec1dbd01d35db96389a784125dde024d5f7
         extract: no
         dir: deps/tcltk
 
@@ -146,10 +154,11 @@ buildScript: |
     __addLib "sqlite"      "3.50.4.0"
     __addLib "mpdecimal"   "4.0.0"
     __addLib "xz"          "5.2.5"
-    __addLib "zlib"        "1.3.1"
+    __addLib "zlib-ng"     "2.2.4"
+    __addLib "zstd"        "1.5.7"
     __addBin "libffi"      "3.4.4"
-    __addBin "openssl-bin" "3.0.18"
-    __addBin "tcltk"       "8.6.15.0"
+    __addBin "openssl-bin" "3.5.9"
+    __addBin "tcltk"       "9.0.4.0"
 
     # If we do not set PreferredToolArchitecture to "x64" the Python buildsystem
     # will start a win32 build even we want to build the 64-bit variant!

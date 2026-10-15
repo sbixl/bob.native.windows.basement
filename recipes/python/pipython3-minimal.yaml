@@ -1,10 +1,10 @@
 metaEnvironment:
-    PKG_VERSION: "3.13.11"
+    PKG_VERSION: "3.14.8"
 
 checkoutSCM:
     scm: url
     url: ${PYTHON_MIRROR}/${PKG_VERSION}/python-${PKG_VERSION}-embed-amd64.zip
-    digestSHA256: 1ec066fb61ba5e8c73e29e048cd07c26850f74585e3a116005135b31b8004890
+    digestSHA256: a93abe456ab01bd96d7a085b3cdb6566b3063f4241360d114142fbdb07f0a310
 
 buildVars: [PKG_VERSION]
 buildScript: |
