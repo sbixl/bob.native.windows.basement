@@ -1,12 +1,12 @@
 shared: True
 
 metaEnvironment:
-    PKG_VERSION: "25.0.1"
+    PKG_VERSION: "27"
 
 checkoutSCM:
     scm: url
-    url: ${JAVA_MIRROR}/java/GA/jdk${PKG_VERSION}/2fbf10d8c78e40bd87641c434705079d/8/GPL/openjdk-${PKG_VERSION}_windows-x64_bin.zip
-    digestSHA256: "2bbae75bc31a848b7cb5f297270efb7bef9bba0deeec6a671625563dc090ad69"
+    url: ${JAVA_MIRROR}/java/GA/jdk${PKG_VERSION}/55ce5470a6294008af0057ff4626d0e5/35/GPL/openjdk-${PKG_VERSION}_windows-x64_bin.zip
+    digestSHA256: "41172837168dd25a8d9fe5eb253ac1efc568c5f9ff608144bcacadfdf50f876c"
     dir: openjdk
     extract: no
 
