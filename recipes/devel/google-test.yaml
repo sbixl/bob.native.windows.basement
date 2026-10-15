@@ -1,12 +1,12 @@
 inherit: [cmake]
 
 metaEnvironment:
-    PKG_VERSION: "1.17.0"
+    PKG_VERSION: "1.18.0"
 
 checkoutSCM:
     scm: url
     url: ${GITHUB_MIRROR}/google/googletest/archive/refs/tags/v${PKG_VERSION}.zip
-    digestSHA256: 40d4ec942217dcc84a9ebe2a68584ada7d4a33a8ee958755763278ea1c5e18ff
+    digestSHA256: 63b9c77751a5b8f492486005f67533fdc58682b67476fcb91650be5958d5195a
 
 buildVars: [PKG_VERSION]
 buildScript: |
