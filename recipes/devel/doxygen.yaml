@@ -7,7 +7,7 @@ environment:
     PARALLEL_JOBS: "1"
 
 metaEnvironment:
-    PKG_VERSION: "1_15_0"
+    PKG_VERSION: "1_18_0"
 
 depends:
     - name: devel::flex
@@ -18,7 +18,7 @@ depends:
 checkoutSCM:
     scm: url
     url: ${GITHUB_MIRROR}/doxygen/doxygen/archive/refs/tags/Release_${PKG_VERSION}.zip
-    digestSHA256: 2eba5f9c3f3f4e7a7ed8e147b5db355bdb7e3979648ab36ba8350ec9ea1f2fc4
+    digestSHA256: e99682a868afece567c22159ca18a5cdcf2822fbd4a53fb0ec653acd033c8137
 
 buildTools: [flex, bison]
 buildVars: [PKG_VERSION]
