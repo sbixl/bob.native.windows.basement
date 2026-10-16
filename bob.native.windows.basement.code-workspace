@@ -42,5 +42,6 @@
             "diffEditor.ignoreTrimWhitespace": false,
         },
 		"search.exclude": {"**/.git": true, "**/.svn": true, "**/.hg": true},
+        "todo-tree.ripgrep.ripgrep": "D:\\tools\\ide\\vsc\\ripgrep\\rg.exe"
 	}
 }
