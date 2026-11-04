@@ -132,8 +132,7 @@ As you can see, it is now about six times faster, which is much more practical. 
 multiple workstations that you want to work on, you can share this binary archive among all
 workstations or team members. Then everyone can download the pre-built packages from there. As long
 as the recipes and their inputs have not changed, Bob will always download packages from there. If a
-recipe or its input has changed, Bob will not find a suitable artifact in the binary archive and will
-build the affected package(s) from scratch.
+recipe or its input has changed, Bob will not find a suitable artifact in the binary archive and will build the affected package(s) from scratch.
 
 In the `tests` directory, there are several recipes that build small test packages using the
 basement layer. They act as smoke tests for this project.
@@ -189,15 +188,7 @@ examples for more information on how to do this):
   * doxygen
   * google-test
 
-Since Windows does not have a native compiler by default, the MSVC compiler must be installed.
-Independently of this, a native host Clang compiler can optionally be built downstream as the host
-toolchain. The Clang compiler uses the GNU command line by default and not the MSVC command line.
-
-In addition to the default host toolchain setup, this project also supports working with the MSVC
-Build Tools 2019 and 2022. The corresponding recipes provide the toolchain as Bob packages, so the
-Build Tools do not need to be installed locally on the machine. The packaged toolchains are made
-available through the Bob recipes and can be selected as needed for the target build environment.
-See the [MSVC recipe](recipes/devel/msvc.yaml) for details.
+In addition to the default host toolchain, the MSVC Build Tools 2019 and 2022 are available as Bob packages too. They can be selected for target builds without a local installation if required. See the [MSVC recipe](recipes/devel/msvc.yaml) for details. A native host Clang compiler can optionally be built downstream as the host toolchain. It uses the GNU command line by default rather than the MSVC command line.
 
 The following cross-compiling toolchains are available pre-configured. If you need other targets,
 you can depend on `devel::cross-toolchain` directly and configure it as you like.
