@@ -193,6 +193,12 @@ Since Windows does not have a native compiler by default, the MSVC compiler must
 Independently of this, a native host Clang compiler can optionally be built downstream as the host
 toolchain. The Clang compiler uses the GNU command line by default and not the MSVC command line.
 
+In addition to the default host toolchain setup, this project also supports working with the MSVC
+Build Tools 2019 and 2022. The corresponding recipes provide the toolchain as Bob packages, so the
+Build Tools do not need to be installed locally on the machine. The packaged toolchains are made
+available through the Bob recipes and can be selected as needed for the target build environment.
+See the [MSVC recipe](recipes/devel/msvc.yaml) for details.
+
 The following cross-compiling toolchains are available pre-configured. If you need other targets,
 you can depend on `devel::cross-toolchain` directly and configure it as you like.
 
