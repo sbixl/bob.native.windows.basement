@@ -19,9 +19,9 @@ endif()
 add_library(LibGreet greet.c greet.h)
 add_library(LibGreet::LibGreet ALIAS LibGreet)
 target_include_directories(LibGreet
-   PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
-   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 target_link_libraries(LibGreet PUBLIC LibHoller::LibHoller)
 
 set_target_properties(LibGreet PROPERTIES
@@ -32,10 +32,11 @@ set_target_properties(LibGreet PROPERTIES
 
 # Generate header for export/import definitions
 generate_export_header(LibGreet)
-
-# install rules
-install(TARGETS LibGreet EXPORT LibGreetTargets)
-install(FILES greet.h ${PROJECT_BINARY_DIR}/libgreet_export.h TYPE INCLUDE)
+install(TARGETS LibGreet EXPORT LibGreetTargets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
 
 # package stuff
 include(CMakePackageConfigHelpers)
@@ -45,28 +46,24 @@ write_basic_package_version_file(
   COMPATIBILITY SameMajorVersion
 )
 
-export(EXPORT LibGreetTargets
+export(TARGETS LibGreet
   FILE "${CMAKE_CURRENT_BINARY_DIR}/LibGreetTargets.cmake"
   NAMESPACE LibGreet::
 )
 configure_file(LibGreetConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/LibGreetConfig.cmake"
-  COPYONLY
+  @ONLY
 )
 
-set(ConfigPackageLocation lib/cmake/LibGreet)
+set(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/cmake/LibGreet)
 install(EXPORT LibGreetTargets
-  FILE
-    LibGreetTargets.cmake
-  NAMESPACE
-    LibGreet::
-  DESTINATION
-    ${ConfigPackageLocation}
+  FILE LibGreetTargets.cmake
+  NAMESPACE LibGreet::
+  DESTINATION ${ConfigPackageLocation}
 )
-install(
-  FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/LibGreetConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/LibGreetConfigVersion.cmake"
-  DESTINATION
-    ${ConfigPackageLocation}
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/LibGreetConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/LibGreetConfigVersion.cmake"
+  DESTINATION ${ConfigPackageLocation}
 )
+

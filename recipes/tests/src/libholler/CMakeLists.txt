@@ -11,25 +11,21 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
 # Add library
-add_library(LibHoller holler.c holler.h)
-add_library(LibHoller::LibHoller ALIAS LibHoller)
-target_include_directories(LibHoller
-   PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
-   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
-
-set_target_properties(LibHoller PROPERTIES
-	VERSION "${LibHoller_VERSION}"
-	SOVERSION "1"
-	POSITION_INDEPENDENT_CODE "${BUILD_SHARED_LIBS}"
-)
+add_library(libHoller holler.c holler.h)
+add_library(LibHoller::LibHoller ALIAS libHoller)
+target_include_directories(libHoller
+  PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+set_target_properties(libHoller PROPERTIES EXPORT_NAME LibHoller)
 
 # Generate header for export/import definitions
-generate_export_header(LibHoller)
-
-# install rules
-install(TARGETS LibHoller EXPORT LibHollerTargets)
-install(FILES holler.h ${PROJECT_BINARY_DIR}/libholler_export.h TYPE INCLUDE)
+generate_export_header(libHoller)
+install(TARGETS libHoller EXPORT LibHollerTargets
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
 
 # package stuff
 include(CMakePackageConfigHelpers)
@@ -39,28 +35,24 @@ write_basic_package_version_file(
   COMPATIBILITY SameMajorVersion
 )
 
-export(EXPORT LibHollerTargets
+export(TARGETS libHoller
   FILE "${CMAKE_CURRENT_BINARY_DIR}/LibHollerTargets.cmake"
   NAMESPACE LibHoller::
 )
 configure_file(LibHollerConfig.cmake.in
   "${CMAKE_CURRENT_BINARY_DIR}/LibHollerConfig.cmake"
-  COPYONLY
+  @ONLY
 )
 
-set(ConfigPackageLocation lib/cmake/LibHoller)
+set(ConfigPackageLocation ${CMAKE_INSTALL_LIBDIR}/cmake/LibHoller)
 install(EXPORT LibHollerTargets
-  FILE
-    LibHollerTargets.cmake
-  NAMESPACE
-    LibHoller::
-  DESTINATION
-    ${ConfigPackageLocation}
+  FILE LibHollerTargets.cmake
+  NAMESPACE LibHoller::
+  DESTINATION ${ConfigPackageLocation}
 )
-install(
-  FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/LibHollerConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/LibHollerConfigVersion.cmake"
-  DESTINATION
-    ${ConfigPackageLocation}
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/LibHollerConfig.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/LibHollerConfigVersion.cmake"
+  DESTINATION ${ConfigPackageLocation}
 )
+
