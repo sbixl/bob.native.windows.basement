@@ -4,7 +4,7 @@ project(Greeter LANGUAGES C)
 include(GNUInstallDirs)
 
 if(NOT TARGET LibGreet::LibGreet)
-   find_package(LibGreet 2.0 CONFIG REQUIRED)
+   find_package(LibGreet CONFIG REQUIRED)
 endif()
 
 add_executable(greeter greeter.c)

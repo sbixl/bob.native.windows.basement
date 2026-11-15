@@ -1,18 +1,14 @@
 cmake_minimum_required(VERSION 3.15)
-project(LibGreet
-   VERSION 2.1.42
-   LANGUAGES C)
+project(LibGreet LANGUAGES C)
 
 include(GNUInstallDirs)
 include(GenerateExportHeader)
 
-# do not export any symbols by default
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+option(LIBGREET_INSTALL_HEADERS "Install public headers" OFF)
 
 # Find dependency if target does not exist yet in build tree
 if (NOT TARGET LibHoller::LibHoller)
-   find_package(LibHoller 1.0 CONFIG REQUIRED)
+  find_package(LibHoller CONFIG REQUIRED)
 endif()
 
 # Add library
@@ -24,14 +20,19 @@ target_include_directories(LibGreet
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 target_link_libraries(LibGreet PUBLIC LibHoller::LibHoller)
 
-set_target_properties(LibGreet PROPERTIES
-	VERSION "${LibGreet_VERSION}"
-	SOVERSION "2"
-	POSITION_INDEPENDENT_CODE "${BUILD_SHARED_LIBS}"
-)
-
 # Generate header for export/import definitions
-generate_export_header(LibGreet)
+#generate_export_header(LibGreet)
+if(LIBGREET_INSTALL_HEADERS)
+  target_include_directories(LibGreet PUBLIC
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+  )
+  install(FILES
+    greet.h
+    "${CMAKE_CURRENT_BINARY_DIR}/libgreet_export.h"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  )
+endif()
+
 install(TARGETS LibGreet EXPORT LibGreetTargets
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -39,13 +40,6 @@ install(TARGETS LibGreet EXPORT LibGreetTargets
 )
 
 # package stuff
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-  "${CMAKE_CURRENT_BINARY_DIR}/LibGreetConfigVersion.cmake"
-  VERSION ${LibGreet_VERSION}
-  COMPATIBILITY SameMajorVersion
-)
-
 export(TARGETS LibGreet
   FILE "${CMAKE_CURRENT_BINARY_DIR}/LibGreetTargets.cmake"
   NAMESPACE LibGreet::
@@ -63,7 +57,6 @@ install(EXPORT LibGreetTargets
 )
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/LibGreetConfig.cmake"
-  "${CMAKE_CURRENT_BINARY_DIR}/LibGreetConfigVersion.cmake"
   DESTINATION ${ConfigPackageLocation}
 )
 

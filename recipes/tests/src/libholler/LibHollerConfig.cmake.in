@@ -1,5 +1,9 @@
 include("${CMAKE_CURRENT_LIST_DIR}/LibHollerTargets.cmake")
-set_property(TARGET LibHoller::LibHoller APPEND PROPERTY
-	INTERFACE_INCLUDE_DIRECTORIES
-		"@CMAKE_CURRENT_SOURCE_DIR@;@CMAKE_CURRENT_BINARY_DIR@"
-)
+get_target_property(_LibHollerIncludeDirs LibHoller::LibHoller INTERFACE_INCLUDE_DIRECTORIES)
+if(NOT _LibHollerIncludeDirs)
+	set_property(TARGET LibHoller::LibHoller APPEND PROPERTY
+		INTERFACE_INCLUDE_DIRECTORIES
+			"@CMAKE_CURRENT_SOURCE_DIR@;@CMAKE_CURRENT_BINARY_DIR@"
+	)
+endif()
+unset(_LibHollerIncludeDirs)
