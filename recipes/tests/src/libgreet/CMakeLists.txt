@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 4.4)
 project(LibGreet LANGUAGES C)
 
 include(GNUInstallDirs)
-include(GenerateExportHeader)
 
 option(LIBGREET_INSTALL_HEADERS "Install public headers" OFF)
 
@@ -14,22 +13,16 @@ endif()
 # Add library
 add_library(LibGreet greet.c greet.h)
 add_library(LibGreet::LibGreet ALIAS LibGreet)
+
 target_include_directories(LibGreet
   PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+
 target_link_libraries(LibGreet PUBLIC LibHoller::LibHoller)
 
-# Generate header for export/import definitions
-#generate_export_header(LibGreet)
 if(LIBGREET_INSTALL_HEADERS)
   target_include_directories(LibGreet PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-  )
-  install(FILES
-    greet.h
-    "${CMAKE_CURRENT_BINARY_DIR}/libgreet_export.h"
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   )
 endif()
 

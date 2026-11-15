@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 4.4)
 project(LibHoller LANGUAGES C)
 
 include(GNUInstallDirs)
-include(GenerateExportHeader)
 
 option(LIBHOLLER_INSTALL_HEADERS "Install public headers" OFF)
 
@@ -12,21 +11,13 @@ add_library(LibHoller::LibHoller ALIAS libHoller)
 
 target_include_directories(libHoller
   PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
 set_target_properties(libHoller PROPERTIES EXPORT_NAME LibHoller)
 
-# Generate header for export/import definitions
-#generate_export_header(libHoller)
 if(LIBHOLLER_INSTALL_HEADERS)
   target_include_directories(libHoller PUBLIC
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-  )
-  install(FILES
-    holler.h
-    "${CMAKE_CURRENT_BINARY_DIR}/libholler_export.h"
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   )
 endif()
 
